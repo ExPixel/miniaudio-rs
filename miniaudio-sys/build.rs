@@ -111,6 +111,7 @@ fn apply_definitions(b: &mut cc::Build) {
     }
 }
 
+#[allow(clippy::logic_bug)]
 fn apply_flags(b: &mut cc::Build) {
     if cfg!(target_feature = "sse2") && !(cfg!(feature = "no-sse2")) {
         b.flag_if_supported("-msse2");
