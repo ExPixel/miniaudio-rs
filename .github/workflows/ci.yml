@@ -1,0 +1,75 @@
+name: Tests
+
+on:
+    pull_request:
+        branches:
+            - master
+    push:
+        branches:
+            - master
+
+jobs:
+    cargo_tests:
+        name: ${{ matrix.rust_channel }} ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
+
+        strategy:
+            matrix:
+                rust_channel: [stable, beta, nightly]
+                os: [ubuntu-latest, windows-latest, macOS-latest]
+
+        env:
+            CARGO_INCREMENTAL: 0
+
+        steps:
+        - uses: actions/checkout@v2
+        - name: Checkout Submodules
+          shell: bash
+          run: |
+            auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+            git submodule sync --recursive
+            git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+        - uses: actions-rs/toolchain@v1
+          with:
+              toolchain: ${{ matrix.rust_channel }}
+              override: true
+
+        - name: Cache Cargo Registry
+          uses: actions/cache@v1
+          with:
+              path: ~/.cargo/registry
+              key: ${{ matrix.os }}-${{ matrix.rust_channel }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+        - name: Cache Cargo Index
+          uses: actions/cache@v1
+          with:
+              path: ~/.cargo/git
+              key: ${{ matrix.os }}-${{ matrix.rust_channel }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+
+        - name: Cache Cargo Target Dir
+          uses: actions/cache@v1
+          with:
+              path: target
+              key: ${{ matrix.os }}-${{ matrix.rust_channel }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+
+        - name: Install LLVM (Windows)
+          run: choco install llvm
+          if: matrix.os == 'windows-latest'
+
+        # Display Tool Versions:
+        - name: Check Tools
+          run: |
+            rustc --version
+            cargo --version
+            cargo fmt --version
+            cargo clippy --version
+
+        # Run Tests:
+        - name: Test
+          run: cargo test
+        - name: Test (Ignored)
+          run: cargo test -- ignored
+        - name: Check Formatting
+          run: cargo fmt --all -- --check
+        - name: Clippy Lints
+          run: cargo clippy --all-features -- -A warnings
