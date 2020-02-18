@@ -2,7 +2,7 @@ use super::constants::*;
 use std::os::raw::{c_float, c_void};
 
 #[repr(i32)]
-#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub enum MAResult {
     Success = 0,
 
@@ -50,7 +50,7 @@ pub enum MAResult {
 }
 
 #[repr(u8)]
-#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub enum Channel {
     None = 0,
     Mono = 1,
@@ -124,20 +124,20 @@ impl Channel {
 }
 
 #[repr(i32)]
-#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub enum StreamFormat {
     PCM = 0,
 }
 
 #[repr(i32)]
-#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub enum StreamLayout {
     Interleaved = 0,
     Deinterleaved = 1,
 }
 
 #[repr(i32)]
-#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub enum DitherMode {
     None = 0,
     Rectangle = 1,
@@ -145,7 +145,7 @@ pub enum DitherMode {
 }
 
 #[repr(i32)]
-#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub enum Format {
     /// Mainly used for indicating error, but also used as the default for the output format for
     /// decoders.
@@ -159,7 +159,7 @@ pub enum Format {
 }
 
 #[repr(i32)]
-#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub enum ChannelMixMode {
     /// Simple averaging based on the plane(s) the channel is sitting on.
     Rectangular = 0,
@@ -184,7 +184,7 @@ impl Default for ChannelMixMode {
 }
 
 #[repr(i32)]
-#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub enum StandardChannelMap {
     Microsoft = 0,
     Alsa = 1,
@@ -214,7 +214,7 @@ impl Default for StandardChannelMap {
 }
 
 #[repr(i32)]
-#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub enum PerformanceProfile {
     LowLatency = 0,
     Conservative = 1,
@@ -238,6 +238,11 @@ const NO_AVX2_MASK: u32 = 1 << 1;
 const NO_AVX512_MASK: u32 = 1 << 2;
 const NO_NEON_MASK: u32 = 1 << 3;
 
+const USE_SSE2_MASK: u32 = 1 << 0;
+const USE_AVX2_MASK: u32 = 1 << 1;
+const USE_AVX512_MASK: u32 = 1 << 2;
+const USE_NEON_MASK: u32 = 1 << 3;
+
 macro_rules! impl_bitfield {
     ($ForType:ty, $BitField:ident, $Set:ident, $Get:ident, $Mask:expr) => {
         impl $ForType {
@@ -256,7 +261,43 @@ macro_rules! impl_bitfield {
     };
 }
 
-macro_rules! impl_simd_bitfields {
+macro_rules! impl_use_simd_bitfields {
+    ($ForType:ty, $SIMDField:ident, $Offset:expr) => {
+        impl_bitfield!(
+            $ForType,
+            $SIMDField,
+            set_use_sse2,
+            use_sse2,
+            USE_SSE2_MASK << $Offset
+        );
+
+        impl_bitfield!(
+            $ForType,
+            $SIMDField,
+            set_use_avx2,
+            use_avx2,
+            USE_AVX2_MASK << $Offset
+        );
+
+        impl_bitfield!(
+            $ForType,
+            $SIMDField,
+            set_use_avx512,
+            use_avx512,
+            USE_AVX512_MASK << $Offset
+        );
+
+        impl_bitfield!(
+            $ForType,
+            $SIMDField,
+            set_use_neon,
+            use_neon,
+            USE_NEON_MASK << $Offset
+        );
+    };
+}
+
+macro_rules! impl_no_simd_bitfields {
     ($ForType:ty, $SIMDField:ident, $Offset:expr) => {
         impl_bitfield!(
             $ForType,
@@ -293,7 +334,7 @@ macro_rules! impl_simd_bitfields {
 }
 
 #[repr(C)]
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct FormatConverterConfig {
     pub format_in: Format,
     pub format_out: Format,
@@ -302,25 +343,57 @@ pub struct FormatConverterConfig {
     pub stream_format_out: StreamFormat,
     pub dither_mode: DitherMode,
     simd_bits: u32,
-    pub on_read: FormatConverterReadProc,
-    pub on_read_deinterleaved: FormatConverterReadDeinterleavedProc,
+    pub on_read: Option<FormatConverterReadProc>,
+    pub on_read_deinterleaved: Option<FormatConverterReadDeinterleavedProc>,
     pub user_data: *mut c_void,
 }
-impl_simd_bitfields!(FormatConverterConfig, simd_bits, 0);
+impl_no_simd_bitfields!(FormatConverterConfig, simd_bits, 0);
+
+impl Default for FormatConverterConfig {
+    fn default() -> FormatConverterConfig {
+        FormatConverterConfig {
+            format_in: Format::Unknown,
+            format_out: Format::Unknown,
+            channels: 0,
+            stream_format_in: StreamFormat::PCM,
+            stream_format_out: StreamFormat::PCM,
+            dither_mode: DitherMode::None,
+            simd_bits: 0,
+            on_read: None,
+            on_read_deinterleaved: None,
+            user_data: std::ptr::null_mut(),
+        }
+    }
+}
 
 #[repr(C)]
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct FormatConverter {
     pub config: FormatConverterConfig,
     pub simd_bits: u32,
-    pub on_convert_pcm:
+    pub on_convert_pcm: Option<
         extern "C" fn(dst: *mut c_void, src: *const c_void, count: u64, dither_mode: DitherMode),
-    pub on_interleave_pcm:
+    >,
+    pub on_interleave_pcm: Option<
         extern "C" fn(dst: *mut c_void, src: *const *const c_void, frame_count: u64, channels: u32),
-    pub on_deinterleave_pcm:
+    >,
+    pub on_deinterleave_pcm: Option<
         extern "C" fn(dst: *mut *mut c_void, src: *const c_void, frame_count: u64, channels: u32),
+    >,
 }
-impl_simd_bitfields!(FormatConverter, simd_bits, 0);
+impl_use_simd_bitfields!(FormatConverter, simd_bits, 0);
+
+impl Default for FormatConverter {
+    fn default() -> FormatConverter {
+        FormatConverter {
+            config: FormatConverterConfig::default(),
+            simd_bits: 0,
+            on_convert_pcm: None,
+            on_interleave_pcm: None,
+            on_deinterleave_pcm: None,
+        }
+    }
+}
 
 pub type ChannelRouterReadDeinterleavedProc = extern "C" fn(
     router: *mut ChannelRouter,
@@ -330,7 +403,7 @@ pub type ChannelRouterReadDeinterleavedProc = extern "C" fn(
 ) -> u32;
 
 #[repr(C)]
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct ChannelRouterConfig {
     pub channels_in: u32,
     pub channels_out: u32,
@@ -342,10 +415,10 @@ pub struct ChannelRouterConfig {
     pub on_read_deinterleaved: ChannelRouterReadDeinterleavedProc,
     pub user_data: *mut c_void,
 }
-impl_simd_bitfields!(ChannelRouterConfig, simd_bits, 0);
+impl_no_simd_bitfields!(ChannelRouterConfig, simd_bits, 0);
 
 #[repr(C)]
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct ChannelRouter {
     pub config: ChannelRouterConfig,
     bitfields: u32,
@@ -380,10 +453,10 @@ impl_bitfield!(
     is_stereo_to_mono,
     1 << 3
 );
-impl_simd_bitfields!(ChannelRouter, bitfields, 4);
+impl_use_simd_bitfields!(ChannelRouter, bitfields, 4);
 
 #[repr(i32)]
-#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub enum SrcAlgorithm {
     Linear = 0,
     Sinc = 1,
@@ -397,7 +470,7 @@ impl Default for SrcAlgorithm {
 }
 
 #[repr(i32)]
-#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub enum SrcSincWindowFunction {
     Hann = 0,
     Rectangular = 1,
@@ -410,7 +483,7 @@ impl Default for SrcSincWindowFunction {
 }
 
 #[repr(C)]
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct SrcConfigSinc {
     pub window_function: SrcSincWindowFunction,
     pub window_width: u32,
@@ -425,7 +498,7 @@ pub type SrcReadDeinterleavedProc = extern "C" fn(
 ) -> u32;
 
 #[repr(C)]
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct SrcConfig {
     pub sample_rate_in: u32,
     pub sample_rate_out: u32,
@@ -443,11 +516,11 @@ impl_bitfield!(
     never_consume_end_of_input,
     1 << 0
 );
-impl_simd_bitfields!(SrcConfig, bitfields, 1);
+impl_no_simd_bitfields!(SrcConfig, bitfields, 1);
 
 #[repr(C)]
 #[repr(align(64))]
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct Src {
     pub inner: SrcInnerUnion,
     pub config: SrcConfig,
@@ -460,13 +533,20 @@ impl_bitfield!(
     is_end_of_input_loaded,
     1 << 0
 );
-impl_simd_bitfields!(Src, bitfields, 1);
+impl_use_simd_bitfields!(Src, bitfields, 1);
 
 #[repr(align(64))]
 #[derive(Clone, Copy)]
 pub union SrcInnerUnion {
     pub linear: SrcLinear,
     pub sinc: SrcSinc,
+}
+
+// FIXME: implement better debug output for this type.
+impl std::fmt::Debug for SrcInnerUnion {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "SrcInnerUnion {{ /* unknown */ }}")
+    }
 }
 
 #[repr(C)]
