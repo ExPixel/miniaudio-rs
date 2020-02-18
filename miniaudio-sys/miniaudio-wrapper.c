@@ -28,6 +28,14 @@ size_t debug_ma_sizeof_src() {
     return sizeof(ma_src);
 }
 
+size_t debug_ma_sizeof_pcm_converter_config() {
+    return sizeof(ma_pcm_converter_config);
+}
+
+size_t debug_ma_sizeof_pcm_converter() {
+    return sizeof(ma_pcm_converter);
+}
+
 /**
  * The following functions initialize miniaudio C structs with some
  * "random" values so that we can check for correct alignment in Rust.

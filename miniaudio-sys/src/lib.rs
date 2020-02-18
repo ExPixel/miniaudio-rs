@@ -43,6 +43,16 @@ mod test {
         );
 
         assert_eq!(unsafe { debug_ma_sizeof_src() }, std::mem::size_of::<Src>());
+
+        assert_eq!(
+            unsafe { debug_ma_sizeof_pcm_converter_config() },
+            std::mem::size_of::<PCMConverterConfig>()
+        );
+
+        assert_eq!(
+            unsafe { debug_ma_sizeof_pcm_converter() },
+            std::mem::size_of::<PCMConverter>()
+        );
     }
 
     #[test]
@@ -159,9 +169,9 @@ mod test {
         unsafe { debug_ma_init_src(&mut src) };
 
         unsafe {
-            assert_eq!(src.inner.sinc.time_in, 45.0);
-            assert_eq!(src.inner.sinc.input_frame_count, 345);
-            assert_eq!(src.inner.sinc.window_pos_in_samples, 857);
+            assert_eq!(src.sinc().time_in, 45.0);
+            assert_eq!(src.sinc().input_frame_count, 345);
+            assert_eq!(src.sinc().window_pos_in_samples, 857);
         }
 
         assert_eq!(src.is_end_of_input_loaded(), false);

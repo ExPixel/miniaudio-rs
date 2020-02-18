@@ -246,6 +246,7 @@ const USE_NEON_MASK: u32 = 1 << 3;
 macro_rules! impl_bitfield {
     ($ForType:ty, $BitField:ident, $Set:ident, $Get:ident, $Mask:expr) => {
         impl $ForType {
+            #[inline]
             pub fn $Set(&mut self, value: bool) {
                 if value {
                     self.$BitField |= $Mask;
@@ -254,6 +255,27 @@ macro_rules! impl_bitfield {
                 }
             }
 
+            #[inline]
+            pub fn $Get(&self) -> bool {
+                (self.$BitField & $Mask) != 0
+            }
+        }
+    };
+
+    ($ForType:ty, $BitField:ident, $Set:ident, $Get:ident, $Mask:expr, $Doc:expr) => {
+        impl $ForType {
+            #[doc = $Doc]
+            #[inline]
+            pub fn $Set(&mut self, value: bool) {
+                if value {
+                    self.$BitField |= $Mask;
+                } else {
+                    self.$BitField &= !($Mask);
+                }
+            }
+
+            #[doc = $Doc]
+            #[inline]
             pub fn $Get(&self) -> bool {
                 (self.$BitField & $Mask) != 0
             }
@@ -572,7 +594,7 @@ impl Default for SrcConfig {
 #[repr(align(64))]
 #[derive(Debug, Clone, Copy)]
 pub struct Src {
-    pub inner: SrcInnerUnion,
+    inner: SrcInnerUnion,
     pub config: SrcConfig,
     bitfields: u32,
 }
@@ -584,6 +606,28 @@ impl_bitfield!(
     1 << 0
 );
 impl_use_simd_bitfields!(Src, bitfields, 1);
+
+impl Src {
+    #[inline]
+    pub unsafe fn linear(&self) -> &SrcLinear {
+        &self.inner.linear
+    }
+
+    #[inline]
+    pub unsafe fn sinc(&self) -> &SrcSinc {
+        &self.inner.sinc
+    }
+
+    #[inline]
+    pub fn set_linear(&mut self, linear: SrcLinear) {
+        self.inner.linear = linear;
+    }
+
+    #[inline]
+    pub fn set_sinc(&mut self, sinc: SrcSinc) {
+        self.inner.sinc = sinc;
+    }
+}
 
 impl Default for Src {
     fn default() -> Src {
@@ -643,3 +687,147 @@ pub struct SrcSinc {
     pub table: [c_float;
         MA_SRC_SINC_MAX_WINDOW_WIDTH as usize * MA_SRC_SINC_LOOKUP_TABLE_RESOLUTION as usize],
 }
+
+pub type PCMConverterReadProc = extern "C" fn(
+    dsp: *mut PCMConverter,
+    frames_out: *mut c_void,
+    frame_count: u32,
+    user_data: *mut c_void,
+) -> u32;
+
+#[repr(u32)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+pub enum DynamicSampleRate {
+    Disallow = 0,
+    Allow = 1,
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct PCMConverterConfig {
+    pub format_in: Format,
+    pub channels_in: u32,
+    pub sample_rate_in: u32,
+    pub channel_map_in: [Channel; MA_MAX_CHANNELS as usize],
+    pub format_out: Format,
+    pub channels_out: u32,
+    pub sample_rate_out: u32,
+    pub channel_map_out: [Channel; MA_MAX_CHANNELS as usize],
+    pub channel_mix_mode: ChannelMixMode,
+    pub dither_mode: DitherMode,
+    pub src_algorithm: SrcAlgorithm,
+    pub allow_dynamic_sample_rate: DynamicSampleRate,
+    bitfields: u32,
+    pub on_read: Option<PCMConverterReadProc>,
+    pub user_data: *mut c_void,
+    sinc_union: PCMConverterSinc,
+}
+impl_bitfield!(
+    PCMConverterConfig,
+    bitfields,
+    set_never_consume_end_of_input,
+    never_consume_end_of_input,
+    1 << 0
+);
+impl_no_simd_bitfields!(PCMConverterConfig, bitfields, 1);
+
+impl PCMConverterConfig {
+    #[inline]
+    pub unsafe fn sinc(&self) -> &SrcConfigSinc {
+        &self.sinc_union.sinc
+    }
+
+    pub fn set_sinc(&mut self, sinc: SrcConfigSinc) {
+        self.sinc_union.sinc = sinc;
+    }
+}
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub union PCMConverterSinc {
+    pub sinc: SrcConfigSinc,
+}
+
+// FIXME: implement better debug output for this type.
+impl std::fmt::Debug for PCMConverterSinc {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "PCMConverterSinc {{ /* unknown */ }}")
+    }
+}
+
+#[repr(C)]
+#[repr(align(64))]
+#[derive(Debug, Clone, Copy)]
+pub struct PCMConverter {
+    pub on_read: Option<PCMConverterReadProc>,
+    pub user_data: *mut c_void,
+
+    /// For converting data to f32 in preparation for further processing.
+    pub format_converter_in: FormatConverter,
+    /// For converting data to the requested output format. USed as the final step in the
+    /// processing pipeline.
+    pub format_converter_out: FormatConverter,
+    /// For channel conversion.
+    pub channel_router: ChannelRouter,
+    /// For sample rate conversion.
+    pub src: Src,
+    bitfields: u32,
+}
+
+impl_bitfield!(
+    PCMConverter,
+    bitfields,
+    set_is_dynamic_sample_rate_allowed,
+    is_dynamic_sample_rate_allowed,
+    1 << 0,
+    "ma_pcm_converset_set_input_sample_rate() and ma_pcm_set_output_sample_rate() will fail if this is set to false."
+);
+
+impl_bitfield!(
+    PCMConverter,
+    bitfields,
+    set_is_pre_format_conversion_required,
+    is_pre_format_conversion_required,
+    1 << 1
+);
+
+impl_bitfield!(
+    PCMConverter,
+    bitfields,
+    set_is_post_format_conversion_required,
+    is_post_format_conversion_required,
+    1 << 2
+);
+
+impl_bitfield!(
+    PCMConverter,
+    bitfields,
+    set_is_channel_routing_required,
+    is_channel_routing_required,
+    1 << 3
+);
+
+impl_bitfield!(
+    PCMConverter,
+    bitfields,
+    set_is_src_required,
+    is_src_required,
+    1 << 4
+);
+
+impl_bitfield!(
+    PCMConverter,
+    bitfields,
+    set_is_channel_routing_at_start,
+    is_channel_routing_at_start,
+    1 << 5
+);
+
+impl_bitfield!(
+    PCMConverter,
+    bitfields,
+    set_is_passthrough,
+    is_passthrough,
+    1 << 6,
+    "Will be set to true when the conversion pipeline is an optimization passthrough."
+);
