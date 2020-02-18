@@ -59,3 +59,65 @@ void debug_ma_init_format_converter(ma_format_converter* converter) {
     converter->onInterleavePCM = NULL;
     converter->onDeinterleavePCM = NULL;
 }
+
+void debug_ma_init_channel_router_config(ma_channel_router_config* config) {
+    config->channelsIn = 23;
+    config->channelsOut = 483;
+    config->mixingMode = ma_channel_mix_mode_custom_weights;
+    config->noSSE2 = 0;
+    config->noAVX2 = 0;
+    config->noAVX512 = 1;
+    config->noNEON = 1;
+    config->onReadDeinterleaved = NULL;
+    config->pUserData = NULL;
+
+    // FIXME test the arrays too at some point:
+    /* config->channelMapIn = {}; */
+    /* config->channelMapOut = {}; */
+    /* config->weights = {}; */
+}
+
+void debug_ma_init_channel_router(ma_channel_router* router) {
+    debug_ma_init_channel_router_config(&router->config);
+    router->isPassthrough = 1;
+    router->isSimpleShuffle = 0;
+    router->isSimpleMonoExpansion = 0;
+    router->isStereoToMono = 1;
+    router->useSSE2 = 1;
+    router->useAVX2 = 1;
+    router->useAVX512 = 0;
+    router->useNEON = 0;
+
+    // FIXME test the arrays too at some point:
+    /* router.shuffleTable = {}; */
+}
+
+void debug_ma_init_src_config(ma_src_config* config) {
+    config->sampleRateIn = 55;
+    config->sampleRateOut = 8734;
+    config->channels = 66;
+    config->algorithm = ma_src_algorithm_sinc;
+    config->neverConsumeEndOfInput = 1;
+    config->noSSE2 = 0;
+    config->noAVX2 = 0;
+    config->noAVX512 = 1;
+    config->noNEON = 1;
+    config->onReadDeinterleaved = NULL;
+    config->pUserData = NULL;
+    config->sinc.windowFunction = ma_src_sinc_window_function_rectangular;
+    config->sinc.windowWidth = 88;
+}
+
+void debug_ma_init_src(ma_src* src) {
+    debug_ma_init_src_config(&src->config);
+
+    src->sinc.timeIn = 45.0;
+    src->sinc.inputFrameCount = 345;
+    src->sinc.windowPosInSamples = 857;
+
+    src->isEndOfInputLoaded = 0;
+    src->useSSE2 = 1;
+    src->useAVX2 = 1;
+    src->useAVX512 = 0;
+    src->useNEON = 0;
+}

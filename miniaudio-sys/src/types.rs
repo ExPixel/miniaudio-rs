@@ -412,10 +412,26 @@ pub struct ChannelRouterConfig {
     pub mixing_mode: ChannelMixMode,
     pub weights: [[c_float; MA_MAX_CHANNELS as usize]; MA_MAX_CHANNELS as usize],
     pub simd_bits: u32,
-    pub on_read_deinterleaved: ChannelRouterReadDeinterleavedProc,
+    pub on_read_deinterleaved: Option<ChannelRouterReadDeinterleavedProc>,
     pub user_data: *mut c_void,
 }
 impl_no_simd_bitfields!(ChannelRouterConfig, simd_bits, 0);
+
+impl Default for ChannelRouterConfig {
+    fn default() -> ChannelRouterConfig {
+        ChannelRouterConfig {
+            channels_in: 0,
+            channels_out: 0,
+            channel_map_in: [Channel::None; MA_MAX_CHANNELS as usize],
+            channel_map_out: [Channel::None; MA_MAX_CHANNELS as usize],
+            mixing_mode: ChannelMixMode::Rectangular,
+            weights: [[0f32; MA_MAX_CHANNELS as usize]; MA_MAX_CHANNELS as usize],
+            simd_bits: 0,
+            on_read_deinterleaved: None,
+            user_data: std::ptr::null_mut(),
+        }
+    }
+}
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
@@ -455,6 +471,16 @@ impl_bitfield!(
 );
 impl_use_simd_bitfields!(ChannelRouter, bitfields, 4);
 
+impl Default for ChannelRouter {
+    fn default() -> ChannelRouter {
+        ChannelRouter {
+            config: ChannelRouterConfig::default(),
+            bitfields: 0,
+            shuffle_table: [0u8; MA_MAX_CHANNELS as usize],
+        }
+    }
+}
+
 #[repr(i32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
 pub enum SrcAlgorithm {
@@ -489,6 +515,15 @@ pub struct SrcConfigSinc {
     pub window_width: u32,
 }
 
+impl Default for SrcConfigSinc {
+    fn default() -> SrcConfigSinc {
+        SrcConfigSinc {
+            window_function: SrcSincWindowFunction::default(),
+            window_width: 0,
+        }
+    }
+}
+
 /// Returns the number of frames that were read.
 pub type SrcReadDeinterleavedProc = extern "C" fn(
     p_src: *mut Src,
@@ -505,7 +540,7 @@ pub struct SrcConfig {
     pub channels: u32,
     pub algorithm: SrcAlgorithm,
     bitfields: u32,
-    pub on_read_deinterleaved: SrcReadDeinterleavedProc,
+    pub on_read_deinterleaved: Option<SrcReadDeinterleavedProc>,
     pub user_data: *mut c_void,
     pub sinc: SrcConfigSinc,
 }
@@ -517,6 +552,21 @@ impl_bitfield!(
     1 << 0
 );
 impl_no_simd_bitfields!(SrcConfig, bitfields, 1);
+
+impl Default for SrcConfig {
+    fn default() -> SrcConfig {
+        SrcConfig {
+            sample_rate_in: 0,
+            sample_rate_out: 0,
+            channels: 0,
+            algorithm: SrcAlgorithm::default(),
+            bitfields: 0,
+            on_read_deinterleaved: None,
+            user_data: std::ptr::null_mut(),
+            sinc: SrcConfigSinc::default(),
+        }
+    }
+}
 
 #[repr(C)]
 #[repr(align(64))]
@@ -535,6 +585,25 @@ impl_bitfield!(
 );
 impl_use_simd_bitfields!(Src, bitfields, 1);
 
+impl Default for Src {
+    fn default() -> Src {
+        Src {
+            inner: SrcInnerUnion {
+                linear: SrcLinear {
+                    input: [[0.0f32; MA_MAX_CHANNELS as usize];
+                        MA_SRC_INPUT_BUFFER_SIZE_IN_SAMPLES as usize],
+                    time_in: 0.0f32,
+                    left_over_frames: 0,
+                },
+            },
+
+            config: SrcConfig::default(),
+            bitfields: 0,
+        }
+    }
+}
+
+#[repr(C)]
 #[repr(align(64))]
 #[derive(Clone, Copy)]
 pub union SrcInnerUnion {
@@ -553,24 +622,24 @@ impl std::fmt::Debug for SrcInnerUnion {
 #[repr(align(64))]
 #[derive(Clone, Copy)]
 pub struct SrcLinear {
-    input: [[c_float; MA_MAX_CHANNELS as usize]; MA_SRC_INPUT_BUFFER_SIZE_IN_SAMPLES as usize],
-    time_in: c_float,
-    left_over_frames: u32,
+    pub input: [[c_float; MA_MAX_CHANNELS as usize]; MA_SRC_INPUT_BUFFER_SIZE_IN_SAMPLES as usize],
+    pub time_in: c_float,
+    pub left_over_frames: u32,
 }
 
 #[repr(C)]
 #[repr(align(64))]
 #[derive(Clone, Copy)]
 pub struct SrcSinc {
-    input: [[c_float; MA_MAX_CHANNELS as usize];
+    pub input: [[c_float; MA_MAX_CHANNELS as usize];
         MA_SRC_SINC_MAX_WINDOW_WIDTH as usize * 2 + MA_SRC_INPUT_BUFFER_SIZE_IN_SAMPLES as usize],
-    time_in: c_float,
+    pub time_in: c_float,
     /// The number of frames sitting in the input buffer, not including the first half of the
     /// window.
-    input_frame_count: u32,
+    pub input_frame_count: u32,
     /// An offset of `input`.
-    window_pos_in_samples: u32,
+    pub window_pos_in_samples: u32,
     /// Precomputed lookup table. The +1 is used to avoid the need for an overflow check.
-    table: [c_float;
+    pub table: [c_float;
         MA_SRC_SINC_MAX_WINDOW_WIDTH as usize * MA_SRC_SINC_LOOKUP_TABLE_RESOLUTION as usize],
 }

@@ -17,4 +17,8 @@ extern "C" {
     pub fn debug_ma_sizeof_src() -> usize;
     pub fn debug_ma_init_format_converter_config(config: &mut FormatConverterConfig);
     pub fn debug_ma_init_format_converter(converter: &mut FormatConverter);
+    pub fn debug_ma_init_channel_router_config(config: &mut ChannelRouterConfig);
+    pub fn debug_ma_init_channel_router(router: &mut ChannelRouter);
+    pub fn debug_ma_init_src_config(config: &mut SrcConfig);
+    pub fn debug_ma_init_src(src: &mut Src);
 }
