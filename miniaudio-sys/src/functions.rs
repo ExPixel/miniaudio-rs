@@ -1,6 +1,6 @@
 use super::constants::*;
 use super::types::*;
-use std::os::raw::{c_char, c_void};
+use libc::{c_char, c_void};
 
 #[cfg(test)]
 extern "C" {
@@ -15,6 +15,10 @@ extern "C" {
     pub fn debug_ma_sizeof_src() -> usize;
     pub fn debug_ma_sizeof_pcm_converter_config() -> usize;
     pub fn debug_ma_sizeof_pcm_converter() -> usize;
+    pub fn debug_ma_sizeof_thread() -> usize;
+    pub fn debug_ma_sizeof_mutex() -> usize;
+    pub fn debug_ma_sizeof_event() -> usize;
+    pub fn debug_ma_sizeof_semaphore() -> usize;
     pub fn debug_ma_init_format_converter_config(config: &mut FormatConverterConfig);
     pub fn debug_ma_init_format_converter(converter: &mut FormatConverter);
     pub fn debug_ma_init_channel_router_config(config: &mut ChannelRouterConfig);
@@ -489,3 +493,8 @@ extern "C" {
         interleaved_pcm_frames: *mut c_void,
     );
 }
+
+/*
+ * Device IO
+ */
+extern "C" {}

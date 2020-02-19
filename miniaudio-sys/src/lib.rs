@@ -53,6 +53,26 @@ mod test {
             unsafe { debug_ma_sizeof_pcm_converter() },
             std::mem::size_of::<PCMConverter>()
         );
+
+        assert_eq!(
+            unsafe { debug_ma_sizeof_thread() },
+            std::mem::size_of::<Thread>()
+        );
+
+        assert_eq!(
+            unsafe { debug_ma_sizeof_mutex() },
+            std::mem::size_of::<Mutex>()
+        );
+
+        assert_eq!(
+            unsafe { debug_ma_sizeof_event() },
+            std::mem::size_of::<Event>()
+        );
+
+        assert_eq!(
+            unsafe { debug_ma_sizeof_semaphore() },
+            std::mem::size_of::<Semaphore>()
+        );
     }
 
     #[test]

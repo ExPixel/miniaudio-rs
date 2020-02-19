@@ -1,5 +1,23 @@
 use super::constants::*;
-use std::os::raw::{c_float, c_void};
+use libc::{c_char, c_float, c_int, c_void};
+
+macro_rules! impl_void_debug {
+    ($Type:ty, $Name:expr) => {
+        impl std::fmt::Debug for $Type {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, concat!($Name, "{{ /* omitted */ }}"))
+            }
+        }
+    };
+
+    ($Type:ty) => {
+        impl_void_debug!($Type, stringify!($Type));
+    };
+}
+
+pub type Handle = *mut c_void;
+pub type Proc = extern "C" fn();
+pub type Ptr = *mut c_void;
 
 #[repr(u32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
@@ -713,11 +731,7 @@ pub union SrcInnerUnion {
 }
 
 // FIXME: implement better debug output for this type.
-impl std::fmt::Debug for SrcInnerUnion {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "SrcInnerUnion {{ /* unknown */ }}")
-    }
-}
+impl_void_debug!(SrcInnerUnion);
 
 #[repr(C)]
 #[repr(align(64))]
@@ -803,13 +817,7 @@ impl PCMConverterConfig {
 pub union PCMConverterSinc {
     pub sinc: SrcConfigSinc,
 }
-
-// FIXME: implement better debug output for this type.
-impl std::fmt::Debug for PCMConverterSinc {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "PCMConverterSinc {{ /* unknown */ }}")
-    }
-}
+impl_void_debug!(PCMConverterSinc);
 
 #[repr(C)]
 #[repr(align(64))]
@@ -887,3 +895,285 @@ impl_bitfield!(
     1 << 6,
     "Will be set to true when the conversion pipeline is an optimization passthrough."
 );
+
+#[cfg(feature = "ma-support-wasapi")]
+pub struct IMMNotificationClient {
+    lp_vtbl: *mut c_void,
+    counter: u32,
+    device: *mut Device,
+}
+
+#[repr(i32)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+pub enum Backend {
+    WASAPI = 0,
+    DSOUND = 1,
+    WINMM = 2,
+    CoreAudio = 3,
+    SNDIO = 4,
+    Audio4 = 5,
+    OSS = 6,
+    PulseAudio = 7,
+    Alsa = 8,
+    Jack = 9,
+    AAudio = 10,
+    OpenSL = 11,
+    WebAudio = 12,
+
+    // Must always be the last item. Lowest priority, and used as the terminator for backend
+    // enumeration.
+    Null = 13,
+}
+
+#[repr(i32)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+pub enum ThreadPriority {
+    Idle = -5,
+    Lowest = -4,
+    Low = -3,
+    Normal = -2,
+    High = -1,
+    Highest = 0,
+    Realtime = 1,
+}
+
+impl Default for ThreadPriority {
+    fn default() -> ThreadPriority {
+        ThreadPriority::Highest
+    }
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct Thread {
+    pub context: *mut Context,
+    pub platform: PlatformThread,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub union PlatformThread {
+    #[cfg(feature = "ma-win32")]
+    pub win32: Win32Thread,
+    #[cfg(feature = "ma-posix")]
+    pub posix: PosixThread,
+    pub unused: c_int,
+}
+impl_void_debug!(PlatformThread);
+
+#[cfg(feature = "ma-win32")]
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct Win32Thread {
+    pub thread_handle: Handle,
+}
+#[cfg(feature = "ma-win32")]
+impl_void_debug!(Win32Thread);
+
+#[cfg(feature = "ma-posix")]
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct PosixThread {
+    pub thread: libc::pthread_t,
+}
+#[cfg(feature = "ma-posix")]
+impl_void_debug!(PosixThread);
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct Mutex {
+    pub context: *mut Context,
+    pub platform: PlatformMutex,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub union PlatformMutex {
+    #[cfg(feature = "ma-win32")]
+    pub win32: Win32Mutex,
+    #[cfg(feature = "ma-posix")]
+    pub posix: PosixMutex,
+    pub unused: c_int,
+}
+impl_void_debug!(PlatformMutex);
+
+#[cfg(feature = "ma-win32")]
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct Win32Mutex {
+    pub mutex_handle: Handle,
+}
+#[cfg(feature = "ma-win32")]
+impl_void_debug!(Win32Mutex);
+
+#[cfg(feature = "ma-posix")]
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct PosixMutex {
+    pub mutex: libc::pthread_mutex_t,
+}
+#[cfg(feature = "ma-posix")]
+impl_void_debug!(PosixMutex);
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct Event {
+    pub context: *mut Context,
+    pub platform: PlatformEvent,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub union PlatformEvent {
+    #[cfg(feature = "ma-win32")]
+    pub win32: Win32Event,
+    #[cfg(feature = "ma-posix")]
+    pub posix: PosixEvent,
+    pub unused: c_int,
+}
+impl_void_debug!(PlatformEvent);
+
+#[cfg(feature = "ma-win32")]
+#[derive(Clone, Copy)]
+pub struct Win32Event {
+    pub event_handle: Handle,
+}
+#[cfg(feature = "ma-win32")]
+impl_void_debug!(Win32Event);
+
+#[cfg(feature = "ma-posix")]
+#[derive(Clone, Copy)]
+pub struct PosixEvent {
+    pub mutex: libc::pthread_mutex_t,
+    pub condition: libc::pthread_cond_t,
+    pub value: u32,
+}
+#[cfg(feature = "ma-posix")]
+impl_void_debug!(PosixEvent);
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct Semaphore {
+    pub context: *mut Context,
+    pub platform: PlatformSemaphore,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub union PlatformSemaphore {
+    #[cfg(feature = "ma-win32")]
+    pub win32: Win32Sempahore,
+    #[cfg(feature = "ma-posix")]
+    pub posix: PosixSemaphore,
+    pub unused: c_int,
+}
+impl_void_debug!(PlatformSemaphore);
+
+#[cfg(feature = "ma-win32")]
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct Win32Sempahore {
+    pub semaphore_handle: Handle,
+}
+#[cfg(feature = "ma-win32")]
+impl_void_debug!(Win32Sempahore);
+
+#[cfg(feature = "ma-posix")]
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct PosixSemaphore {
+    pub semaphore: libc::sem_t,
+}
+#[cfg(feature = "ma-posix")]
+impl_void_debug!(PosixSemaphore);
+
+/// The callback for processing audio data from the device.
+///
+/// pOutput is a pointer to a buffer that will receive audio data that will later be played back through the speakers. This will be non-null
+/// for a playback or full-duplex device and null for a capture device.
+///
+/// pInput is a pointer to a buffer containing input data from the device. This will be non-null for a capture or full-duplex device, and
+/// null for a playback device.
+///
+/// frameCount is the number of PCM frames to process. If an output buffer is provided (pOutput is not null), applications should write out
+/// to the entire output buffer. Note that frameCount will not necessarily be exactly what you asked for when you initialized the deviced.
+/// The bufferSizeInFrames and bufferSizeInMilliseconds members of the device config are just hints, and are not necessarily exactly what
+/// you'll get.
+///
+/// Do _not_ call any miniaudio APIs from the callback. Attempting the stop the device can result in a deadlock. The proper way to stop the
+/// device is to call ma_device_stop() from a different thread, normally the main application thread.
+pub type DeviceCallbackProc =
+    extern "C" fn(device: *mut Device, output: *mut c_void, input: *const c_void, frame_count: u32);
+
+/// The callback for when the device has been stopped.
+///
+/// This will be called when the device is stopped explicitly with ma_device_stop() and also called implicitly when the device is stopped
+/// through external forces such as being unplugged or an internal error occuring.
+///
+/// Do not restart the device from the callback.
+pub type StopProc = extern "C" fn(device: *mut Device);
+
+/// The callback for handling log messages.
+///
+/// It is possible for pDevice to be null in which case the log originated from the context. If it is non-null you can assume the message
+/// came from the device.
+///
+/// logLevel is one of the following:
+/// - MA_LOG_LEVEL_VERBOSE
+/// - MA_LOG_LEVEL_INFO
+/// - MA_LOG_LEVEL_WARNING
+/// - MA_LOG_LEVEL_ERROR
+pub type LogProc = extern "C" fn(
+    context: *mut Context,
+    device: *mut Device,
+    log_level: LogLevel,
+    message: *const c_char,
+);
+
+#[repr(i32)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+pub enum DeviceType {
+    Playback = 1,
+    Capture = 2,
+    Duplex = 3,
+    Loopback = 4,
+}
+
+#[repr(i32)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+pub enum ShareMode {
+    Shared = 0,
+    Exclusive = 1,
+}
+
+/// iOS/tvOS/watchOS session categories
+#[repr(i32)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+pub enum IOSSessionCategory {
+    /// AVAudioSessionCategoryPlayAndRecord with AVAudioSessionCategoryOptionDefaultToSpeaker.
+    Default = 0,
+    /// Leave the session category unchanged.
+    None = 1,
+    /// AVAudioSessionCategoryAmbient
+    Ambient = 2,
+    /// AVAudioSessionCategorySoloAmbient
+    SoloAmbient = 3,
+    /// AVAudioSessionCategoryPlayback
+    Playback = 4,
+    /// AVAudioSessionCategoryRecord
+    Record = 5,
+    /// AVAudioSessionCategoryPlayAndRecord
+    PlayAndRecord = 6,
+    /// AVAudioSessionCategoryMultiRoute
+    MultiRoute = 7,
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct Context {
+    x: u32,
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct Device {}

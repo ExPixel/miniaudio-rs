@@ -159,6 +159,9 @@ fn emit_supported_features() {
     let ma_ios = cfg!(target_os = "ios");
     let ma_apple = ma_macos | ma_ios;
 
+    // #FIXME This is probably not correct but it's not a big deal atm.
+    let ma_posix = !ma_win32;
+
     emit_feat_cond("ma-win32", ma_win32);
     emit_feat_cond("ma-win32-desktop", ma_win32_desktop);
     emit_feat_cond("ma-unix", ma_unix);
@@ -173,6 +176,7 @@ fn emit_supported_features() {
     emit_feat_cond("ma-macos", ma_macos);
     emit_feat_cond("ma-ios", ma_ios);
     emit_feat_cond("ma-apple", ma_apple);
+    emit_feat_cond("ma-posix", ma_posix);
 
     let mut support_wasapi = false;
     let mut support_dsound = false;
