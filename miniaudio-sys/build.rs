@@ -10,6 +10,8 @@ pub fn main() {
         .file("./miniaudio-wrapper.c")
         .compile("libminiaudio");
 
+    emit_supported_features();
+
     // only rebuild if these files are changed.
     println!("cargo:rerun-if-changed=./miniaudio/miniaudio.h");
     println!("cargo:rerun-if-changed=./miniaudio-wrapper.c");
@@ -127,5 +129,88 @@ fn apply_flags(b: &mut cc::Build) {
 
     if cfg!(target_feature = "neon") && !(cfg!(feature = "no-neon")) {
         b.flag_if_supported("-mneon");
+    }
+}
+
+#[allow(clippy::logic_bug)]
+fn emit_supported_features() {
+    let emit_feat = |feature: &'static str| {
+        println!("cargo:rustc-cfg=feature=\"{}\"", feature);
+    };
+
+    let ma_win32 = cfg!(target_family = "windows");
+    let ma_win32_desktop = ma_win32; // FIXME for now I just assume they are the same.
+    let ma_unix = cfg!(target_family = "unix");
+    let ma_android = cfg!(target_os = "android");
+    let ma_linux = ma_android | cfg!(target_os = "linux");
+    let ma_openbsd = cfg!(target_os = "openbsd");
+    let ma_freebsd = cfg!(target_os = "freebsd");
+    let ma_netbsd = cfg!(target_os = "netbsd");
+    let ma_dragonfly = cfg!(target_os = "dragonfly");
+    let ma_bsd = ma_openbsd | ma_freebsd | ma_netbsd | ma_dragonfly;
+    let ma_emscripten = cfg!(target_os = "emscripten");
+    let ma_macos = cfg!(target_os = "macos");
+    let ma_ios = cfg!(target_os = "ios");
+    let ma_apple = ma_macos | ma_ios;
+
+    if !cfg!(target_feature = "no-device-io") {
+        if ma_win32 {
+            emit_feat("ma-support-wasapi");
+            if ma_win32_desktop {
+                emit_feat("ma-support-dsound");
+                emit_feat("ma-support-winmm");
+                emit_feat("ma-support-jack");
+            }
+        }
+
+        if ma_unix {
+            if ma_linux {
+                // ALSA is not supported on Android.
+                if !ma_android {
+                    emit_feat("ma-support-alsa");
+                }
+            }
+
+            if !ma_bsd && !ma_android && !ma_emscripten {
+                emit_feat("ma-support-pulseaudio");
+                emit_feat("ma-support-jack");
+            }
+
+            if ma_android {
+                emit_feat("ma-support-aaudio");
+                emit_feat("ma-support-opensl");
+            }
+
+            // FIXME change this to ma_bsd whenever miniaudio decides to do it as well.
+            if ma_openbsd {
+                // SNDIO is only supported on OpenBSD for now. May be expanded later if there is
+                // demand.
+                emit_feat("ma-support-sndio");
+            }
+
+            if ma_netbsd || ma_openbsd {
+                // Only support audio(4) on platforms with known support.
+                emit_feat("ma-support-audio4");
+            }
+
+            if ma_freebsd || ma_dragonfly {
+                // Only support OSS on specific platforms with known support.
+                emit_feat("ma-support-oss");
+            }
+        }
+
+        if ma_apple {
+            emit_feat("ma-support-coreaudio");
+        }
+
+        if ma_emscripten {
+            emit_feat("ma-support-webaudio");
+        }
+
+        // Explicitly disable the null backend for Emscripten because it uses a background thread
+        // which is not properly supported right now.
+        if !ma_emscripten {
+            emit_feat("ma-support-null");
+        }
     }
 }

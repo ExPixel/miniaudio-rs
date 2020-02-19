@@ -1,9 +1,67 @@
 use super::constants::*;
 use std::os::raw::{c_float, c_void};
 
+#[repr(u32)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+pub enum LogLevel {
+    Error = 1,
+    Warning = 2,
+    Info = 3,
+    Verbose = 4,
+}
+
+/// 32-bit boolean value used by mini-audio.
+#[repr(C)]
+#[repr(packed)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+pub struct Bool(u32);
+
+impl Bool {
+    pub const TRUE: Bool = Bool(1);
+    pub const FALSE: Bool = Bool(0);
+}
+
+impl Default for Bool {
+    #[inline]
+    fn default() -> Bool {
+        Self::FALSE
+    }
+}
+
+impl From<Bool> for bool {
+    #[inline]
+    fn from(b: Bool) -> bool {
+        b.0 != 0
+    }
+}
+
+impl From<bool> for Bool {
+    #[inline]
+    fn from(b: bool) -> Bool {
+        if b {
+            Bool::TRUE
+        } else {
+            Bool::FALSE
+        }
+    }
+}
+
+impl std::ops::Not for Bool {
+    type Output = Bool;
+
+    #[inline]
+    fn not(self) -> Bool {
+        if bool::from(self) {
+            Bool::FALSE
+        } else {
+            Bool::TRUE
+        }
+    }
+}
+
 #[repr(i32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
-pub enum MAResult {
+pub enum Result {
     Success = 0,
 
     /* General errors. */
@@ -429,10 +487,10 @@ pub type ChannelRouterReadDeinterleavedProc = extern "C" fn(
 pub struct ChannelRouterConfig {
     pub channels_in: u32,
     pub channels_out: u32,
-    pub channel_map_in: [Channel; MA_MAX_CHANNELS as usize],
-    pub channel_map_out: [Channel; MA_MAX_CHANNELS as usize],
+    pub channel_map_in: [Channel; MA_MAX_CHANNELS],
+    pub channel_map_out: [Channel; MA_MAX_CHANNELS],
     pub mixing_mode: ChannelMixMode,
-    pub weights: [[c_float; MA_MAX_CHANNELS as usize]; MA_MAX_CHANNELS as usize],
+    pub weights: [[c_float; MA_MAX_CHANNELS]; MA_MAX_CHANNELS],
     pub simd_bits: u32,
     pub on_read_deinterleaved: Option<ChannelRouterReadDeinterleavedProc>,
     pub user_data: *mut c_void,
@@ -444,10 +502,10 @@ impl Default for ChannelRouterConfig {
         ChannelRouterConfig {
             channels_in: 0,
             channels_out: 0,
-            channel_map_in: [Channel::None; MA_MAX_CHANNELS as usize],
-            channel_map_out: [Channel::None; MA_MAX_CHANNELS as usize],
+            channel_map_in: [Channel::None; MA_MAX_CHANNELS],
+            channel_map_out: [Channel::None; MA_MAX_CHANNELS],
             mixing_mode: ChannelMixMode::Rectangular,
-            weights: [[0f32; MA_MAX_CHANNELS as usize]; MA_MAX_CHANNELS as usize],
+            weights: [[0f32; MA_MAX_CHANNELS]; MA_MAX_CHANNELS],
             simd_bits: 0,
             on_read_deinterleaved: None,
             user_data: std::ptr::null_mut(),
@@ -460,7 +518,7 @@ impl Default for ChannelRouterConfig {
 pub struct ChannelRouter {
     pub config: ChannelRouterConfig,
     bitfields: u32,
-    pub shuffle_table: [u8; MA_MAX_CHANNELS as usize],
+    pub shuffle_table: [u8; MA_MAX_CHANNELS],
 }
 
 impl_bitfield!(
@@ -498,7 +556,7 @@ impl Default for ChannelRouter {
         ChannelRouter {
             config: ChannelRouterConfig::default(),
             bitfields: 0,
-            shuffle_table: [0u8; MA_MAX_CHANNELS as usize],
+            shuffle_table: [0u8; MA_MAX_CHANNELS],
         }
     }
 }
@@ -634,8 +692,7 @@ impl Default for Src {
         Src {
             inner: SrcInnerUnion {
                 linear: SrcLinear {
-                    input: [[0.0f32; MA_MAX_CHANNELS as usize];
-                        MA_SRC_INPUT_BUFFER_SIZE_IN_SAMPLES as usize],
+                    input: [[0.0f32; MA_MAX_CHANNELS]; MA_SRC_INPUT_BUFFER_SIZE_IN_SAMPLES],
                     time_in: 0.0f32,
                     left_over_frames: 0,
                 },
@@ -666,7 +723,7 @@ impl std::fmt::Debug for SrcInnerUnion {
 #[repr(align(64))]
 #[derive(Clone, Copy)]
 pub struct SrcLinear {
-    pub input: [[c_float; MA_MAX_CHANNELS as usize]; MA_SRC_INPUT_BUFFER_SIZE_IN_SAMPLES as usize],
+    pub input: [[c_float; MA_MAX_CHANNELS]; MA_SRC_INPUT_BUFFER_SIZE_IN_SAMPLES],
     pub time_in: c_float,
     pub left_over_frames: u32,
 }
@@ -675,8 +732,8 @@ pub struct SrcLinear {
 #[repr(align(64))]
 #[derive(Clone, Copy)]
 pub struct SrcSinc {
-    pub input: [[c_float; MA_MAX_CHANNELS as usize];
-        MA_SRC_SINC_MAX_WINDOW_WIDTH as usize * 2 + MA_SRC_INPUT_BUFFER_SIZE_IN_SAMPLES as usize],
+    pub input: [[c_float; MA_MAX_CHANNELS];
+        MA_SRC_SINC_MAX_WINDOW_WIDTH * 2 + MA_SRC_INPUT_BUFFER_SIZE_IN_SAMPLES],
     pub time_in: c_float,
     /// The number of frames sitting in the input buffer, not including the first half of the
     /// window.
@@ -684,8 +741,7 @@ pub struct SrcSinc {
     /// An offset of `input`.
     pub window_pos_in_samples: u32,
     /// Precomputed lookup table. The +1 is used to avoid the need for an overflow check.
-    pub table: [c_float;
-        MA_SRC_SINC_MAX_WINDOW_WIDTH as usize * MA_SRC_SINC_LOOKUP_TABLE_RESOLUTION as usize],
+    pub table: [c_float; MA_SRC_SINC_MAX_WINDOW_WIDTH * MA_SRC_SINC_LOOKUP_TABLE_RESOLUTION],
 }
 
 pub type PCMConverterReadProc = extern "C" fn(
@@ -708,11 +764,11 @@ pub struct PCMConverterConfig {
     pub format_in: Format,
     pub channels_in: u32,
     pub sample_rate_in: u32,
-    pub channel_map_in: [Channel; MA_MAX_CHANNELS as usize],
+    pub channel_map_in: [Channel; MA_MAX_CHANNELS],
     pub format_out: Format,
     pub channels_out: u32,
     pub sample_rate_out: u32,
-    pub channel_map_out: [Channel; MA_MAX_CHANNELS as usize],
+    pub channel_map_out: [Channel; MA_MAX_CHANNELS],
     pub channel_mix_mode: ChannelMixMode,
     pub dither_mode: DitherMode,
     pub src_algorithm: SrcAlgorithm,
