@@ -19,73 +19,73 @@ pub fn main() {
 }
 
 fn apply_definitions(b: &mut cc::Build) {
-    if cfg!(feature = "no-wasapi") {
+    if cfg!(feature = "ma-no-wasapi") {
         b.define("MA_NO_WASAPI", "1");
     }
 
-    if cfg!(feature = "no-dsound") {
+    if cfg!(feature = "ma-no-dsound") {
         b.define("MA_NO_DSOUND", "1");
     }
 
-    if cfg!(feature = "no-winmm") {
+    if cfg!(feature = "ma-no-winmm") {
         b.define("MA_NO_WINMM", "1");
     }
-    if cfg!(feature = "no-alsa") {
+    if cfg!(feature = "ma-no-alsa") {
         b.define("MA_NO_ALSA", "1");
     }
-    if cfg!(feature = "no-pulseaudio") {
+    if cfg!(feature = "ma-no-pulseaudio") {
         b.define("MA_NO_PULSEAUDIO", "1");
     }
-    if cfg!(feature = "no-jack") {
+    if cfg!(feature = "ma-no-jack") {
         b.define("MA_NO_JACK", "1");
     }
-    if cfg!(feature = "no-coreaudio") {
+    if cfg!(feature = "ma-no-coreaudio") {
         b.define("MA_NO_COREAUDIO", "1");
     }
-    if cfg!(feature = "no-sndio") {
+    if cfg!(feature = "ma-no-sndio") {
         b.define("MA_NO_SNDIO", "1");
     }
-    if cfg!(feature = "no-audio4") {
+    if cfg!(feature = "ma-no-audio4") {
         b.define("MA_NO_AUDIO4", "1");
     }
-    if cfg!(feature = "no-oss") {
+    if cfg!(feature = "ma-no-oss") {
         b.define("MA_NO_OSS", "1");
     }
-    if cfg!(feature = "no-aaudio") {
+    if cfg!(feature = "ma-no-aaudio") {
         b.define("MA_NO_AAUDIO", "1");
     }
-    if cfg!(feature = "no-opensl") {
+    if cfg!(feature = "ma-no-opensl") {
         b.define("MA_NO_OPENSL", "1");
     }
-    if cfg!(feature = "no-webaudio") {
+    if cfg!(feature = "ma-no-webaudio") {
         b.define("MA_NO_WEBAUDIO", "1");
     }
-    if cfg!(feature = "no-null") {
+    if cfg!(feature = "ma-no-null") {
         b.define("MA_NO_NULL", "1");
     }
-    if cfg!(feature = "no-decoding") {
+    if cfg!(feature = "ma-no-decoding") {
         b.define("MA_NO_DECODING", "1");
     }
-    if cfg!(feature = "no-device-io") {
+    if cfg!(feature = "ma-no-device-io") {
         b.define("MA_NO_DEVICE_IO", "1");
     }
-    if cfg!(feature = "no-stdio") {
+    if cfg!(feature = "ma-no-stdio") {
         b.define("MA_NO_STDIO", "1");
     }
-    if cfg!(feature = "no-sse2") {
+    if cfg!(feature = "ma-no-sse2") {
         b.define("MA_NO_SSE2", "1");
     }
-    if cfg!(feature = "no-avx2") {
+    if cfg!(feature = "ma-no-avx2") {
         b.define("MA_NO_AVX2", "1");
     }
-    if cfg!(feature = "no-avx512") {
+    if cfg!(feature = "ma-no-avx512") {
         b.define("MA_NO_AVX512", "1");
     }
-    if cfg!(feature = "no-neon") {
+    if cfg!(feature = "ma-no-neon") {
         b.define("MA_NO_NEON", "1");
     }
 
-    if cfg!(feature = "debug-output") {
+    if cfg!(feature = "ma-debug-output") {
         b.define("MA_DEBUG_OUTPUT", "1");
     }
 
@@ -95,16 +95,16 @@ fn apply_definitions(b: &mut cc::Build) {
     const LOG_LEVEL_WARNING: &'static str = "2";
     const LOG_LEVEL_ERROR: &'static str = "1";
 
-    if cfg!(feature = "log-level-error") {
+    if cfg!(feature = "ma-log-level-error") {
         log_level = Some(LOG_LEVEL_ERROR);
     }
-    if cfg!(feature = "log-level-warning") {
+    if cfg!(feature = "ma-log-level-warning") {
         log_level = Some(LOG_LEVEL_WARNING);
     }
-    if cfg!(feature = "log-level-info") {
+    if cfg!(feature = "ma-log-level-info") {
         log_level = Some(LOG_LEVEL_INFO);
     }
-    if cfg!(feature = "log-level-verbose") {
+    if cfg!(feature = "ma-log-level-verbose") {
         log_level = Some(LOG_LEVEL_VERBOSE);
     }
 
@@ -115,19 +115,19 @@ fn apply_definitions(b: &mut cc::Build) {
 
 #[allow(clippy::logic_bug)]
 fn apply_flags(b: &mut cc::Build) {
-    if cfg!(target_feature = "sse2") && !(cfg!(feature = "no-sse2")) {
+    if cfg!(target_feature = "sse2") && !(cfg!(feature = "ma-no-sse2")) {
         b.flag_if_supported("-msse2");
     }
 
-    if cfg!(target_feature = "avx2") && !(cfg!(feature = "no-avx2")) {
+    if cfg!(target_feature = "avx2") && !(cfg!(feature = "ma-no-avx2")) {
         b.flag_if_supported("-mavx2");
     }
 
-    if cfg!(target_feature = "avx512") && !(cfg!(feature = "no-avx512")) {
+    if cfg!(target_feature = "avx512") && !(cfg!(feature = "ma-no-avx512")) {
         b.flag_if_supported("-mavx512");
     }
 
-    if cfg!(target_feature = "neon") && !(cfg!(feature = "no-neon")) {
+    if cfg!(target_feature = "neon") && !(cfg!(feature = "ma-no-neon")) {
         b.flag_if_supported("-mneon");
     }
 }
@@ -153,13 +153,28 @@ fn emit_supported_features() {
     let ma_ios = cfg!(target_os = "ios");
     let ma_apple = ma_macos | ma_ios;
 
+    let mut support_wasapi = false;
+    let mut support_dsound = false;
+    let mut support_winmm = false;
+    let mut support_alsa = false;
+    let mut support_jack = false;
+    let mut support_pulseaudio = false;
+    let mut support_aaudio = false;
+    let mut support_opensl = false;
+    let mut support_sndio = false;
+    let mut support_audio4 = false;
+    let mut support_oss = false;
+    let mut support_coreaudio = false;
+    let mut support_webaudio = false;
+    let mut support_null = false;
+
     if !cfg!(target_feature = "no-device-io") {
         if ma_win32 {
-            emit_feat("ma-support-wasapi");
+            support_wasapi = true;
             if ma_win32_desktop {
-                emit_feat("ma-support-dsound");
-                emit_feat("ma-support-winmm");
-                emit_feat("ma-support-jack");
+                support_dsound = true;
+                support_winmm = true;
+                support_jack = true;
             }
         }
 
@@ -167,50 +182,166 @@ fn emit_supported_features() {
             if ma_linux {
                 // ALSA is not supported on Android.
                 if !ma_android {
-                    emit_feat("ma-support-alsa");
+                    support_alsa = true;
                 }
             }
 
             if !ma_bsd && !ma_android && !ma_emscripten {
-                emit_feat("ma-support-pulseaudio");
-                emit_feat("ma-support-jack");
+                support_pulseaudio = true;
+                support_jack = true;
             }
 
             if ma_android {
-                emit_feat("ma-support-aaudio");
-                emit_feat("ma-support-opensl");
+                support_aaudio = true;
+                support_opensl = true;
             }
 
             // FIXME change this to ma_bsd whenever miniaudio decides to do it as well.
             if ma_openbsd {
                 // SNDIO is only supported on OpenBSD for now. May be expanded later if there is
                 // demand.
-                emit_feat("ma-support-sndio");
+                support_sndio = true;
             }
 
             if ma_netbsd || ma_openbsd {
                 // Only support audio(4) on platforms with known support.
-                emit_feat("ma-support-audio4");
+                support_audio4 = true;
             }
 
             if ma_freebsd || ma_dragonfly {
                 // Only support OSS on specific platforms with known support.
-                emit_feat("ma-support-oss");
+                support_oss = true;
             }
         }
 
         if ma_apple {
-            emit_feat("ma-support-coreaudio");
+            support_coreaudio = true;
         }
 
         if ma_emscripten {
-            emit_feat("ma-support-webaudio");
+            support_webaudio = true;
         }
 
         // Explicitly disable the null backend for Emscripten because it uses a background thread
         // which is not properly supported right now.
         if !ma_emscripten {
-            emit_feat("ma-support-null");
+            support_null = true;
         }
+    }
+
+    //
+    // EMIT SUPPORT FLAGS:
+    //
+
+    if support_wasapi {
+        emit_feat("ma-support-wasapi");
+    }
+
+    if support_dsound {
+        emit_feat("ma-support-dsound");
+    }
+
+    if support_winmm {
+        emit_feat("ma-support-winmm");
+    }
+
+    if support_alsa {
+        emit_feat("ma-support-alsa");
+    }
+
+    if support_pulseaudio {
+        emit_feat("ma-support-pulseaudio");
+    }
+
+    if support_aaudio {
+        emit_feat("ma-support-aaudio");
+    }
+
+    if support_opensl {
+        emit_feat("ma-support-opensl");
+    }
+
+    if support_sndio {
+        emit_feat("ma-support-sndio");
+    }
+
+    if support_audio4 {
+        emit_feat("ma-support-audio4");
+    }
+
+    if support_oss {
+        emit_feat("ma-support-oss");
+    }
+
+    if support_coreaudio {
+        emit_feat("ma-support-coreaudio");
+    }
+
+    if support_webaudio {
+        emit_feat("ma-support-webaudio");
+    }
+
+    if support_null {
+        emit_feat("ma-support-null");
+    }
+
+    //
+    // EMIT ENABLE FLAGS:
+    //
+
+    if !cfg!(feature = "ma-no-wasapi") && support_wasapi {
+        emit_feat("ma-enable-wasapi");
+    }
+
+    if !cfg!(feature = "ma-no-dsound") && support_dsound {
+        emit_feat("ma-enable-dsound");
+    }
+
+    if !cfg!(feature = "ma-no-winmm") && support_winmm {
+        emit_feat("ma-enable-winmm");
+    }
+
+    if !cfg!(feature = "ma-no-jack") && support_jack {
+        emit_feat("ma-enable-jack");
+    }
+
+    if !cfg!(feature = "ma-no-alsa") && support_alsa {
+        emit_feat("ma-enable-alsa");
+    }
+
+    if !cfg!(feature = "ma-no-pulseaudio") && support_pulseaudio {
+        emit_feat("ma-enable-pulseaudio");
+    }
+
+    if !cfg!(feature = "ma-no-aaudio") && support_aaudio {
+        emit_feat("ma-enable-aaudio");
+    }
+
+    if !cfg!(feature = "ma-no-opensl") && support_opensl {
+        emit_feat("ma-enable-opensl");
+    }
+
+    if !cfg!(feature = "ma-no-sndio") && support_sndio {
+        emit_feat("ma-enable-sndio");
+    }
+
+    if !cfg!(feature = "ma-no-audio4") && support_audio4 {
+        emit_feat("ma-enable-audio4");
+    }
+
+    if !cfg!(feature = "ma-no-oss") && support_oss {
+        emit_feat("ma-enable-oss");
+    }
+
+    if !cfg!(feature = "ma-no-coreaudio") && support_coreaudio {
+        emit_feat("ma-enable-coreaudio");
+    }
+
+    if !cfg!(feature = "ma-no-webaudio") && support_webaudio {
+        emit_feat("ma-enable-webaudio");
+    }
+
+    if !cfg!(feature = "ma-no-null") && support_null {
+        emit_feat("ma-enable-null");
     }
 }
