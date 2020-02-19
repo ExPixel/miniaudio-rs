@@ -15,10 +15,16 @@ extern "C" {
     pub fn debug_ma_sizeof_src() -> usize;
     pub fn debug_ma_sizeof_pcm_converter_config() -> usize;
     pub fn debug_ma_sizeof_pcm_converter() -> usize;
+
+    #[cfg(not(feature = "ma-no-device-io"))]
     pub fn debug_ma_sizeof_thread() -> usize;
+    #[cfg(not(feature = "ma-no-device-io"))]
     pub fn debug_ma_sizeof_mutex() -> usize;
+    #[cfg(not(feature = "ma-no-device-io"))]
     pub fn debug_ma_sizeof_event() -> usize;
+    #[cfg(not(feature = "ma-no-device-io"))]
     pub fn debug_ma_sizeof_semaphore() -> usize;
+
     pub fn debug_ma_init_format_converter_config(config: &mut FormatConverterConfig);
     pub fn debug_ma_init_format_converter(converter: &mut FormatConverter);
     pub fn debug_ma_init_channel_router_config(config: &mut ChannelRouterConfig);

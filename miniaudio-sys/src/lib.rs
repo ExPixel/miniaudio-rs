@@ -54,25 +54,28 @@ mod test {
             std::mem::size_of::<PCMConverter>()
         );
 
-        assert_eq!(
-            unsafe { debug_ma_sizeof_thread() },
-            std::mem::size_of::<Thread>()
-        );
+        #[cfg(not(feature = "ma-no-device-io"))]
+        {
+            assert_eq!(
+                unsafe { debug_ma_sizeof_thread() },
+                std::mem::size_of::<Thread>()
+            );
 
-        assert_eq!(
-            unsafe { debug_ma_sizeof_mutex() },
-            std::mem::size_of::<Mutex>()
-        );
+            assert_eq!(
+                unsafe { debug_ma_sizeof_mutex() },
+                std::mem::size_of::<Mutex>()
+            );
 
-        assert_eq!(
-            unsafe { debug_ma_sizeof_event() },
-            std::mem::size_of::<Event>()
-        );
+            assert_eq!(
+                unsafe { debug_ma_sizeof_event() },
+                std::mem::size_of::<Event>()
+            );
 
-        assert_eq!(
-            unsafe { debug_ma_sizeof_semaphore() },
-            std::mem::size_of::<Semaphore>()
-        );
+            assert_eq!(
+                unsafe { debug_ma_sizeof_semaphore() },
+                std::mem::size_of::<Semaphore>()
+            );
+        }
     }
 
     #[test]

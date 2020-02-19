@@ -36,6 +36,7 @@ size_t debug_ma_sizeof_pcm_converter() {
     return sizeof(ma_pcm_converter);
 }
 
+#ifndef MA_NO_DEVICE_IO
 size_t debug_ma_sizeof_thread() {
     return sizeof(ma_thread);
 }
@@ -51,6 +52,7 @@ size_t debug_ma_sizeof_event() {
 size_t debug_ma_sizeof_semaphore() {
     return sizeof(ma_semaphore);
 }
+#endif
 
 /**
  * The following functions initialize miniaudio C structs with some
