@@ -19,6 +19,16 @@ macro_rules! impl_void_debug {
     };
 }
 
+macro_rules! impl_default {
+    ($Type:ty, $Value:expr) => {
+        impl Default for $Type {
+            fn default() -> $Type {
+                $Value
+            }
+        }
+    };
+}
+
 pub type Handle = *mut c_void;
 pub type Proc = extern "C" fn();
 pub type Ptr = *mut c_void;
@@ -32,28 +42,21 @@ pub enum LogLevel {
     Verbose = 4,
 }
 
-/// 32-bit boolean value used by mini-audio.
-#[repr(C)]
-#[repr(packed)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
-pub struct Bool(u32);
-
-impl Bool {
-    pub const TRUE: Bool = Bool(1);
-    pub const FALSE: Bool = Bool(0);
-}
-
-impl Default for Bool {
-    #[inline]
-    fn default() -> Bool {
-        Self::FALSE
+bitflags::bitflags! {
+    /// 32-bit boolean value used by mini-audio.
+    #[repr(transparent)]
+    pub struct Bool: u32 {
+        const FALSE = 0;
+        const TRUE = 1;
     }
 }
+
+impl_default!(Bool, Bool::FALSE);
 
 impl From<Bool> for bool {
     #[inline]
     fn from(b: Bool) -> bool {
-        b.0 != 0
+        b != Bool::FALSE
     }
 }
 
@@ -64,19 +67,6 @@ impl From<bool> for Bool {
             Bool::TRUE
         } else {
             Bool::FALSE
-        }
-    }
-}
-
-impl std::ops::Not for Bool {
-    type Output = Bool;
-
-    #[inline]
-    fn not(self) -> Bool {
-        if bool::from(self) {
-            Bool::FALSE
-        } else {
-            Bool::TRUE
         }
     }
 }
@@ -236,6 +226,10 @@ pub enum Format {
     S24 = 3,
     S32 = 4,
     F32 = 5,
+}
+
+impl Format {
+    pub const COUNT: usize = 6;
 }
 
 #[repr(i32)]
@@ -902,7 +896,7 @@ impl_bitfield!(
 
 #[cfg(not(feature = "ma-no-device-io"))]
 mod device_io {
-    use super::{Handle, LogLevel};
+    use super::*;
     use libc::{c_char, c_int, c_void};
 
     #[cfg(feature = "ma-support-wasapi")]
@@ -1151,6 +1145,7 @@ mod device_io {
         Duplex = 3,
         Loopback = 4,
     }
+    impl_default!(DeviceType, DeviceType::Playback);
 
     #[repr(i32)]
     #[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
@@ -1158,6 +1153,7 @@ mod device_io {
         Shared = 0,
         Exclusive = 1,
     }
+    impl_default!(ShareMode, ShareMode::Shared);
 
     /// iOS/tvOS/watchOS session categories
     #[repr(i32)]
@@ -1181,13 +1177,1081 @@ mod device_io {
         MultiRoute = 7,
     }
 
+    // /// iOS/tvOS/watchOS session category options
+    // #[repr(i32)]
+    // #[derive(Debug, Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+    // pub enum IOSSessionCategoryOption {}
+
+    bitflags::bitflags! {
+        #[repr(transparent)]
+        pub struct IOSSessionCategoryOption: i32 {
+            /// AVAudioSessionCategoryOptionMixWithOthers
+            const MIX_WITH_OTHERS = 0x01;
+            /// AVAudioSessionCategoryOptionDuckOthers
+            const DUCK_OTHERS = 0x02;
+            /// AVAudioSessionCategoryOptionAllowBluetooth
+            const ALLOW_BLUETOOTH = 0x04;
+            /// AVAudioSessionCategoryOptionDefaultToSpeaker
+            const DEFAULT_TO_SPEAKER = 0x08;
+            /// AVAudioSessionCategoryOptionInterruptSpokenAudioAndMixWithOthers
+            const INTERRUPT_SPOKEN_AUDIO_AND_MIX_WITH_OTHERS = 0x11;
+            /// AVAudioSessionCategoryOptionAllowBluetoothA2DP
+            const ALLOW_BLUETOOTH_A2DP = 0x20;
+            /// AVAudioSessionCategoryOptionAllowAirPlay
+            const ALLOW_AIR_PLAY = 0x40;
+        }
+    }
+
+    #[repr(C)]
+    #[derive(Copy, Clone)]
+    pub union DeviceID {
+        /// WASAPI uses a wchar_t string for identification.
+        #[cfg(feature = "ma-support-wasapi")]
+        pub wasapi: [libc::wchar_t; 64],
+        /// DirectSound uses a GUID for identification.
+        #[cfg(feature = "ma-support-dsound")]
+        pub dsound: [u8; 16],
+        /// When creating a device, WinMM expects a Win32 UINT_PTR for device identification. In
+        /// practice it's actually just a UINT.
+        #[cfg(feature = "ma-support-winmm")]
+        pub winmm: u32,
+        /// ALSA uses a name string for identification.
+        #[cfg(feature = "ma-support-alsa")]
+        pub alsa: [libc::c_char; 256],
+        /// PulseAudio uses a name string for identification.
+        #[cfg(feature = "ma-support-pulseaudio")]
+        pub pulse: [libc::c_char; 256],
+        /// JACK always uses default devices.
+        #[cfg(feature = "ma-support-jack")]
+        pub jack: libc::c_int,
+        /// Core Audio uses a string for identification.
+        #[cfg(feature = "ma-support-coreaudio")]
+        pub coreaudio: [libc::c_char; 256],
+        /// SND/0, ect.
+        #[cfg(feature = "ma-support-sndio")]
+        pub sndio: [libc::c_char; 256],
+        /// "/dev/audio", ect.
+        #[cfg(feature = "ma-support-audio4")]
+        pub audio4: [libc::c_char; 256],
+        /// "dev/dsp0", ect. "dev/dsp" for default device.
+        #[cfg(feature = "ma-support-oss")]
+        pub oss: [libc::c_char; 64],
+        /// AAudio uses a 32-bit integer for identification.
+        #[cfg(feature = "ma-support-aaudio")]
+        pub aaudio: i32,
+        /// OpenSL|ES uses a 32-bit unsigned integer for identification.
+        #[cfg(feature = "ma-support-opensl")]
+        pub opensl: u32,
+        /// Web Audio always uses default devices for now, but if this changes it'll be a GUID.
+        #[cfg(feature = "ma-support-webaudio")]
+        pub webaudio: [libc::c_char; 32],
+        /// The null backend uses an integer for device IDs.
+        #[cfg(feature = "ma-support-null")]
+        pub nullbackend: libc::c_int,
+    }
+    impl_void_debug!(DeviceID);
+
+    /// `name` and `id` are the only pieces of information guaranteed to be filled in during device
+    /// enumeration.
+    ///
+    /// - `format_count`
+    /// - `formats`
+    /// - `min_channels`
+    /// - `max_channels`
+    /// - `min_sample_rate`
+    /// - `max_sample_rate`
+    ///
+    /// These other details are filled in when possible using `ma_context_get_device_info()`.
+    /// Note that you are allowed to initialize a device with settings outside of this range, but
+    /// it just means the data will be converted using miniaudio's data conversion pipeline before
+    /// sending the data to/from the device. Most programs will not need to worry about these
+    /// values but it's provided here mainly for the purpose of information or in the rare case
+    /// that someone might find it useful.
+    ///
+    /// They will be set to 0 when returned by `ma_context_enumerate_devices()` or
+    /// `ma_context_get_devices()`.
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct DeviceInfo {
+        pub id: DeviceID,
+        pub name: [libc::c_char; 256],
+
+        pub format_count: u32,
+        pub formats: [Format; Format::COUNT],
+        pub min_channels: u32,
+        pub max_channels: u32,
+        pub min_sample_rate: u32,
+        pub max_sample_rate: u32,
+    }
+
+    impl std::fmt::Debug for DeviceInfo {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            f.debug_struct("DeviceInfo")
+                .field("id", &self.id)
+                .field("name", &crate::util::cstr_display(&self.name))
+                .field("format_count", &self.format_count)
+                .field("formats", &self.formats)
+                .field("min_channels", &self.min_channels)
+                .field("max_channels", &self.max_channels)
+                .field("min_sample_rate", &self.min_sample_rate)
+                .field("max_sample_rate", &self.max_sample_rate)
+                .finish()
+        }
+    }
+
+    #[repr(C)]
+    #[derive(Copy, Clone)]
+    pub union Timer {
+        pub counter: i64,
+        pub counter_d: f64,
+    }
+    impl_void_debug!(Timer);
+
     #[repr(C)]
     #[derive(Debug, Clone, Copy)]
-    pub struct Context {
-        x: u32,
+    pub struct DeviceConfig {
+        pub device_type: DeviceType,
+        pub sample_rate: u32,
+        pub buffer_size_in_frames: u32,
+        pub buffer_size_in_milliseconds: u32,
+        pub periods: u32,
+        pub performance_profile: PerformanceProfile,
+        /// When set to true, the contents of the output buffer passed into the data callback will
+        /// be left undefined rather than initialized to zero.
+        pub no_pre_zeroed_output_buffer: Bool,
+        /// When set to true, the contents of the output buffer passed into the data callback will
+        /// be clipped after returning. Only applies when the playback sample format is f32.
+        pub no_clip: Bool,
+        pub data_callback: Option<DeviceCallbackProc>,
+        pub stop_callback: Option<StopProc>,
+        pub user_data: *mut c_void,
+        pub playback: DeviceConfigPlayback,
+        pub capture: DeviceConfigCapture,
+        pub wasapi: DeviceConfigWASAPI,
+        pub alsa: DeviceConfigALSA,
+        pub pulse: DeviceConfigPulse,
     }
 
     #[repr(C)]
     #[derive(Debug, Clone, Copy)]
-    pub struct Device {}
+    pub struct DeviceConfigPlayback {
+        pub device_id: *mut DeviceID,
+        pub format: Format,
+        pub channels: u32,
+        pub channel_map: [Channel; MA_MAX_CHANNELS],
+        pub share_mode: ShareMode,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    pub struct DeviceConfigCapture {
+        pub device_id: *mut DeviceID,
+        pub format: Format,
+        pub channels: u32,
+        pub channel_map: [Channel; MA_MAX_CHANNELS],
+        pub share_mode: ShareMode,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    pub struct DeviceConfigWASAPI {
+        /// When set to true, disables the use of AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM.
+        pub no_auto_convert_src: Bool,
+        /// When set to true, disables the use of AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY.
+        pub no_default_quality_src: Bool,
+        /// Disables automatic stream routing.
+        pub no_auto_stream_routing: Bool,
+        /// Disables WASAPI's hardware offloading feature.
+        pub no_hardware_offloading: Bool,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    pub struct DeviceConfigALSA {
+        /// Disables MMap mode.
+        pub no_mmap: Bool,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    pub struct DeviceConfigPulse {
+        stream_name_playback: *const libc::c_char,
+        stream_name_capture: *const libc::c_char,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    pub struct ContextConfig {
+        pub log_callback: Option<LogProc>,
+        pub thread_priority: ThreadPriority,
+        pub user_data: *mut c_void,
+        pub alsa: ContextConfigALSA,
+        pub pulse: ContextConfigPulse,
+        pub coreaudio: ContextConfigCoreAudio,
+        pub jack: ContextConfigJack,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    pub struct ContextConfigALSA {
+        pub user_verbose_device_enumeration: Bool,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    pub struct ContextConfigPulse {
+        pub application_name: *const libc::c_char,
+        pub server_name: *const libc::c_char,
+        /// Enables autospawning of the pulse audio daemon if necessary.
+        pub try_auto_spawn: Bool,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    pub struct ContextConfigCoreAudio {
+        pub session_category: IOSSessionCategory,
+        pub session_category_options: IOSSessionCategoryOption,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    pub struct ContextConfigJack {
+        pub client_name: *const libc::c_char,
+        pub try_start_server: Bool,
+    }
+
+    pub type EnumDevicesCallbackProc = extern "C" fn(
+        context: &mut Context,
+        device_type: DeviceType,
+        info: &DeviceInfo,
+        user_data: *mut c_void,
+    ) -> Bool;
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    pub struct Context {
+        /// DirectSound, ALSA, ect.
+        pub backend: Backend,
+        pub log_callback: LogProc,
+        pub thread_priority: ThreadPriority,
+        pub user_data: *mut c_void,
+        /// Used to make `ma_context_get_devices()` thread safe.
+        pub device_enum_lock: Mutex,
+        /// Used to make `ma_context_get_device_info()` thread safe.
+        pub device_info_lock: Mutex,
+        /// Total capacity of `device_infos`.
+        pub device_info_capacity: u32,
+        pub playback_device_info_count: u32,
+        pub capture_device_info_count: u32,
+        /// Playback devices first, then capture.
+        pub device_infos: *mut DeviceInfo,
+        bitfields: u32,
+        pub on_uninit: Option<extern "C" fn(context: *mut Context) -> Result>,
+        pub on_device_id_equal: Option<
+            extern "C" fn(
+                context: *mut Context,
+                id0: *const DeviceID,
+                id1: *const DeviceID,
+            ) -> Bool,
+        >,
+        pub on_enum_devices: Option<
+            extern "C" fn(
+                context: *mut Context,
+                callback: EnumDevicesCallbackProc,
+                user_data: *mut c_void,
+            ) -> Result,
+        >,
+        pub on_get_device_info: Option<
+            extern "C" fn(
+                context: *mut Context,
+                device_type: DeviceType,
+                device_id: DeviceID,
+                share_mode: ShareMode,
+                device_info: *mut DeviceInfo,
+            ) -> Result,
+        >,
+        pub on_device_init: Option<
+            extern "C" fn(
+                context: *mut Context,
+                config: *const DeviceConfig,
+                device: *mut Device,
+            ) -> Result,
+        >,
+        pub on_device_uninit: Option<extern "C" fn(device: *mut Device)>,
+        pub on_device_start: Option<extern "C" fn(device: *mut Device) -> Result>,
+        pub on_device_stop: Option<extern "C" fn(device: *mut Device) -> Result>,
+        pub on_device_main_loop: Option<extern "C" fn(device: *mut Device) -> Result>,
+
+        pub api: ContextAPI,
+        pub plt: ContextPLT,
+    }
+
+    impl_bitfield!(
+        Context,
+        bitfields,
+        set_is_backend_asynchronous,
+        is_backend_asynchronous,
+        1 << 0
+    );
+
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub union ContextAPI {
+        #[cfg(feature = "ma-support-wasapi")]
+        pub wasapi: ContextWASAPI,
+        #[cfg(feature = "ma-support-dsound")]
+        pub dsound: ContextDSound,
+        #[cfg(feature = "ma-support-winmm")]
+        pub winmm: ContextWinMM,
+        #[cfg(feature = "ma-support-alsa")]
+        pub alsa: ContextAlsa,
+        #[cfg(feature = "ma-support-pulseaudio")]
+        pub pulseaudio: ContextPulseAudio,
+        #[cfg(feature = "ma-support-jack")]
+        pub jack: ContextJack,
+        #[cfg(feature = "ma-support-coreaudio")]
+        pub coreaudio: ContextCoreAudio,
+        #[cfg(feature = "ma-support-sndio")]
+        pub sndio: ContextSNDIO,
+        #[cfg(feature = "ma-support-oss")]
+        pub oss: ContextOSS,
+        #[cfg(feature = "ma-support-audio4")]
+        pub audio4: ContextAudio4,
+        #[cfg(feature = "ma-support-aaudio")]
+        pub aaudio: ContextAAudio,
+        #[cfg(feature = "ma-support-opensl")]
+        pub opensl: ContextOpenSL,
+        #[cfg(feature = "ma-support-webaudio")]
+        pub webaudio: ContextWebAudio,
+        #[cfg(feature = "ma-support-null")]
+        pub null_backend: ContextNull,
+    }
+    impl_void_debug!(ContextAPI);
+
+    /// Platform stuff.
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub union ContextPLT {
+        #[cfg(feature = "ma-win32")]
+        pub win32: ContextWin32,
+        #[cfg(feature = "ma-posix")]
+        pub posix: ContextPosix,
+        pub unused: libc::c_int,
+    }
+    impl_void_debug!(ContextPLT);
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-wasapi")]
+    pub struct ContextWASAPI {
+        pub unused: libc::c_int,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-dsound")]
+    pub struct ContextDSound {
+        pub sound_dll: Handle,
+        pub direct_sound_create: Proc,
+        pub direct_sound_enumerate_a: Proc,
+        pub direct_sound_capture_create: Proc,
+        pub direct_sound_capture_enumerate_a: Proc,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-winmm")]
+    pub struct ContextWinMM {
+        pub win_mm: Handle,
+        pub waveOutGetNumDevs: Proc,
+        pub waveOutGetDevCapsA: Proc,
+        pub waveOutOpen: Proc,
+        pub waveOutClose: Proc,
+        pub waveOutPrepareHeader: Proc,
+        pub waveOutUnprepareHeader: Proc,
+        pub waveOutWrite: Proc,
+        pub waveOutReset: Proc,
+        pub waveInGetNumDevs: Proc,
+        pub waveInGetDevCapsA: Proc,
+        pub waveInOpen: Proc,
+        pub waveInClose: Proc,
+        pub waveInPrepareHeader: Proc,
+        pub waveInUnprepareHeader: Proc,
+        pub waveInAddBuffer: Proc,
+        pub waveInStart: Proc,
+        pub waveInReset: Proc,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-alsa")]
+    pub struct ContextAlsa {
+        pub asound_so: Handle,
+        pub snd_pcm_open: Proc,
+        pub snd_pcm_close: Proc,
+        pub snd_pcm_hw_params_sizeof: Proc,
+        pub snd_pcm_hw_params_any: Proc,
+        pub snd_pcm_hw_params_set_format: Proc,
+        pub snd_pcm_hw_params_set_format_first: Proc,
+        pub snd_pcm_hw_params_get_format_mask: Proc,
+        pub snd_pcm_hw_params_set_channels_near: Proc,
+        pub snd_pcm_hw_params_set_rate_resample: Proc,
+        pub snd_pcm_hw_params_set_rate_near: Proc,
+        pub snd_pcm_hw_params_set_buffer_size_near: Proc,
+        pub snd_pcm_hw_params_set_periods_near: Proc,
+        pub snd_pcm_hw_params_set_access: Proc,
+        pub snd_pcm_hw_params_get_format: Proc,
+        pub snd_pcm_hw_params_get_channels: Proc,
+        pub snd_pcm_hw_params_get_channels_min: Proc,
+        pub snd_pcm_hw_params_get_channels_max: Proc,
+        pub snd_pcm_hw_params_get_rate: Proc,
+        pub snd_pcm_hw_params_get_rate_min: Proc,
+        pub snd_pcm_hw_params_get_rate_max: Proc,
+        pub snd_pcm_hw_params_get_buffer_size: Proc,
+        pub snd_pcm_hw_params_get_periods: Proc,
+        pub snd_pcm_hw_params_get_access: Proc,
+        pub snd_pcm_hw_params: Proc,
+        pub snd_pcm_sw_params_sizeof: Proc,
+        pub snd_pcm_sw_params_current: Proc,
+        pub snd_pcm_sw_params_get_boundary: Proc,
+        pub snd_pcm_sw_params_set_avail_min: Proc,
+        pub snd_pcm_sw_params_set_start_threshold: Proc,
+        pub snd_pcm_sw_params_set_stop_threshold: Proc,
+        pub snd_pcm_sw_params: Proc,
+        pub snd_pcm_format_mask_sizeof: Proc,
+        pub snd_pcm_format_mask_test: Proc,
+        pub snd_pcm_get_chmap: Proc,
+        pub snd_pcm_state: Proc,
+        pub snd_pcm_prepare: Proc,
+        pub snd_pcm_start: Proc,
+        pub snd_pcm_drop: Proc,
+        pub snd_pcm_drain: Proc,
+        pub snd_device_name_hint: Proc,
+        pub snd_device_name_get_hint: Proc,
+        pub snd_card_get_index: Proc,
+        pub snd_device_name_free_hint: Proc,
+        pub snd_pcm_mmap_begin: Proc,
+        pub snd_pcm_mmap_commit: Proc,
+        pub snd_pcm_recover: Proc,
+        pub snd_pcm_readi: Proc,
+        pub snd_pcm_writei: Proc,
+        pub snd_pcm_avail: Proc,
+        pub snd_pcm_avail_update: Proc,
+        pub snd_pcm_wait: Proc,
+        pub snd_pcm_info: Proc,
+        pub snd_pcm_info_sizeof: Proc,
+        pub snd_pcm_info_get_name: Proc,
+        pub snd_config_update_free_global: Proc,
+
+        pub internal_device_enum_lock: Mutex,
+        pub use_verbose_device_enumeration: Bool,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-pulseaudio")]
+    pub struct ContextPulseAudio {
+        pub pulse_so: Handle,
+
+        pub pa_mainloop_new: Proc,
+        pub pa_mainloop_free: Proc,
+        pub pa_mainloop_get_api: Proc,
+        pub pa_mainloop_iterate: Proc,
+        pub pa_mainloop_wakeup: Proc,
+        pub pa_context_new: Proc,
+        pub pa_context_unref: Proc,
+        pub pa_context_connect: Proc,
+        pub pa_context_disconnect: Proc,
+        pub pa_context_set_state_callback: Proc,
+        pub pa_context_get_state: Proc,
+        pub pa_context_get_sink_info_list: Proc,
+        pub pa_context_get_source_info_list: Proc,
+        pub pa_context_get_sink_info_by_name: Proc,
+        pub pa_context_get_source_info_by_name: Proc,
+        pub pa_operation_unref: Proc,
+        pub pa_operation_get_state: Proc,
+        pub pa_channel_map_init_extend: Proc,
+        pub pa_channel_map_valid: Proc,
+        pub pa_channel_map_compatible: Proc,
+        pub pa_stream_new: Proc,
+        pub pa_stream_unref: Proc,
+        pub pa_stream_connect_playback: Proc,
+        pub pa_stream_connect_record: Proc,
+        pub pa_stream_disconnect: Proc,
+        pub pa_stream_get_state: Proc,
+        pub pa_stream_get_sample_spec: Proc,
+        pub pa_stream_get_channel_map: Proc,
+        pub pa_stream_get_buffer_attr: Proc,
+        pub pa_stream_set_buffer_attr: Proc,
+        pub pa_stream_get_device_name: Proc,
+        pub pa_stream_set_write_callback: Proc,
+        pub pa_stream_set_read_callback: Proc,
+        pub pa_stream_flush: Proc,
+        pub pa_stream_drain: Proc,
+        pub pa_stream_is_corked: Proc,
+        pub pa_stream_cork: Proc,
+        pub pa_stream_trigger: Proc,
+        pub pa_stream_begin_write: Proc,
+        pub pa_stream_write: Proc,
+        pub pa_stream_peek: Proc,
+        pub pa_stream_drop: Proc,
+        pub pa_stream_writable_size: Proc,
+        pub pa_stream_readable_size: Proc,
+
+        pub application_name: *mut libc::c_char,
+        pub server_name: *mut libc::c_char,
+        pub try_auto_spawn: Bool,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-jack")]
+    pub struct ContextJack {
+        pub jack_so: Handle,
+
+        pub jack_client_open: Proc,
+        pub jack_client_close: Proc,
+        pub jack_client_name_size: Proc,
+        pub jack_set_process_callback: Proc,
+        pub jack_set_buffer_size_callback: Proc,
+        pub jack_on_shutdown: Proc,
+        pub jack_get_sample_rate: Proc,
+        pub jack_get_buffer_size: Proc,
+        pub jack_get_ports: Proc,
+        pub jack_activate: Proc,
+        pub jack_deactivate: Proc,
+        pub jack_connect: Proc,
+        pub jack_port_register: Proc,
+        pub jack_port_name: Proc,
+        pub jack_port_get_buffer: Proc,
+        pub jack_free: Proc,
+
+        pub client_name: *mut libc::c_char,
+        pub try_start_server: Bool,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-coreaudio")]
+    pub struct ContextCoreAudio {
+        pub core_foundation: Handle,
+        pub cf_string_get_cstring: Proc,
+        pub cf_release: Proc,
+
+        pub core_audio: Handle,
+        pub audio_object_get_property_data: Proc,
+        pub audio_object_get_property_data_size: Proc,
+        pub audio_object_set_property_data: Proc,
+        pub audio_object_add_property_listener: Proc,
+        pub audio_object_remove_property_listener: Proc,
+
+        /// Could possibly be set to AudioToolbox on later version os macOS.
+        pub audio_init: Handle,
+        pub audio_component_find_next: Proc,
+        pub audio_component_instance_dispose: Proc,
+        pub audio_component_instance_new: Proc,
+        pub audio_output_unit_start: Proc,
+        pub audio_output_unit_stop: Proc,
+        pub audio_unit_add_property_listener: Proc,
+        pub audio_unit_get_property_info: Proc,
+        pub audio_unit_get_property: Proc,
+        pub audio_unit_set_property: Proc,
+        pub audio_unit_initialize: Proc,
+        pub audio_unit_render: Proc,
+
+        /// AudioComponent
+        pub component: Ptr,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-sndio")]
+    pub struct ContextSNDIO {
+        pub sndio_so: Handle,
+        pub sio_open: Proc,
+        pub sio_close: Proc,
+        pub sio_setpar: Proc,
+        pub sio_getpar: Proc,
+        pub sio_getcap: Proc,
+        pub sio_start: Proc,
+        pub sio_stop: Proc,
+        pub sio_read: Proc,
+        pub sio_write: Proc,
+        pub sio_onmove: Proc,
+        pub sio_nfds: Proc,
+        pub sio_pollfd: Proc,
+        pub sio_revents: Proc,
+        pub sio_eof: Proc,
+        pub sio_setvol: Proc,
+        pub sio_onvol: Proc,
+        pub sio_initpar: Proc,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-audio4")]
+    pub struct ContextAudio4 {
+        pub unused: libc::c_int,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-oss")]
+    pub struct ContextOSS {
+        pub version_major: libc::c_int,
+        pub version_minor: libc::c_int,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-aaudio")]
+    pub struct ContextAAudio {
+        /// libaudio.so
+        pub aaudio: Handle,
+        pub aaudio_create_stream_builder: Proc,
+        pub aaudio_stream_builder_delete: Proc,
+        pub aaudio_stream_builder_set_device_id: Proc,
+        pub aaudio_stream_builder_set_direction: Proc,
+        pub aaudio_stream_builder_set_sharing_mode: Proc,
+        pub aaudio_stream_builder_set_format: Proc,
+        pub aaudio_stream_builder_set_channel_count: Proc,
+        pub aaudio_stream_builder_set_sample_rate: Proc,
+        pub aaudio_stream_builder_set_buffer_capacity_in_frames: Proc,
+        pub aaudio_stream_builder_set_frames_per_data_callback: Proc,
+        pub aaudio_stream_builder_set_data_callback: Proc,
+        pub aaudio_stream_builder_set_error_callback: Proc,
+        pub aaudio_stream_builder_set_performance_mode: Proc,
+        pub aaudio_stream_builder_open_stream: Proc,
+        pub aaudio_stream_close: Proc,
+        pub aaudio_stream_get_state: Proc,
+        pub aaudio_stream_wait_for_state_change: Proc,
+        pub aaudio_stream_get_format: Proc,
+        pub aaudio_stream_get_channel_count: Proc,
+        pub aaudio_stream_get_sample_rate: Proc,
+        pub aaudio_stream_get_buffer_capacity_in_frames: Proc,
+        pub aaudio_stream_get_frames_per_data_callback: Proc,
+        pub aaudio_stream_get_frames_per_burst: Proc,
+        pub aaudio_stream_request_start: Proc,
+        pub aaudio_stream_request_stop: Proc,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-opensl")]
+    pub struct ContextOpenSL {
+        pub unused: libc::c_int,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-webaudio")]
+    pub struct ContextWebAudio {
+        pub unused: libc::c_int,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-null")]
+    pub struct ContextNull {
+        pub unused: libc::c_int,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-win32")]
+    pub struct ContextWin32 {
+        /// HMODULE
+        pub ole32_dll: Handle,
+        pub co_initialize_ex: Proc,
+        pub co_uninitialize: Proc,
+        pub co_create_instance: Proc,
+        pub co_task_mem_free: Proc,
+        pub prop_variant_clear: Proc,
+        pub string_from_guid2: Proc,
+
+        /// HMODULE
+        pub user32_dll: Handle,
+        pub get_foreground_window: Proc,
+        pub get_desktop_window: Proc,
+
+        /// HMODULE
+        pub advapi32_dll: Handle,
+        pub reg_open_key_ex_a: Proc,
+        pub reg_close_key: Proc,
+        pub reg_query_value_ex_a: Proc,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-posix")]
+    pub struct ContextPosix {
+        pub thread_so: Handle,
+        pub pthread_create: Proc,
+        pub pthread_join: Proc,
+        pub pthread_mutex_init: Proc,
+        pub pthread_mutex_destroy: Proc,
+        pub pthread_mutex_lock: Proc,
+        pub pthread_mutex_unlock: Proc,
+        pub pthread_cond_init: Proc,
+        pub pthread_cond_destroy: Proc,
+        pub pthread_cond_wait: Proc,
+        pub pthread_cond_signal: Proc,
+        pub pthread_attr_init: Proc,
+        pub pthread_attr_destroy: Proc,
+        pub pthread_attr_setschedpolicy: Proc,
+        pub pthread_attr_getschedparam: Proc,
+        pub pthread_attr_setschedparam: Proc,
+    }
+
+    #[repr(C)]
+    #[repr(align(64))]
+    #[derive(Debug, Clone, Copy)]
+    pub struct Device {
+        pub context: *mut Context,
+        pub device_type: DeviceType,
+        pub sample_rate: u32,
+        pub state: u32,
+        pub on_data: Option<DeviceCallbackProc>,
+        pub on_stop: Option<StopProc>,
+        /// Application defined data.
+        pub user_data: *mut libc::c_void,
+        pub lock: Mutex,
+        pub wakeup_event: Event,
+        pub start_event: Event,
+        pub stop_event: Event,
+        pub thread: Thread,
+        /// This is set by the worker thread after it's finished doing a job.
+        pub work_result: Result,
+        bitfields: u32,
+        pub master_volume_factor: f32,
+
+        pub playback: DevicePlayback,
+        pub capture: DeviceCapture,
+        pub api: DeviceAPI,
+    }
+
+    impl_bitfield!(
+        Device,
+        bitfields,
+        set_using_default_sample_rate,
+        using_default_sample_rate,
+        1 << 0
+    );
+
+    impl_bitfield!(
+        Device,
+        bitfields,
+        set_using_default_buffer_size,
+        using_default_buffer_size,
+        1 << 1
+    );
+
+    impl_bitfield!(
+        Device,
+        bitfields,
+        set_using_default_periods,
+        using_default_periods,
+        1 << 2
+    );
+
+    impl_bitfield!(
+        Device,
+        bitfields,
+        set_is_owner_of_context,
+        is_owner_of_context,
+        1 << 3,
+        "When set to true, uninitializing, the device will also uninitialize the context. Set to true when NULL is passed into `ma_device_init()`."
+    );
+
+    impl_bitfield!(
+        Device,
+        bitfields,
+        set_no_pre_zeroed_output_buffer,
+        no_pre_zeroed_output_buffer,
+        1 << 4
+    );
+
+    impl_bitfield!(Device, bitfields, set_no_clip, no_clip, 1 << 5);
+
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub union DeviceAPI {
+        #[cfg(feature = "ma-support-wasapi")]
+        pub wasapi: DeviceWASAPI,
+        #[cfg(feature = "ma-support-dsound")]
+        pub dsound: DeviceDSound,
+        #[cfg(feature = "ma-support-winmm")]
+        pub winmm: DeviceWinMM,
+        #[cfg(feature = "ma-support-alsa")]
+        pub alsa: DeviceAlsa,
+        #[cfg(feature = "ma-support-pulseaudio")]
+        pub pulseaudio: DevicePulseAudio,
+        #[cfg(feature = "ma-support-jack")]
+        pub jack: DeviceJack,
+        #[cfg(feature = "ma-support-coreaudio")]
+        pub coreaudio: DeviceCoreAudio,
+        #[cfg(feature = "ma-support-sndio")]
+        pub sndio: DeviceSNDIO,
+        #[cfg(feature = "ma-support-audio4")]
+        pub audio4: DeviceAudio4,
+        #[cfg(feature = "ma-support-oss")]
+        pub oss: DeviceOSS,
+        #[cfg(feature = "ma-support-aaudio")]
+        pub aaudio: DeviceAAudio,
+        #[cfg(feature = "ma-support-opensl")]
+        pub opensl: DeviceOpenSL,
+        #[cfg(feature = "ma-support-webaudio")]
+        pub webaudio: DeviceWebAudio,
+        #[cfg(feature = "ma-support-null")]
+        pub null_device: DeviceNull,
+    }
+
+    impl_void_debug!(DeviceAPI);
+
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct DevicePlayback {
+        /// Maybe temporary. Likely to be replaced with a query API.
+        pub name: [libc::c_char; 256],
+        /// Set to whatever was passed in when the device was initialized.
+        pub share_mode: ShareMode,
+        bitfields: u32,
+        pub format: Format,
+        pub channels: u32,
+        pub channel_map: [Channel; MA_MAX_CHANNELS],
+        pub internal_format: Format,
+        pub internal_channels: u32,
+        pub internal_sample_rate: u32,
+        pub internal_channel_map: [Channel; MA_MAX_CHANNELS],
+        pub internal_buffer_size_in_frames: u32,
+        pub internal_periods: u32,
+        pub converter: PCMConverter,
+        /// Internal use only. Used as the data source when reading from the device.
+        pub dsp_frame_count: u32,
+        /// Internal use only. Used as the data source when reading from the device.
+        pub dsp_frames: *const u8,
+    }
+
+    impl_bitfield!(
+        DevicePlayback,
+        bitfields,
+        set_using_default_format,
+        using_default_format,
+        1 << 0
+    );
+
+    impl_bitfield!(
+        DevicePlayback,
+        bitfields,
+        set_using_default_channels,
+        using_default_channels,
+        1 << 1
+    );
+
+    impl_bitfield!(
+        DevicePlayback,
+        bitfields,
+        set_using_default_channel_map,
+        using_default_channel_map,
+        1 << 2
+    );
+
+    impl std::fmt::Debug for DevicePlayback {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            f.debug_struct("DevicePlayback")
+                .field("name", &crate::util::cstr_display(&self.name))
+                .field("share_mode", &self.share_mode)
+                .field("using_default_format", &self.using_default_format())
+                .field("using_default_channels", &self.using_default_channels())
+                .field(
+                    "using_default_channel_map",
+                    &self.using_default_channel_map(),
+                )
+                .field("format", &self.format)
+                .field("channels", &self.channels)
+                .field("channel_map", &self.channel_map)
+                .field("internal_format", &self.internal_format)
+                .field("internal_channels", &self.internal_channels)
+                .field("internal_sample_rate", &self.internal_sample_rate)
+                .field("internal_channel_map", &self.internal_channel_map)
+                .field(
+                    "internal_buffer_size_in_frames",
+                    &self.internal_buffer_size_in_frames,
+                )
+                .field("internal_periods", &self.internal_periods)
+                .field("converter", &self.converter)
+                .field("dsp_frame_count", &self.dsp_frame_count)
+                .field("dsp_frames", &self.dsp_frames)
+                .finish()
+        }
+    }
+
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct DeviceCapture {
+        /// Maybe temporary. Likely to be replaced with a query API.
+        pub name: [libc::c_char; 256],
+        /// Set to whatever was passed in when the device was initialized.
+        pub share_mode: ShareMode,
+        bitfields: u32,
+        pub format: Format,
+        pub channels: u32,
+        pub channel_map: [Channel; MA_MAX_CHANNELS],
+        pub internal_format: Format,
+        pub internal_channels: u32,
+        pub internal_sample_rate: u32,
+        pub internal_channel_map: [Channel; MA_MAX_CHANNELS],
+        pub internal_buffer_size_in_frames: u32,
+        pub internal_periods: u32,
+        pub converter: PCMConverter,
+        /// Internal use only. Used as the data source when reading from the device.
+        pub dsp_frame_count: u32,
+        /// Internal use only. Used as the data source when reading from the device.
+        pub dsp_frames: *const u8,
+    }
+
+    impl_bitfield!(
+        DeviceCapture,
+        bitfields,
+        set_using_default_format,
+        using_default_format,
+        1 << 0
+    );
+
+    impl_bitfield!(
+        DeviceCapture,
+        bitfields,
+        set_using_default_channels,
+        using_default_channels,
+        1 << 1
+    );
+
+    impl_bitfield!(
+        DeviceCapture,
+        bitfields,
+        set_using_default_channel_map,
+        using_default_channel_map,
+        1 << 2
+    );
+
+    impl std::fmt::Debug for DeviceCapture {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            f.debug_struct("DeviceCapture")
+                .field("name", &crate::util::cstr_display(&self.name))
+                .field("share_mode", &self.share_mode)
+                .field("using_default_format", &self.using_default_format())
+                .field("using_default_channels", &self.using_default_channels())
+                .field(
+                    "using_default_channel_map",
+                    &self.using_default_channel_map(),
+                )
+                .field("format", &self.format)
+                .field("channels", &self.channels)
+                .field("channel_map", &self.channel_map)
+                .field("internal_format", &self.internal_format)
+                .field("internal_channels", &self.internal_channels)
+                .field("internal_sample_rate", &self.internal_sample_rate)
+                .field("internal_channel_map", &self.internal_channel_map)
+                .field(
+                    "internal_buffer_size_in_frames",
+                    &self.internal_buffer_size_in_frames,
+                )
+                .field("internal_periods", &self.internal_periods)
+                .field("converter", &self.converter)
+                .field("dsp_frame_count", &self.dsp_frame_count)
+                .field("dsp_frames", &self.dsp_frames)
+                .finish()
+        }
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-wasapi")]
+    pub struct DeviceWASAPI {
+        pub audio_client_playback: Ptr,
+        pub audio_client_capture: Ptr,
+        pub render_client: Ptr,
+        pub capture_client: Ptr,
+        pub device_enumerator: Ptr,
+        pub notification_client: IMMNotificationClient,
+        pub event_playback: Handle,
+        pub event_capture: Handle,
+        pub actual_buffer_size_in_frames_playback: u32,
+        pub actual_buffer_size_in_frames_capture: u32,
+        pub original_buffer_size_in_frames: u32,
+        pub original_buffer_size_in_milliseconds: u32,
+        pub original_periods: u32,
+        pub has_default_playback_device_changed: Bool,
+        pub has_default_capture_device_changed: Bool,
+        pub peruiod_size_in_frames_playback: u32,
+        pub period_size_in_frames_capture: u32,
+        pub is_started_capture: Bool,
+        pub is_started_playback: Bool,
+        bitfields: u32,
+    }
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-dsound")]
+    pub struct DeviceDSound {/* FIXME */}
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-winmm")]
+    pub struct DeviceWinMM {/* FIXME */}
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-alsa")]
+    pub struct DeviceAlsa {/* FIXME */}
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-pulseaudio")]
+    pub struct DevicePulseAudio {/* FIXME */}
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-jack")]
+    pub struct DeviceJack {/* FIXME */}
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-coreaudio")]
+    pub struct DeviceCoreAudio {/* FIXME */}
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-sndio")]
+    pub struct DeviceSNDIO {/* FIXME */}
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-audio4")]
+    pub struct DeviceAudio4 {/* FIXME */}
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-oss")]
+    pub struct DeviceOSS {/* FIXME */}
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-aaudio")]
+    pub struct DeviceAAudio {/* FIXME */}
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-opensl")]
+    pub struct DeviceOpenSL {/* FIXME */}
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-webaudio")]
+    pub struct DeviceWebAudio {/* FIXME */}
+
+    #[repr(C)]
+    #[derive(Debug, Clone, Copy)]
+    #[cfg(feature = "ma-support-null")]
+    pub struct DeviceNull {/* FIXME */}
 }

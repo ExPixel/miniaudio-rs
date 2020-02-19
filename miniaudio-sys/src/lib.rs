@@ -1,6 +1,7 @@
 mod constants;
 mod functions;
 mod types;
+pub mod util;
 
 pub use constants::*;
 pub use functions::*;
@@ -14,66 +15,112 @@ mod test {
     pub fn test_struct_sizes() {
         assert_eq!(
             unsafe { debug_ma_sizeof_format_converter_config() },
-            std::mem::size_of::<FormatConverterConfig>()
+            std::mem::size_of::<FormatConverterConfig>(),
+            "sizeof(FormatConverterConfig)",
         );
 
         assert_eq!(
             unsafe { debug_ma_sizeof_format_converter() },
-            std::mem::size_of::<FormatConverter>()
+            std::mem::size_of::<FormatConverter>(),
+            "sizeof(FormatConverter)",
         );
 
         assert_eq!(
             unsafe { debug_ma_sizeof_channel_router_config() },
-            std::mem::size_of::<ChannelRouterConfig>()
+            std::mem::size_of::<ChannelRouterConfig>(),
+            "sizeof(ChannelRouterConfig)",
         );
 
         assert_eq!(
             unsafe { debug_ma_sizeof_channel_router() },
-            std::mem::size_of::<ChannelRouter>()
+            std::mem::size_of::<ChannelRouter>(),
+            "sizeof(ChannelRouter)",
         );
 
         assert_eq!(
             unsafe { debug_ma_sizeof_src_config_sinc() },
-            std::mem::size_of::<SrcConfigSinc>()
+            std::mem::size_of::<SrcConfigSinc>(),
+            "sizeof(SrcConfigSinc)",
         );
 
         assert_eq!(
             unsafe { debug_ma_sizeof_src_config() },
-            std::mem::size_of::<SrcConfig>()
+            std::mem::size_of::<SrcConfig>(),
+            "sizeof(SrcConfig)",
         );
 
-        assert_eq!(unsafe { debug_ma_sizeof_src() }, std::mem::size_of::<Src>());
+        assert_eq!(
+            unsafe { debug_ma_sizeof_src() },
+            std::mem::size_of::<Src>(),
+            "sizeof(Src)",
+        );
 
         assert_eq!(
             unsafe { debug_ma_sizeof_pcm_converter_config() },
-            std::mem::size_of::<PCMConverterConfig>()
+            std::mem::size_of::<PCMConverterConfig>(),
+            "sizeof(PCMConverterConfig)",
         );
 
         assert_eq!(
             unsafe { debug_ma_sizeof_pcm_converter() },
-            std::mem::size_of::<PCMConverter>()
+            std::mem::size_of::<PCMConverter>(),
+            "sizeof(PCMConverter)",
         );
 
         #[cfg(not(feature = "ma-no-device-io"))]
         {
             assert_eq!(
                 unsafe { debug_ma_sizeof_thread() },
-                std::mem::size_of::<Thread>()
+                std::mem::size_of::<Thread>(),
+                "sizeof(Thread)",
             );
 
             assert_eq!(
                 unsafe { debug_ma_sizeof_mutex() },
-                std::mem::size_of::<Mutex>()
+                std::mem::size_of::<Mutex>(),
+                "sizeof(Mutex)",
             );
 
             assert_eq!(
                 unsafe { debug_ma_sizeof_event() },
-                std::mem::size_of::<Event>()
+                std::mem::size_of::<Event>(),
+                "sizeof(Event)",
             );
 
             assert_eq!(
                 unsafe { debug_ma_sizeof_semaphore() },
-                std::mem::size_of::<Semaphore>()
+                std::mem::size_of::<Semaphore>(),
+                "sizeof(Semaphore)",
+            );
+
+            assert_eq!(
+                unsafe { debug_ma_sizeof_device_info() },
+                std::mem::size_of::<DeviceInfo>(),
+                "sizeof(DeviceInfo)",
+            );
+
+            assert_eq!(
+                unsafe { debug_ma_sizeof_device_config() },
+                std::mem::size_of::<DeviceConfig>(),
+                "sizeof(DeviceConfig)",
+            );
+
+            assert_eq!(
+                unsafe { debug_ma_sizeof_context_config() },
+                std::mem::size_of::<ContextConfig>(),
+                "sizeof(ContextConfig)",
+            );
+
+            assert_eq!(
+                unsafe { debug_ma_sizeof_context() },
+                std::mem::size_of::<Context>(),
+                "sizeof(Context)",
+            );
+
+            assert_eq!(
+                unsafe { debug_ma_sizeof_device() },
+                std::mem::size_of::<Device>(),
+                "sizeof(Device)",
             );
         }
     }

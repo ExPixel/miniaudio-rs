@@ -24,6 +24,16 @@ extern "C" {
     pub fn debug_ma_sizeof_event() -> usize;
     #[cfg(not(feature = "ma-no-device-io"))]
     pub fn debug_ma_sizeof_semaphore() -> usize;
+    #[cfg(not(feature = "ma-no-device-io"))]
+    pub fn debug_ma_sizeof_device_info() -> usize;
+    #[cfg(not(feature = "ma-no-device-io"))]
+    pub fn debug_ma_sizeof_device_config() -> usize;
+    #[cfg(not(feature = "ma-no-device-io"))]
+    pub fn debug_ma_sizeof_context_config() -> usize;
+    #[cfg(not(feature = "ma-no-device-io"))]
+    pub fn debug_ma_sizeof_device() -> usize;
+    #[cfg(not(feature = "ma-no-device-io"))]
+    pub fn debug_ma_sizeof_context() -> usize;
 
     pub fn debug_ma_init_format_converter_config(config: &mut FormatConverterConfig);
     pub fn debug_ma_init_format_converter(converter: &mut FormatConverter);

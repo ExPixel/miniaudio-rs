@@ -52,6 +52,26 @@ size_t debug_ma_sizeof_event() {
 size_t debug_ma_sizeof_semaphore() {
     return sizeof(ma_semaphore);
 }
+
+size_t debug_ma_sizeof_device_info() {
+    return sizeof(ma_device_info);
+}
+
+size_t debug_ma_sizeof_device_config() {
+    return sizeof(ma_device_config);
+}
+
+size_t debug_ma_sizeof_context_config() {
+    return sizeof(ma_context_config);
+}
+
+size_t debug_ma_sizeof_device() {
+    return sizeof(ma_device);
+}
+
+size_t debug_ma_sizeof_context() {
+    return sizeof(ma_context);
+}
 #endif
 
 /**
