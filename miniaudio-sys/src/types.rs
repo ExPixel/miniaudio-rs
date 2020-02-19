@@ -902,7 +902,7 @@ impl_bitfield!(
 
 #[cfg(not(feature = "ma-no-device-io"))]
 mod device_io {
-    use super::LogLevel;
+    use super::{Handle, LogLevel};
     use libc::{c_char, c_int, c_void};
 
     #[cfg(feature = "ma-support-wasapi")]
