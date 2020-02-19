@@ -52,10 +52,6 @@ jobs:
               path: target
               key: ${{ matrix.os }}-${{ matrix.rust_channel }}-cargo-build-target-${{ hashFiles('**/Cargo.toml') }}
 
-        - name: Install LLVM (Windows)
-          run: choco install llvm
-          if: matrix.os == 'windows-latest'
-
         # Display Tool Versions:
         - name: Check Tools
           run: |
