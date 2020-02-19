@@ -138,6 +138,12 @@ fn emit_supported_features() {
         println!("cargo:rustc-cfg=feature=\"{}\"", feature);
     };
 
+    let emit_feat_cond = |feature: &'static str, cond: bool| {
+        if cond {
+            emit_feat(feature);
+        }
+    };
+
     let ma_win32 = cfg!(target_family = "windows");
     let ma_win32_desktop = ma_win32; // FIXME for now I just assume they are the same.
     let ma_unix = cfg!(target_family = "unix");
@@ -152,6 +158,21 @@ fn emit_supported_features() {
     let ma_macos = cfg!(target_os = "macos");
     let ma_ios = cfg!(target_os = "ios");
     let ma_apple = ma_macos | ma_ios;
+
+    emit_feat_cond("ma-win32", ma_win32);
+    emit_feat_cond("ma-win32-desktop", ma_win32_desktop);
+    emit_feat_cond("ma-unix", ma_unix);
+    emit_feat_cond("ma-android", ma_android);
+    emit_feat_cond("ma-linux", ma_linux);
+    emit_feat_cond("ma-openbsd", ma_openbsd);
+    emit_feat_cond("ma-freebsd", ma_freebsd);
+    emit_feat_cond("ma-netbsd", ma_netbsd);
+    emit_feat_cond("ma-dragonfly", ma_dragonfly);
+    emit_feat_cond("ma-bsd", ma_bsd);
+    emit_feat_cond("ma-emscripten", ma_emscripten);
+    emit_feat_cond("ma-macos", ma_macos);
+    emit_feat_cond("ma-ios", ma_ios);
+    emit_feat_cond("ma-apple", ma_apple);
 
     let mut support_wasapi = false;
     let mut support_dsound = false;
@@ -232,116 +253,74 @@ fn emit_supported_features() {
     //
     // EMIT SUPPORT FLAGS:
     //
-
-    if support_wasapi {
-        emit_feat("ma-support-wasapi");
-    }
-
-    if support_dsound {
-        emit_feat("ma-support-dsound");
-    }
-
-    if support_winmm {
-        emit_feat("ma-support-winmm");
-    }
-
-    if support_alsa {
-        emit_feat("ma-support-alsa");
-    }
-
-    if support_pulseaudio {
-        emit_feat("ma-support-pulseaudio");
-    }
-
-    if support_aaudio {
-        emit_feat("ma-support-aaudio");
-    }
-
-    if support_opensl {
-        emit_feat("ma-support-opensl");
-    }
-
-    if support_sndio {
-        emit_feat("ma-support-sndio");
-    }
-
-    if support_audio4 {
-        emit_feat("ma-support-audio4");
-    }
-
-    if support_oss {
-        emit_feat("ma-support-oss");
-    }
-
-    if support_coreaudio {
-        emit_feat("ma-support-coreaudio");
-    }
-
-    if support_webaudio {
-        emit_feat("ma-support-webaudio");
-    }
-
-    if support_null {
-        emit_feat("ma-support-null");
-    }
+    emit_feat_cond("ma-support-wasapi", support_wasapi);
+    emit_feat_cond("ma-support-dsound", support_dsound);
+    emit_feat_cond("ma-support-winmm", support_winmm);
+    emit_feat_cond("ma-support-alsa", support_alsa);
+    emit_feat_cond("ma-support-pulseaudio", support_pulseaudio);
+    emit_feat_cond("ma-support-aaudio", support_aaudio);
+    emit_feat_cond("ma-support-opensl", support_opensl);
+    emit_feat_cond("ma-support-sndio", support_sndio);
+    emit_feat_cond("ma-support-audio4", support_audio4);
+    emit_feat_cond("ma-support-oss", support_oss);
+    emit_feat_cond("ma-support-coreaudio", support_coreaudio);
+    emit_feat_cond("ma-support-webaudio", support_webaudio);
+    emit_feat_cond("ma-support-null", support_null);
 
     //
     // EMIT ENABLE FLAGS:
     //
-
-    if !cfg!(feature = "ma-no-wasapi") && support_wasapi {
-        emit_feat("ma-enable-wasapi");
-    }
-
-    if !cfg!(feature = "ma-no-dsound") && support_dsound {
-        emit_feat("ma-enable-dsound");
-    }
-
-    if !cfg!(feature = "ma-no-winmm") && support_winmm {
-        emit_feat("ma-enable-winmm");
-    }
-
-    if !cfg!(feature = "ma-no-jack") && support_jack {
-        emit_feat("ma-enable-jack");
-    }
-
-    if !cfg!(feature = "ma-no-alsa") && support_alsa {
-        emit_feat("ma-enable-alsa");
-    }
-
-    if !cfg!(feature = "ma-no-pulseaudio") && support_pulseaudio {
-        emit_feat("ma-enable-pulseaudio");
-    }
-
-    if !cfg!(feature = "ma-no-aaudio") && support_aaudio {
-        emit_feat("ma-enable-aaudio");
-    }
-
-    if !cfg!(feature = "ma-no-opensl") && support_opensl {
-        emit_feat("ma-enable-opensl");
-    }
-
-    if !cfg!(feature = "ma-no-sndio") && support_sndio {
-        emit_feat("ma-enable-sndio");
-    }
-
-    if !cfg!(feature = "ma-no-audio4") && support_audio4 {
-        emit_feat("ma-enable-audio4");
-    }
-
-    if !cfg!(feature = "ma-no-oss") && support_oss {
-        emit_feat("ma-enable-oss");
-    }
-
-    if !cfg!(feature = "ma-no-coreaudio") && support_coreaudio {
-        emit_feat("ma-enable-coreaudio");
-    }
-
-    if !cfg!(feature = "ma-no-webaudio") && support_webaudio {
-        emit_feat("ma-enable-webaudio");
-    }
-
-    if !cfg!(feature = "ma-no-null") && support_null {
-        emit_feat("ma-enable-null");
-    }
+    emit_feat_cond(
+        "ma-enable-wasapi",
+        !cfg!(feature = "ma-no-wasapi") && support_wasapi,
+    );
+    emit_feat_cond(
+        "ma-enable-dsound",
+        !cfg!(feature = "ma-no-dsound") && support_dsound,
+    );
+    emit_feat_cond(
+        "ma-enable-winmm",
+        !cfg!(feature = "ma-no-winmm") && support_winmm,
+    );
+    emit_feat_cond(
+        "ma-enable-jack",
+        !cfg!(feature = "ma-no-jack") && support_jack,
+    );
+    emit_feat_cond(
+        "ma-enable-alsa",
+        !cfg!(feature = "ma-no-alsa") && support_alsa,
+    );
+    emit_feat_cond(
+        "ma-enable-pulseaudio",
+        !cfg!(feature = "ma-no-pulseaudio") && support_pulseaudio,
+    );
+    emit_feat_cond(
+        "ma-enable-aaudio",
+        !cfg!(feature = "ma-no-aaudio") && support_aaudio,
+    );
+    emit_feat_cond(
+        "ma-enable-opensl",
+        !cfg!(feature = "ma-no-opensl") && support_opensl,
+    );
+    emit_feat_cond(
+        "ma-enable-sndio",
+        !cfg!(feature = "ma-no-sndio") && support_sndio,
+    );
+    emit_feat_cond(
+        "ma-enable-audio4",
+        !cfg!(feature = "ma-no-audio4") && support_audio4,
+    );
+    emit_feat_cond("ma-enable-oss", !cfg!(feature = "ma-no-oss") && support_oss);
+    emit_feat_cond(
+        "ma-enable-coreaudio",
+        !cfg!(feature = "ma-no-coreaudio") && support_coreaudio,
+    );
+    emit_feat_cond(
+        "ma-enable-webaudio",
+        !cfg!(feature = "ma-no-webaudio") && support_webaudio,
+    );
+    emit_feat_cond(
+        "ma-enable-null",
+        !cfg!(feature = "ma-no-null") && support_null,
+    );
 }
