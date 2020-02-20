@@ -1,5 +1,6 @@
 #include "./miniaudio/miniaudio.h"
 
+#if 0
 size_t debug_ma_sizeof_format_converter_config() {
     return sizeof(ma_format_converter_config);
 }
@@ -181,3 +182,4 @@ void debug_ma_init_src(ma_src* src) {
     src->useAVX512 = 0;
     src->useNEON = 0;
 }
+#endif
