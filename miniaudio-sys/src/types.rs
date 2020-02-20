@@ -1366,7 +1366,7 @@ mod device_io {
     #[derive(Copy, Clone)]
     pub union Timer {
         pub counter: i64,
-        pub counter_d: f64,
+        pub counter_d: libc::c_double,
     }
     impl_void_debug!(Timer);
 
@@ -2401,8 +2401,8 @@ mod device_io {
         pub client: Ptr,
         pub ports_playback: [Ptr; MA_MAX_CHANNELS],
         pub ports_capture: [Ptr; MA_MAX_CHANNELS],
-        pub intermediary_buffer_playback: *mut f32,
-        pub intermediary_buffer_capture: *mut f32,
+        pub intermediary_buffer_playback: *mut libc::c_float,
+        pub intermediary_buffer_capture: *mut libc::c_float,
         pub duplex_rb: PCMRingBuffer,
     }
 
@@ -2514,7 +2514,7 @@ mod device_io {
         pub current_period_frames_remaining_playback: u32,
         pub current_period_frames_remaining_capture: u32,
         pub las_processed_frame_playback: u64,
-        pub last_processed_frame_capture: u64,
+        pub last_processed_frame_capture: u32,
         pub is_started: Bool,
     }
 }
