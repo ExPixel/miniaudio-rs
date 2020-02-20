@@ -1097,16 +1097,18 @@ mod device_io {
     }
     impl_void_debug!(PlatformEvent);
 
-    #[cfg(feature = "ma-win32")]
+    #[repr(C)]
     #[derive(Clone, Copy)]
+    #[cfg(feature = "ma-win32")]
     pub struct Win32Event {
         pub event_handle: Handle,
     }
     #[cfg(feature = "ma-win32")]
     impl_void_debug!(Win32Event);
 
-    #[cfg(feature = "ma-posix")]
+    #[repr(C)]
     #[derive(Clone, Copy)]
+    #[cfg(feature = "ma-posix")]
     pub struct PosixEvent {
         pub mutex: libc::pthread_mutex_t,
         pub condition: libc::pthread_cond_t,
@@ -1133,18 +1135,18 @@ mod device_io {
     }
     impl_void_debug!(PlatformSemaphore);
 
-    #[cfg(feature = "ma-win32")]
     #[repr(C)]
     #[derive(Clone, Copy)]
+    #[cfg(feature = "ma-win32")]
     pub struct Win32Sempahore {
         pub semaphore_handle: Handle,
     }
     #[cfg(feature = "ma-win32")]
     impl_void_debug!(Win32Sempahore);
 
-    #[cfg(feature = "ma-posix")]
     #[repr(C)]
     #[derive(Clone, Copy)]
+    #[cfg(feature = "ma-posix")]
     pub struct PosixSemaphore {
         pub semaphore: libc::sem_t,
     }
@@ -2426,7 +2428,7 @@ mod device_io {
         /// switching.
         pub is_switching_capture_device: Bool,
         pub duplex_rb: PCMRingBuffer,
-        pub route_change_handle: *mut c_void,
+        pub route_change_handler: *mut c_void,
     }
 
     #[repr(C)]
