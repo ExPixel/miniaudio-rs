@@ -73,6 +73,16 @@ size_t debug_ma_sizeof_device() {
     return sizeof(ma_device);
 }
 
+size_t debug_ma_sizeof_device_playback() {
+    return sizeof(((ma_device*)NULL)->playback);
+}
+
+#ifdef MA_SUPPORT_COREAUDIO
+size_t debug_ma_sizeof_device_coreaudio() {
+    return sizeof(((ma_device*)NULL)->coreaudio);
+}
+#endif
+
 size_t debug_ma_sizeof_context() {
     return sizeof(ma_context);
 }

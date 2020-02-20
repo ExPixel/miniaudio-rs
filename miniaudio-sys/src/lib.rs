@@ -124,6 +124,22 @@ mod test {
             );
 
             assert_eq!(
+                unsafe { debug_ma_sizeof_device_playback() },
+                std::mem::size_of::<DevicePlayback>(),
+                "sizeof(DevicePlayback)",
+            );
+
+            #[cfg(feature = "ma-support-coreaudio")]
+            {
+                println!("checking coreaudio");
+                assert_eq!(
+                    unsafe { debug_ma_sizeof_device_coreaudio() },
+                    std::mem::size_of::<DeviceCoreAudio>(),
+                    "sizeof(DeviceCoreAudio)",
+                );
+            }
+
+            assert_eq!(
                 unsafe { debug_ma_sizeof_device() },
                 std::mem::size_of::<Device>(),
                 "sizeof(Device)",

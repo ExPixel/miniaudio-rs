@@ -16,6 +16,10 @@ extern "C" {
     pub fn debug_ma_sizeof_pcm_converter_config() -> usize;
     pub fn debug_ma_sizeof_pcm_converter() -> usize;
     pub fn debug_ma_sizeof_pcm_rb() -> usize;
+    pub fn debug_ma_sizeof_device_playback() -> usize;
+
+    #[cfg(feature = "ma-support-coreaudio")]
+    pub fn debug_ma_sizeof_device_coreaudio() -> usize;
 
     #[cfg(not(feature = "ma-no-device-io"))]
     pub fn debug_ma_sizeof_thread() -> usize;
