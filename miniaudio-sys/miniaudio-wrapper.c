@@ -36,6 +36,10 @@ size_t debug_ma_sizeof_pcm_converter() {
     return sizeof(ma_pcm_converter);
 }
 
+size_t debug_ma_sizeof_pcm_rb() {
+    return sizeof(ma_pcm_rb);
+}
+
 #ifndef MA_NO_DEVICE_IO
 size_t debug_ma_sizeof_thread() {
     return sizeof(ma_thread);

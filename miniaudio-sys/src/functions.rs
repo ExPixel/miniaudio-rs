@@ -1,6 +1,6 @@
 use super::constants::*;
 use super::types::*;
-use libc::{c_char, c_void};
+use libc::{c_char, c_void, size_t};
 
 #[cfg(test)]
 extern "C" {
@@ -15,6 +15,7 @@ extern "C" {
     pub fn debug_ma_sizeof_src() -> usize;
     pub fn debug_ma_sizeof_pcm_converter_config() -> usize;
     pub fn debug_ma_sizeof_pcm_converter() -> usize;
+    pub fn debug_ma_sizeof_pcm_rb() -> usize;
 
     #[cfg(not(feature = "ma-no-device-io"))]
     pub fn debug_ma_sizeof_thread() -> usize;
@@ -35,12 +36,12 @@ extern "C" {
     #[cfg(not(feature = "ma-no-device-io"))]
     pub fn debug_ma_sizeof_context() -> usize;
 
-    pub fn debug_ma_init_format_converter_config(config: &mut FormatConverterConfig);
-    pub fn debug_ma_init_format_converter(converter: &mut FormatConverter);
-    pub fn debug_ma_init_channel_router_config(config: &mut ChannelRouterConfig);
-    pub fn debug_ma_init_channel_router(router: &mut ChannelRouter);
-    pub fn debug_ma_init_src_config(config: &mut SrcConfig);
-    pub fn debug_ma_init_src(src: &mut Src);
+    pub fn debug_ma_init_format_converter_config(config: *mut FormatConverterConfig);
+    pub fn debug_ma_init_format_converter(converter: *mut FormatConverter);
+    pub fn debug_ma_init_channel_router_config(config: *mut ChannelRouterConfig);
+    pub fn debug_ma_init_channel_router(router: *mut ChannelRouter);
+    pub fn debug_ma_init_src_config(config: *mut SrcConfig);
+    pub fn debug_ma_init_src(src: *mut Src);
 }
 
 /*
@@ -51,7 +52,7 @@ extern "C" {
     pub fn ma_get_standard_channel_map(
         standard_channel_map: StandardChannelMap,
         channels: u32,
-        channel_map: &mut [Channel; MA_MAX_CHANNELS],
+        channel_map: *mut [Channel; MA_MAX_CHANNELS],
     );
 
     /// Copies a channel map.
@@ -65,24 +66,30 @@ extern "C" {
     /// Invalid Channels Maps:
     /// - A channel map with no channels.
     /// - A Channel map with more than one channel and a mono channel.
-    pub fn ma_channel_map_valid(channels: u32, channelMap: &[Channel; MA_MAX_CHANNELS]) -> Bool;
+    pub fn ma_channel_map_valid(
+        channels: u32,
+        channelMap: *const [Channel; MA_MAX_CHANNELS],
+    ) -> Bool;
 
     /// Helper for comparing two channel maps for equality.
     ///
     /// This assumes the channel count is the same between the two.
     pub fn ma_channel_map_equal(
         channels: u32,
-        channelMapA: &[Channel; MA_MAX_CHANNELS],
-        channelMapB: &[Channel; MA_MAX_CHANNELS],
+        channelMapA: *const [Channel; MA_MAX_CHANNELS],
+        channelMapB: *const [Channel; MA_MAX_CHANNELS],
     ) -> Bool;
 
     /// Gelper for determining if a channel map is blank (all channels set to MA_CHANNEL_NONE)
-    pub fn ma_channel_map_blank(channels: u32, channelMap: &[Channel; MA_MAX_CHANNELS]) -> Bool;
+    pub fn ma_channel_map_blank(
+        channels: u32,
+        channelMap: *const [Channel; MA_MAX_CHANNELS],
+    ) -> Bool;
 
     /// Helper for determining whether or not a channel is present in the given channel map.
     pub fn ma_channel_map_contains_channel_position(
         channels: u32,
-        channelMap: &[Channel; MA_MAX_CHANNELS],
+        channelMap: *const [Channel; MA_MAX_CHANNELS],
         channel_position: Channel,
     ) -> Bool;
 }
@@ -94,13 +101,13 @@ extern "C" {
     /// Initializes a format converter.
     #[must_use]
     pub fn ma_format_converter_init(
-        config: &FormatConverterConfig,
-        converter: &mut FormatConverter,
+        config: *const FormatConverterConfig,
+        converter: *mut FormatConverter,
     ) -> Result;
 
     /// Reads data from the format converter as interleaved channels.
     pub fn ma_format_converter_read(
-        converter: &mut FormatConverter,
+        converter: *mut FormatConverter,
         frame_count: u64,
         frames_out: *mut c_void,
         user_data: *mut c_void,
@@ -108,7 +115,7 @@ extern "C" {
 
     /// Reads data from the format converter as deinterleaved channels.
     pub fn ma_format_converter_read_deinterleaved(
-        converter: &mut FormatConverter,
+        converter: *mut FormatConverter,
         frame_count: u64,
         samples_out: *mut *mut c_void,
         user_data: *mut c_void,
@@ -143,13 +150,13 @@ extern "C" {
     /// Initializes a channel router where it is assumed that the input data is non-interleaved.
     #[must_use]
     pub fn ma_channel_router_init(
-        config: &ChannelRouterConfig,
-        router: &mut ChannelRouter,
+        config: *const ChannelRouterConfig,
+        router: *mut ChannelRouter,
     ) -> Result;
 
     /// Reads data from the channel router as deinterleaved channels.
     pub fn ma_channel_router_read_deinterleaved(
-        router: &mut ChannelRouter,
+        router: *mut ChannelRouter,
         frame_count: u64,
         samples_out: *mut *mut c_void,
         user_data: *mut c_void,
@@ -158,9 +165,9 @@ extern "C" {
     /// Helper for initializing a channel router config.
     pub fn ma_channel_router_config_init(
         channels_in: u32,
-        channel_map_in: &[Channel; MA_MAX_CHANNELS],
+        channel_map_in: *const [Channel; MA_MAX_CHANNELS],
         channels_out: u32,
-        channel_map_out: &[Channel; MA_MAX_CHANNELS],
+        channel_map_out: *const [Channel; MA_MAX_CHANNELS],
         mixing_mode: ChannelMixMode,
         on_read: Option<ChannelRouterReadDeinterleavedProc>,
         user_data: *mut c_void,
@@ -173,7 +180,7 @@ extern "C" {
 extern "C" {
     /// Initializes a sample rate conversion object.
     #[must_use]
-    pub fn ma_src_init(config: &SrcConfig, src: &mut Src) -> Result;
+    pub fn ma_src_init(config: *const SrcConfig, src: *mut Src) -> Result;
 
     /// Dynamically adjusts the sample rate.
     ///
@@ -182,7 +189,7 @@ extern "C" {
     /// algorithm.
     #[must_use]
     pub fn ma_src_set_sample_rate(
-        src: &mut Src,
+        src: *mut Src,
         sample_rate_in: u32,
         sample_rate_out: u32,
     ) -> Result;
@@ -191,7 +198,7 @@ extern "C" {
     ///
     /// Returns the number of frames actually read.
     pub fn ma_src_read_deinterleaved(
-        src: &mut Src,
+        src: *mut Src,
         frame_couter: u64,
         samples_out: *mut *mut c_void,
         user_data: *mut c_void,
@@ -216,7 +223,10 @@ extern "C" {
 extern "C" {
     /// Initializes a DSP object.
     #[must_use]
-    pub fn ma_pcm_converter_init(config: &PCMConverterConfig, dsp: &mut PCMConverter) -> Result;
+    pub fn ma_pcm_converter_init(
+        config: *const PCMConverterConfig,
+        dsp: *mut PCMConverter,
+    ) -> Result;
 
     /// Dynamically adjusts the input sample rate.
     ///
@@ -226,7 +236,7 @@ extern "C" {
     #[deprecated]
     #[must_use]
     pub fn ma_pcm_converter_set_input_sample_rate(
-        dsp: &mut PCMConverter,
+        dsp: *mut PCMConverter,
         sample_rate_out: u32,
     ) -> Result;
 
@@ -240,7 +250,7 @@ extern "C" {
     /// **[DEPRECATED]** Use [ma_pcm_converter_set_sample_rate](fn.ma_src_set_sample_rate.html) instead.
     #[must_use]
     pub fn ma_pcm_converter_set_output_sample_rate(
-        dsp: &mut PCMConverter,
+        dsp: *mut PCMConverter,
         sample_rate_out: u32,
     ) -> Result;
 
@@ -252,14 +262,14 @@ extern "C" {
     /// This will fail if the DSP was not initialized with allowDynamicSampleRate.
     #[must_use]
     pub fn ma_pcm_converter_set_sample_rate(
-        dsp: &mut PCMConverter,
+        dsp: *mut PCMConverter,
         sample_rate_in: u32,
         sample_rate_out: u32,
     ) -> Result;
 
     /// Reads a number of frames and runs them through the DSP processor.
     pub fn ma_pcm_converter_read(
-        dsp: &mut PCMConverter,
+        dsp: *mut PCMConverter,
         frames_out: *mut c_void,
         frame_count: u64,
     ) -> u64;
@@ -284,11 +294,11 @@ extern "C" {
         format_in: Format,
         channels_in: u32,
         sample_rate_in: u32,
-        channel_map_in: &mut [Channel; MA_MAX_CHANNELS],
+        channel_map_in: *mut [Channel; MA_MAX_CHANNELS],
         format_out: Format,
         channels_out: u32,
         sample_rate_out: u32,
-        channel_map_out: &mut [Channel; MA_MAX_CHANNELS],
+        channel_map_out: *mut [Channel; MA_MAX_CHANNELS],
         on_read: Option<PCMConverterReadProc>,
         user_data: *mut c_void,
     ) -> PCMConverterConfig;
@@ -326,12 +336,12 @@ extern "C" {
         format_out: Format,
         channels_out: u32,
         sample_rate_out: u32,
-        channel_map_out: &mut [Channel; MA_MAX_CHANNELS],
+        channel_map_out: *mut [Channel; MA_MAX_CHANNELS],
         ptr_in: *const c_void,
         format_in: Format,
         channels_in: u32,
         sample_rate_in: u32,
-        channel_map_in: &mut [Channel; MA_MAX_CHANNELS],
+        channel_map_in: *mut [Channel; MA_MAX_CHANNELS],
         frame_count: u64,
     ) -> u64;
 }
@@ -508,6 +518,171 @@ extern "C" {
         deinterleaved_pcm_frames_ptr: *const *const c_void,
         interleaved_pcm_frames: *mut c_void,
     );
+}
+
+/*
+ * Ring Buffer
+ */
+extern "C" {
+    #[must_use]
+    pub fn ma_rb_init_ex(
+        subbuffer_size_in_bytes: size_t,
+        subbuffer_count: size_t,
+        subbuffer_stride_in_bytes: size_t,
+        optional_preallocated_buffer: *mut c_void,
+        rb: *mut RingBuffer,
+    ) -> Result;
+
+    #[must_use]
+    pub fn ma_rb_init(
+        buffer_size_in_bytes: size_t,
+        optional_preallocated_buffer: *mut c_void,
+        rb: *mut RingBuffer,
+    ) -> Result;
+
+    pub fn ma_rb_uninit(rb: *mut RingBuffer);
+    pub fn ma_rb_reset(rb: *mut RingBuffer);
+
+    #[must_use]
+    pub fn ma_rb_acquire_read(
+        rb: *mut RingBuffer,
+        size_in_bytes: *mut size_t,
+        buffer_out: *mut *mut c_void,
+    ) -> Result;
+
+    #[must_use]
+    pub fn ma_rb_commit_read(
+        rb: *mut RingBuffer,
+        size_in_bytes: *mut size_t,
+        buffer_out: *mut c_void,
+    ) -> Result;
+
+    #[must_use]
+    pub fn ma_rb_acquire_write(
+        rb: *mut RingBuffer,
+        size_in_bytes: *mut size_t,
+        buffer_out: *mut *mut c_void,
+    ) -> Result;
+
+    #[must_use]
+    pub fn ma_rb_commit_write(
+        rb: *mut RingBuffer,
+        size_in_bytes: *mut size_t,
+        buffer_out: *mut c_void,
+    ) -> Result;
+
+    #[must_use]
+    pub fn ma_rb_seek_read(rb: *mut RingBuffer, offset_in_bytes: size_t) -> Result;
+
+    #[must_use]
+    pub fn ma_rb_seek_write(rb: *mut RingBuffer, offset_in_bytes: size_t) -> Result;
+
+    /// Returns the distance between the write pointer and the read pointer.
+    /// Should never be negative for a correct program.
+    /// Will return the number of bytes that can be read before the read
+    /// pointer hits the write pointer
+    pub fn ma_rb_pointer_distance(rb: *mut RingBuffer) -> u32;
+
+    pub fn ma_rb_available_read(rb: *mut RingBuffer) -> u32;
+    pub fn ma_rb_available_write(rb: *mut RingBuffer) -> u32;
+
+    pub fn ma_rb_get_subbuffer_size(rb: *mut RingBuffer) -> size_t;
+    pub fn ma_rb_get_subbuffer_stride(rb: *mut RingBuffer) -> size_t;
+    pub fn ma_rb_get_subbuffer_offset(rb: *mut RingBuffer, subbuffer_index: size_t) -> size_t;
+
+    pub fn ma_rb_get_subbuffer_ptr(
+        rb: *mut RingBuffer,
+        subbuffer_index: size_t,
+        buffer: *mut c_void,
+    ) -> *mut c_void;
+}
+
+/*
+ * PCM Ring Buffer
+ */
+extern "C" {
+    #[must_use]
+    pub fn ma_pcm_rb_init_ex(
+        format: Format,
+        channels: u32,
+        subbuffer_size_in_frames: u32,
+        subbuffer_count: u32,
+        subbuffer_stride_in_frames: u32,
+        optional_preallocated_buffer: *mut c_void,
+        rb: *mut PCMRingBuffer,
+    ) -> Result;
+
+    #[must_use]
+    pub fn ma_pcm_rb_init(
+        format: Format,
+        channels: u32,
+        buffer_size_in_frames: u32,
+        optional_preallocated_buffer: *mut c_void,
+        rb: *mut PCMRingBuffer,
+    ) -> Result;
+
+    pub fn ma_pcm_rb_uninit(rb: *mut PCMRingBuffer);
+    pub fn ma_pcm_rb_reset(rb: *mut PCMRingBuffer);
+
+    #[must_use]
+    pub fn ma_pcm_rb_acquire_read(
+        rb: *mut PCMRingBuffer,
+        size_in_frames_ptr: *mut u32,
+        buffer_out: *mut *mut c_void,
+    ) -> Result;
+
+    #[must_use]
+    pub fn ma_pcm_rb_commit_read(
+        rb: *mut PCMRingBuffer,
+        size_in_frames_ptr: u32,
+        buffer_out: *mut c_void,
+    ) -> Result;
+
+    #[must_use]
+    pub fn ma_pcm_rb_acquire_write(
+        rb: *mut PCMRingBuffer,
+        size_in_frames_ptr: *mut u32,
+        buffer_out: *mut *mut c_void,
+    ) -> Result;
+
+    #[must_use]
+    pub fn ma_pcm_rb_commit_write(
+        rb: *mut PCMRingBuffer,
+        size_in_frames_ptr: u32,
+        buffer_out: *mut c_void,
+    ) -> Result;
+
+    #[must_use]
+    pub fn ma_pcm_rb_seek_read(rb: *mut PCMRingBuffer, offset_in_frames: u32) -> Result;
+    #[must_use]
+    pub fn ma_pcm_rb_seek_write(rb: *mut PCMRingBuffer, offset_in_frames: u32) -> Result;
+
+    /// Returns the distance between the write pointer and the read pointer. Should never be
+    /// negative for a correct program. Will return the number of bytes that can be read before the
+    /// read pointer hits the write pointer.
+    fn ma_pcm_rb_pointer_disance(rb: *mut PCMRingBuffer) -> u32;
+
+    pub fn ma_pcm_rb_available_read(rb: *mut PCMRingBuffer) -> u32;
+    pub fn ma_pcm_rb_available_write(rb: *mut PCMRingBuffer) -> u32;
+
+    pub fn ma_pcm_rb_get_subbuffer_size(rb: *mut PCMRingBuffer) -> u32;
+    pub fn ma_pcm_rb_get_subbuffer_stride(rb: *mut PCMRingBuffer) -> u32;
+    pub fn ma_pcm_rb_get_subbuffer_offset(rb: *mut PCMRingBuffer, subbuffeR_index: u32) -> u32;
+
+    pub fn ma_pcm_rb_get_subbuffer_ptr(
+        rb: *mut PCMRingBuffer,
+        subbuffer_index: u32,
+        buffer: *mut c_void,
+    ) -> *mut c_void;
+}
+
+// NOTE: The C library has a type, so we fix it using this definition here:
+/// Returns the distance between the write pointer and the read pointer. Should never be
+/// negative for a correct program. Will return the number of bytes that can be read before the
+/// read pointer hits the write pointer.
+#[inline]
+pub unsafe extern "C" fn ma_pcm_rb_pointer_distance(rb: *mut PCMRingBuffer) -> u32 {
+    return ma_pcm_rb_pointer_disance(rb);
 }
 
 /*

@@ -67,6 +67,12 @@ mod test {
             "sizeof(PCMConverter)",
         );
 
+        assert_eq!(
+            unsafe { debug_ma_sizeof_pcm_rb() },
+            std::mem::size_of::<PCMRingBuffer>(),
+            "sizeof(PCMRingBuffer)",
+        );
+
         #[cfg(not(feature = "ma-no-device-io"))]
         {
             assert_eq!(

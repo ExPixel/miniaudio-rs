@@ -262,6 +262,7 @@ fn emit_supported_features() {
     emit_feat_cond("ma-support-winmm", support_winmm);
     emit_feat_cond("ma-support-alsa", support_alsa);
     emit_feat_cond("ma-support-pulseaudio", support_pulseaudio);
+    emit_feat_cond("ma-support-jack", support_jack);
     emit_feat_cond("ma-support-aaudio", support_aaudio);
     emit_feat_cond("ma-support-opensl", support_opensl);
     emit_feat_cond("ma-support-sndio", support_sndio);

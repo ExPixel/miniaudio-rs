@@ -894,12 +894,73 @@ impl_bitfield!(
     "Will be set to true when the conversion pipeline is an optimization passthrough."
 );
 
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct RingBuffer {
+    pub buffer: *mut libc::c_void,
+    pub subbuffer_size_in_bytes: u32,
+    pub subbuffer_count: u32,
+    pub subbuffer_stride_in_bytes: u32,
+
+    /// Mose significant bit is the loop flag. Lower 31 bits contains the actual offset in bytes.
+    encoded_read_offset: u32,
+    /// Most significant bit is the loop flag. Lower 31 bits contains the actual offset in bytes.
+    encoded_write_offset: u32,
+
+    bitfields: u32,
+}
+
+impl RingBuffer {
+    /// Does a volatile read of the internal `encoded_read_offset`.
+    #[inline]
+    pub fn encoded_read_offset(&self) -> u32 {
+        unsafe { std::ptr::read_volatile(&self.encoded_read_offset) }
+    }
+
+    /// Does a volatile read of the internal `encoded_write_offset`.
+    #[inline]
+    pub fn encoded_write_offset(&self) -> u32 {
+        unsafe { std::ptr::read_volatile(&self.encoded_write_offset) }
+    }
+
+    /// Does a volatile write to the internal `encoded_read_offset`.
+    #[inline]
+    pub fn set_encoded_read_offset(&mut self, value: u32) {
+        unsafe { std::ptr::write_volatile(&mut self.encoded_read_offset, value) }
+    }
+
+    /// Does a volatile write to the internal `encoded_write_offset`.
+    #[inline]
+    pub fn set_encoded_write_offset(&mut self, value: u32) {
+        unsafe { std::ptr::write_volatile(&mut self.encoded_write_offset, value) }
+    }
+}
+
+impl_bitfield!(RingBuffer, bitfields, set_owns_buffer, owns_buffer, 1 << 0);
+impl_bitfield!(
+    RingBuffer,
+    bitfields,
+    set_clear_on_write_acquire,
+    clear_on_write_acquire,
+    1 << 1
+);
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct PCMRingBuffer {
+    pub ring_buffer: RingBuffer,
+    pub format: Format,
+    pub channels: u32,
+}
+
 #[cfg(not(feature = "ma-no-device-io"))]
 mod device_io {
     use super::*;
     use libc::{c_char, c_int, c_void};
 
     #[cfg(feature = "ma-support-wasapi")]
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
     pub struct IMMNotificationClient {
         lp_vtbl: *mut c_void,
         counter: u32,
@@ -1923,7 +1984,7 @@ mod device_io {
         /// This is set by the worker thread after it's finished doing a job.
         pub work_result: Result,
         bitfields: u32,
-        pub master_volume_factor: f32,
+        pub master_volume_factor: libc::c_float,
 
         pub playback: DevicePlayback,
         pub capture: DeviceCapture,
@@ -2190,68 +2251,268 @@ mod device_io {
         bitfields: u32,
     }
 
+    #[cfg(feature = "ma-support-wasapi")]
+    impl_bitfield!(
+        DeviceWASAPI,
+        bitfields,
+        set_no_auto_convert_src,
+        no_auto_convert_src,
+        1 << 0
+    );
+
+    #[cfg(feature = "ma-support-wasapi")]
+    impl_bitfield!(
+        DeviceWASAPI,
+        bitfields,
+        set_no_default_quality_src,
+        no_default_quality_src,
+        1 << 1
+    );
+
+    #[cfg(feature = "ma-support-wasapi")]
+    impl_bitfield!(
+        DeviceWASAPI,
+        bitfields,
+        set_no_hardware_offloading,
+        no_hardware_offloading,
+        1 << 2
+    );
+
+    #[cfg(feature = "ma-support-wasapi")]
+    impl_bitfield!(
+        DeviceWASAPI,
+        bitfields,
+        set_allow_capture_auto_stream_routing,
+        allow_capture_auto_stream_routing,
+        1 << 3
+    );
+
+    #[cfg(feature = "ma-support-wasapi")]
+    impl_bitfield!(
+        DeviceWASAPI,
+        bitfields,
+        set_allow_playback_auto_stream_routing,
+        allow_playback_auto_stream_routing,
+        1 << 4
+    );
+
     #[repr(C)]
     #[derive(Debug, Clone, Copy)]
     #[cfg(feature = "ma-support-dsound")]
-    pub struct DeviceDSound {/* FIXME */}
+    pub struct DeviceDSound {
+        pub playback: Ptr,
+        pub playback_primary_buffer: Ptr,
+        pub playback_buffer: Ptr,
+        pub capture: Ptr,
+        pub capture_buffer: Ptr,
+    }
 
     #[repr(C)]
     #[derive(Debug, Clone, Copy)]
     #[cfg(feature = "ma-support-winmm")]
-    pub struct DeviceWinMM {/* FIXME */}
+    pub struct DeviceWinMM {
+        pub device_playback: Handle,
+        pub device_capture: Handle,
+        pub event_playback: Handle,
+        pub event_capture: Handle,
+
+        pub fragment_size_in_frames: u32,
+        pub fragment_size_in_bytes: u32,
+        /// Used as index into wave_hdr_playback.
+        pub next_header_playback: u32,
+        /// Used as index into wave_hdr_capture.
+        pub next_header_capture: u32,
+        /// The number of PCM frames consumed in the buffer in wave_header.
+        pub header_frames_consumed_playback: u32,
+        /// The number of PCM frames consumed in the buffer in wave_header.
+        pub header_grames_consumed_capture: u32,
+        /// One instantiation for each period.
+        pub wave_hdr_playback: *mut u8,
+        /// One instantiation for each period.
+        pub wave_hdr_capture: *mut u8,
+        pub intermediary_buffer_playback: *mut u8,
+        pub intermediary_buffer_capture: *mut u8,
+        /// Used internally and is used for the heap allocated data for the intermediary buffer and
+        /// the WAVEHDR structures.
+        pub header_data: *mut u8,
+    }
 
     #[repr(C)]
     #[derive(Debug, Clone, Copy)]
     #[cfg(feature = "ma-support-alsa")]
-    pub struct DeviceAlsa {/* FIXME */}
+    pub struct DeviceAlsa {
+        pub pcm_playback: Ptr,
+        pub pcm_capture: Ptr,
+        bitfields: u32,
+    }
+
+    #[cfg(feature = "ma-support-alsa")]
+    impl_bitfield!(
+        DeviceAlsa,
+        bitfields,
+        set_is_using_mmap_playback,
+        is_using_mmap_playback,
+        1 << 0
+    );
+
+    #[cfg(feature = "ma-support-alsa")]
+    impl_bitfield!(
+        DeviceAlsa,
+        bitfields,
+        set_is_using_mmap_capture,
+        is_using_mmap_capture,
+        1 << 1
+    );
 
     #[repr(C)]
     #[derive(Debug, Clone, Copy)]
     #[cfg(feature = "ma-support-pulseaudio")]
-    pub struct DevicePulseAudio {/* FIXME */}
+    pub struct DevicePulseAudio {
+        pub main_loop: Ptr,
+        pub api: Ptr,
+        pub pulse_context: Ptr,
+        pub stream_playback: Ptr,
+        pub stream_capture: Ptr,
+        pub pulse_context_state: u32,
+        pub mapped_buffer_playback: *mut libc::c_void,
+        pub mapped_buffer_capture: *const libc::c_void,
+        pub mapped_buffer_frames_remaining_playback: u32,
+        pub mapped_buffer_frames_remaining_capture: u32,
+        pub mapped_buffer_frames_capacity_playback: u32,
+        pub mapped_buffer_frames_capacity_capture: u32,
+        bitfields: u32,
+    }
+
+    #[cfg(feature = "ma-support-pulseaudio")]
+    impl_bitfield!(
+        DevicePulseAudio,
+        bitfields,
+        set_break_from_main_loop,
+        break_from_main_loop,
+        1 << 0
+    );
 
     #[repr(C)]
     #[derive(Debug, Clone, Copy)]
     #[cfg(feature = "ma-support-jack")]
-    pub struct DeviceJack {/* FIXME */}
+    pub struct DeviceJack {
+        pub client: Ptr,
+        pub ports_playback: [Ptr; MA_MAX_CHANNELS],
+        pub ports_capture: [Ptr; MA_MAX_CHANNELS],
+        pub intermediary_buffer_playback: *mut f32,
+        pub intermediary_buffer_capture: *mut f32,
+        pub duplex_rb: PCMRingBuffer,
+    }
 
     #[repr(C)]
     #[derive(Debug, Clone, Copy)]
     #[cfg(feature = "ma-support-coreaudio")]
-    pub struct DeviceCoreAudio {/* FIXME */}
+    pub struct DeviceCoreAudio {
+        pub device_object_id_playback: u32,
+        pub device_object_id_capture: u32,
+        pub audio_unit_playback: Ptr,
+        pub audio_unit_capture: Ptr,
+        pub audio_buffer_list: Ptr,
+        pub stop_event: Event,
+        pub original_buffer_size_in_frames: u32,
+        pub original_buffer_size_in_milliseconds: u32,
+        pub original_periods: u32,
+        pub is_default_playback_device: Bool,
+        pub is_default_capture_device: Bool,
+        /// Set to true when the default device has changed and miniaudio is in the process of
+        /// switching.
+        pub is_switching_playback_device: Bool,
+        /// Set to true when the default device has changed and miniaudio is in the process of
+        /// switching.
+        pub is_switching_capture_device: Bool,
+        pub duplex_rb: PCMRingBuffer,
+        pub route_change_handle: *mut c_void,
+    }
 
     #[repr(C)]
     #[derive(Debug, Clone, Copy)]
     #[cfg(feature = "ma-support-sndio")]
-    pub struct DeviceSNDIO {/* FIXME */}
+    pub struct DeviceSNDIO {
+        pub handle_playback: Ptr,
+        pub handle_capture: Ptr,
+        pub is_started_playback: Bool,
+        pub is_started_capture: Bool,
+    }
 
     #[repr(C)]
     #[derive(Debug, Clone, Copy)]
     #[cfg(feature = "ma-support-audio4")]
-    pub struct DeviceAudio4 {/* FIXME */}
+    pub struct DeviceAudio4 {
+        pub fd_playback: libc::c_int,
+        pub fd_capture: libc::c_int,
+    }
 
     #[repr(C)]
     #[derive(Debug, Clone, Copy)]
     #[cfg(feature = "ma-support-oss")]
-    pub struct DeviceOSS {/* FIXME */}
+    pub struct DeviceOSS {
+        pub fd_playback: libc::c_int,
+        pub fd_capture: libc::c_int,
+    }
 
     #[repr(C)]
     #[derive(Debug, Clone, Copy)]
     #[cfg(feature = "ma-support-aaudio")]
-    pub struct DeviceAAudio {/* FIXME */}
+    pub struct DeviceAAudio {
+        pub stream_playback: Ptr,
+        pub stream_capture: Ptr,
+        pub duplex_rb: PCMRingBuffer,
+    }
 
     #[repr(C)]
     #[derive(Debug, Clone, Copy)]
     #[cfg(feature = "ma-support-opensl")]
-    pub struct DeviceOpenSL {/* FIXME */}
+    pub struct DeviceOpenSL {
+        pub output_mix_obj: Ptr,
+        pub output_mix: Ptr,
+        pub audio_player_obj: Ptr,
+        pub audio_player: Ptr,
+        pub audio_recorder_obj: Ptr,
+        pub audio_recorder: Ptr,
+        pub buffer_queue_playback: Ptr,
+        pub buffer_queue_capture: Ptr,
+        pub current_buffer_index_playback: u32,
+        pub current_buffer_index_capture: u32,
+        /// This is malloc()'d and is used for storing audio data. Typed as u8 for easy offsetting.
+        pub buffer_playback: *mut u8,
+        /// This is malloc()'d and is used for storing audio data. Typed as u8 for easy offsetting.
+        pub buffer_capture: *mut u8,
+        pub duplex_rb: PCMRingBuffer,
+    }
 
     #[repr(C)]
     #[derive(Debug, Clone, Copy)]
     #[cfg(feature = "ma-support-webaudio")]
-    pub struct DeviceWebAudio {/* FIXME */}
+    pub struct DeviceWebAudio {
+        /// We use a factory on the JavaScript side to manage devices and use an index for JS/C
+        /// interop.
+        pub index_playback: libc::c_int,
+        /// We use a factory on the JavaScript side to manage devices and use an index for JS/C
+        /// interop.
+        pub index_capture: libc::c_int,
+        pub duplex_rb: PCMRingBuffer,
+    }
 
     #[repr(C)]
     #[derive(Debug, Clone, Copy)]
     #[cfg(feature = "ma-support-null")]
-    pub struct DeviceNull {/* FIXME */}
+    pub struct DeviceNull {
+        pub device_thread: Thread,
+        pub operation_event: Event,
+        pub operation_competion_event: Event,
+        pub operation: u32,
+        pub operation_result: Result,
+        pub timer: Timer,
+        pub prior_runtime: libc::c_double,
+        pub current_period_frames_remaining_playback: u32,
+        pub current_period_frames_remaining_capture: u32,
+        pub las_processed_frame_playback: u64,
+        pub last_processed_frame_capture: u64,
+        pub is_started: Bool,
+    }
 }
