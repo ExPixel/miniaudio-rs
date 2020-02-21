@@ -52,6 +52,21 @@ jobs:
               path: target
               key: ${{ matrix.os }}-${{ matrix.rust_channel }}-cargo-build-target-${{ hashFiles('**/Cargo.toml') }}
 
+        - name: Chocolatey Cache
+          uses: actions/cache@v1
+          with:
+              path: ${{ HOME }}
+              key: ${{ matrix.os }}-choco-cache
+          if: matrix.os == 'windows-latest'
+
+        - name: Setup Choco Cache
+          run: choco config set cacheLocation ${env:HOME}/choco_cache
+          if: matrix.os == 'windows-latest'
+
+        - name: Install LLVM (Windows)
+          run: choco install llvm
+          if: matrix.os == 'windows-latest'
+
         # Display Tool Versions:
         - name: Check Tools
           run: |
