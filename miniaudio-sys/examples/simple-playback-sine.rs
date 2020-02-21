@@ -13,10 +13,19 @@ pub fn main() {
 }
 
 pub unsafe fn enumerate_devices() -> i32 {
-    let mut sine_wave = MaybeUninit::<sys::ma_sine_wave>::uninit();
-    let mut device = MaybeUninit::<sys::ma_device>::uninit();
+    let mut sine_wave = MaybeUninit::<sys::ma_waveform>::uninit();
 
-    sys::ma_sine_wave_init(0.2, 400.0, DEVICE_SAMPLE_RATE, sine_wave.as_mut_ptr());
+    // This has to be boxed because it requires a stable address, and Rust's moves basically make
+    // that impossible without a heap allocation.
+    let mut device = Box::new(MaybeUninit::<sys::ma_device>::uninit());
+
+    sys::ma_waveform_init(
+        sys::ma_waveform_type_sine,
+        0.2,
+        220.0,
+        DEVICE_SAMPLE_RATE,
+        sine_wave.as_mut_ptr(),
+    );
     let mut sine_wave = sine_wave.assume_init();
 
     let mut device_config = sys::ma_device_config_init(sys::ma_device_type_playback);
@@ -33,28 +42,42 @@ pub unsafe fn enumerate_devices() -> i32 {
         eprintln!("Failed to open playback device.");
         return -4;
     }
-    let mut device = device.assume_init();
+    let mut device = transmute::<_, Box<sys::ma_device>>(device);
 
     println!(
         "Device Name: {}",
         sys::util::cstr_display(&device.playback.name)
     );
 
-    if sys::ma_device_start(&mut device) != sys::MA_SUCCESS as _ {
+    if sys::ma_device_start(&mut *device) != sys::MA_SUCCESS as _ {
         eprintln!("Failed to start playback device.");
-        sys::ma_device_uninit(&mut device);
+        sys::ma_device_uninit(&mut *device);
         return -5;
     }
 
+    wait_for_enter();
     println!("Shutting Down...");
 
-    sys::ma_device_uninit(&mut device);
+    sys::ma_device_uninit(&mut *device);
 
     return 0;
 }
 
-unsafe extern "C" fn stop_callback(device_ptr: *mut sys::ma_device) {
-    println!("stop-callback");
+/// Shows a prompt and waits for input on stdin.
+fn wait_for_enter() {
+    use std::io::Write;
+
+    print!("Press ENTER/RETURN to exit...");
+    // Make sure the line above is displayed:
+    std::io::stdout().flush().expect("failed to flush stdout");
+    // Just read some random line off of stdin and discard it:
+    std::io::stdin()
+        .read_line(&mut String::new())
+        .expect("failed to wait for line");
+}
+
+unsafe extern "C" fn stop_callback(_device_ptr: *mut sys::ma_device) {
+    println!("Device Stopped.");
 }
 
 unsafe extern "C" fn data_callback(
@@ -63,11 +86,11 @@ unsafe extern "C" fn data_callback(
     _input_ptr: *const c_void,
     frame_count: u32,
 ) {
-    println!("data-callback");
     assert_eq!((*device_ptr).playback.channels, DEVICE_CHANNELS);
-    let sine_wave = transmute::<_, *mut sys::ma_sine_wave>((*device_ptr).pUserData);
+    let sine_wave = transmute::<_, *mut sys::ma_waveform>((*device_ptr).pUserData);
     assert_ne!(sine_wave, null_mut());
-    sys::ma_sine_wave_read_pcm_frames(
+
+    sys::ma_waveform_read_pcm_frames(
         sine_wave,
         output_ptr,
         frame_count as _,
