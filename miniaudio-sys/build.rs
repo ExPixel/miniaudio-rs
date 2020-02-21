@@ -1,10 +1,16 @@
+extern crate bindgen;
 extern crate cc;
+
+use std::env;
+use std::path::{Path, PathBuf};
 
 pub fn main() {
     let mut cc_builder = cc::Build::new();
     cc_builder.cpp(false).define("MINIAUDIO_IMPLEMENTATION", "");
     apply_flags(&mut cc_builder);
-    apply_definitions(&mut cc_builder);
+    apply_definitions(|name, value| {
+        cc_builder.define(name, value);
+    });
     cc_builder
         .include("./miniaudio")
         .file("./miniaudio-wrapper.c")
@@ -12,81 +18,114 @@ pub fn main() {
 
     emit_supported_features();
 
+    let header_contents = generate_miniaudio_header("./miniaudio/miniaudio.h");
+    let bindings = bindgen::Builder::default()
+        .header_contents("miniaudio.h", &header_contents)
+        .size_t_is_usize(true)
+        .rustfmt_bindings(true)
+        .layout_tests(true)
+        .derive_copy(true)
+        .impl_debug(true)
+        .prepend_enum_name(false)
+        .rust_target(bindgen::RustTarget::Stable_1_36)
+        .generate()
+        .expect("failed to generate bindings");
+
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+    bindings
+        .write_to_file(out_path.join("bindings.rs"))
+        .expect("failed to write bindings");
+
     // only rebuild if these files are changed.
     println!("cargo:rerun-if-changed=./miniaudio/miniaudio.h");
     println!("cargo:rerun-if-changed=./miniaudio-wrapper.c");
     println!("cargo:rerun-if-env-changed=CC");
 }
 
-fn apply_definitions(b: &mut cc::Build) {
+fn generate_miniaudio_header<P: AsRef<Path>>(header_path: P) -> String {
+    use std::io::prelude::*;
+
+    let mut contents = String::new();
+    apply_definitions(|name, value| {
+        contents.push_str(&format!("#define {} {}\n", name, value));
+    });
+
+    let mut file = std::fs::File::open(header_path).expect("failed to open header file");
+    file.read_to_string(&mut contents)
+        .expect("failed to read header contents");
+
+    return contents;
+}
+
+fn apply_definitions<F: FnMut(&str, &str)>(mut define: F) {
     if cfg!(feature = "ma-no-wasapi") {
-        b.define("MA_NO_WASAPI", "1");
+        define("MA_NO_WASAPI", "1");
     }
 
     if cfg!(feature = "ma-no-dsound") {
-        b.define("MA_NO_DSOUND", "1");
+        define("MA_NO_DSOUND", "1");
     }
 
     if cfg!(feature = "ma-no-winmm") {
-        b.define("MA_NO_WINMM", "1");
+        define("MA_NO_WINMM", "1");
     }
     if cfg!(feature = "ma-no-alsa") {
-        b.define("MA_NO_ALSA", "1");
+        define("MA_NO_ALSA", "1");
     }
     if cfg!(feature = "ma-no-pulseaudio") {
-        b.define("MA_NO_PULSEAUDIO", "1");
+        define("MA_NO_PULSEAUDIO", "1");
     }
     if cfg!(feature = "ma-no-jack") {
-        b.define("MA_NO_JACK", "1");
+        define("MA_NO_JACK", "1");
     }
     if cfg!(feature = "ma-no-coreaudio") {
-        b.define("MA_NO_COREAUDIO", "1");
+        define("MA_NO_COREAUDIO", "1");
     }
     if cfg!(feature = "ma-no-sndio") {
-        b.define("MA_NO_SNDIO", "1");
+        define("MA_NO_SNDIO", "1");
     }
     if cfg!(feature = "ma-no-audio4") {
-        b.define("MA_NO_AUDIO4", "1");
+        define("MA_NO_AUDIO4", "1");
     }
     if cfg!(feature = "ma-no-oss") {
-        b.define("MA_NO_OSS", "1");
+        define("MA_NO_OSS", "1");
     }
     if cfg!(feature = "ma-no-aaudio") {
-        b.define("MA_NO_AAUDIO", "1");
+        define("MA_NO_AAUDIO", "1");
     }
     if cfg!(feature = "ma-no-opensl") {
-        b.define("MA_NO_OPENSL", "1");
+        define("MA_NO_OPENSL", "1");
     }
     if cfg!(feature = "ma-no-webaudio") {
-        b.define("MA_NO_WEBAUDIO", "1");
+        define("MA_NO_WEBAUDIO", "1");
     }
     if cfg!(feature = "ma-no-null") {
-        b.define("MA_NO_NULL", "1");
+        define("MA_NO_NULL", "1");
     }
     if cfg!(feature = "ma-no-decoding") {
-        b.define("MA_NO_DECODING", "1");
+        define("MA_NO_DECODING", "1");
     }
     if cfg!(feature = "ma-no-device-io") {
-        b.define("MA_NO_DEVICE_IO", "1");
+        define("MA_NO_DEVICE_IO", "1");
     }
     if cfg!(feature = "ma-no-stdio") {
-        b.define("MA_NO_STDIO", "1");
+        define("MA_NO_STDIO", "1");
     }
     if cfg!(feature = "ma-no-sse2") {
-        b.define("MA_NO_SSE2", "1");
+        define("MA_NO_SSE2", "1");
     }
     if cfg!(feature = "ma-no-avx2") {
-        b.define("MA_NO_AVX2", "1");
+        define("MA_NO_AVX2", "1");
     }
     if cfg!(feature = "ma-no-avx512") {
-        b.define("MA_NO_AVX512", "1");
+        define("MA_NO_AVX512", "1");
     }
     if cfg!(feature = "ma-no-neon") {
-        b.define("MA_NO_NEON", "1");
+        define("MA_NO_NEON", "1");
     }
 
     if cfg!(feature = "ma-debug-output") {
-        b.define("MA_DEBUG_OUTPUT", "1");
+        define("MA_DEBUG_OUTPUT", "1");
     }
 
     let mut log_level: Option<&'static str> = None;
@@ -109,7 +148,7 @@ fn apply_definitions(b: &mut cc::Build) {
     }
 
     if let Some(level) = log_level {
-        b.define("MA_LOG_LEVEL", level);
+        define("MA_LOG_LEVEL", level);
     }
 }
 
