@@ -56,7 +56,7 @@ jobs:
         - name: Chocolatey Cache
           uses: actions/cache@v1
           with:
-              path: ${{ temp }}/choco-cache
+              path: ${{ runner.temp }}/choco-cache
               key: ${{ matrix.os }}-choco-cache
           if: matrix.os == 'windows-latest'
 
@@ -64,7 +64,7 @@ jobs:
           run: choco config set cacheLocation ${env:CHOCO_CACHE}
           if: matrix.os == 'windows-latest'
           env:
-              CHOCO_CACHE: ${{ temp }}/choco-cache
+              CHOCO_CACHE: ${{ runner.temp }}/choco-cache
 
         - name: Install LLVM (Windows)
           run: choco install llvm
