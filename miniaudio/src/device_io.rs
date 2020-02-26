@@ -331,12 +331,14 @@ impl Drop for DeviceConfig {
 pub struct DeviceConfigPlayback(MADeviceConfigPlayback);
 
 impl DeviceConfigPlayback {
-    pub fn device_id(&self) -> *mut DeviceId {
+    pub fn device_id(&self) -> Option<NonNull<DeviceId>> {
         unsafe { std::mem::transmute(self.0.pDeviceID) }
     }
 
-    pub fn set_device_id(&mut self, device_id: *mut DeviceId) {
-        self.0.pDeviceID = unsafe { std::mem::transmute(device_id) };
+    pub fn set_device_id(&mut self, device_id: Option<NonNull<DeviceId>>) {
+        self.0.pDeviceID = device_id
+            .map(|id| id.cast().as_ptr())
+            .unwrap_or(ptr::null_mut());
     }
 
     pub fn format(&self) -> Format {
@@ -376,12 +378,14 @@ impl DeviceConfigPlayback {
 pub struct DeviceConfigCapture(MADeviceConfigCapture);
 
 impl DeviceConfigCapture {
-    pub fn device_id(&self) -> *mut DeviceId {
+    pub fn device_id(&self) -> Option<NonNull<DeviceId>> {
         unsafe { std::mem::transmute(self.0.pDeviceID) }
     }
 
-    pub fn set_device_id(&mut self, device_id: *mut DeviceId) {
-        self.0.pDeviceID = unsafe { std::mem::transmute(device_id) };
+    pub fn set_device_id(&mut self, device_id: Option<NonNull<DeviceId>>) {
+        self.0.pDeviceID = device_id
+            .map(|id| id.cast().as_ptr())
+            .unwrap_or(ptr::null_mut());
     }
 
     pub fn format(&self) -> Format {
