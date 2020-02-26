@@ -5,7 +5,7 @@ use std::mem::MaybeUninit;
 use std::os::raw::c_void;
 use std::ptr;
 use std::ptr::NonNull;
-use std::rc::Rc;
+use std::sync::Arc;
 
 type MADeviceConfigResampling = sys::ma_device_config__bindgen_ty_1;
 type MADeviceConfigPlayback = sys::ma_device_config__bindgen_ty_2;
@@ -120,7 +120,7 @@ impl DeviceInfo {
     pub fn name(&self) -> &str {
         let cstr = unsafe { std::ffi::CStr::from_ptr(self.0.name.as_ptr()) };
 
-        // #FIXME at the moment we just return a blank string instead of invalid UTF-8
+        // FIXME at the moment we just return a blank string instead of invalid UTF-8
         cstr.to_str().unwrap_or("")
     }
 
@@ -131,6 +131,7 @@ impl DeviceInfo {
 
     #[inline]
     pub fn formats(&self) -> [Format; sys::ma_format_count as usize] {
+        // FIXME this should truncate the array and return a slice with length `format_count`
         unsafe { std::mem::transmute(self.0.formats) }
     }
 
@@ -154,6 +155,11 @@ impl DeviceInfo {
         self.0.maxSampleRate
     }
 }
+
+pub type DataCallbackProc = Option<
+    extern "C" fn(device: NonNull<Device>, output: *mut (), input: *mut (), frame_count: u32),
+>;
+pub type StopProc = Option<extern "C" fn(device: NonNull<Device>)>;
 
 #[repr(transparent)]
 pub struct DeviceConfig(sys::ma_device_config);
@@ -227,32 +233,6 @@ impl DeviceConfig {
         self.0.noClip = to_bool32(no_clip);
     }
 
-    pub fn set_data_callback<F>(&mut self, callback: F)
-    where
-        F: FnMut(NonNull<Device>, *mut (), *const (), u32) + 'static,
-    {
-        let user_data = self.ensure_user_data_ptr();
-        unsafe {
-            (*user_data).data_callback = Some(Box::new(callback));
-        }
-
-        // The trampoline will use the user data to call the Rust function.
-        self.0.dataCallback = Some(device_callback_proc_trampoline);
-    }
-
-    pub fn set_stop_callback<F>(&mut self, callback: F)
-    where
-        F: FnMut(NonNull<Device>) + 'static,
-    {
-        let user_data = self.ensure_user_data_ptr();
-        unsafe {
-            (*user_data).stop_callback = Some(Box::new(callback));
-        }
-
-        // The trampoline will use the user data to call the Rust function.
-        self.0.stopCallback = Some(stop_proc_trampoline);
-    }
-
     #[inline]
     pub fn playback(&self) -> &DeviceConfigPlayback {
         unsafe { std::mem::transmute(&self.0.playback) }
@@ -283,38 +263,34 @@ impl DeviceConfig {
         unsafe { std::mem::transmute(&mut self.0.resampling) }
     }
 
-    /// Ensures that there is valid user data in here for allowing rust style callbacks.
-    fn ensure_user_data_ptr(&mut self) -> *mut DeviceUserData {
-        if self.0.pUserData.is_null() {
-            self.0.pUserData = Rc::into_raw(Rc::new(DeviceUserData {
-                data_callback: None,
-                stop_callback: None,
-            })) as *mut _;
-        }
-        self.0.pUserData as *mut DeviceUserData
+    pub fn set_data_callback<C: Into<Option<DataCallbackProc>>>(&mut self, callback: C) {
+        self.0.dataCallback = callback.into().map(|c| unsafe {
+            std::mem::transmute::<
+                _,
+                unsafe extern "C" fn(*mut sys::ma_device, *mut c_void, *const c_void, u32),
+            >(c)
+        });
     }
 
-    /// Will drop our reference to the user data containing the boxed callbacks and then clear the
-    /// pointer to it.
+    pub fn set_stop_callback<C: Into<Option<StopProc>>>(&mut self, callback: C) {
+        self.0.stopCallback = callback.into().map(|c| unsafe {
+            std::mem::transmute::<_, unsafe extern "C" fn(*mut sys::ma_device)>(c)
+        });
+    }
+
+    pub fn set_user_data<T: Sized>(&mut self, data: T) {
+        self.drop_user_data(); // drop any old data if there is any.
+        let user_data = Arc::into_raw(Arc::new(data));
+        self.0.pUserData = user_data as _;
+    }
+
+    /// This will turn the user data back into an Arc and decrement the reference count and
+    /// eventually drop the Arc.
     fn drop_user_data(&mut self) {
         if !self.0.pUserData.is_null() {
-            let user_data = unsafe { Rc::from_raw(self.0.pUserData as _) };
+            let user_data = unsafe { Arc::from_raw(self.0.pUserData) };
             self.0.pUserData = ptr::null_mut();
             drop(user_data);
-        }
-    }
-
-    /// This will return a clone of the user data contained in this
-    /// config. This will return None if there is no user data to be cloned.
-    #[inline(always)]
-    fn clone_user_data(&mut self) -> Option<Rc<DeviceUserData>> {
-        if self.0.pUserData.is_null() {
-            None
-        } else {
-            let user_data = unsafe { Rc::from_raw(self.0.pUserData as _) };
-            let user_data_clone = Rc::clone(&user_data);
-            std::mem::forget(user_data); // we don't want to drop it
-            Some(user_data_clone)
         }
     }
 
@@ -450,24 +426,6 @@ impl DeviceConfigResampling {
     }
 }
 
-struct DeviceUserData {
-    data_callback: Option<Box<dyn FnMut(NonNull<Device>, *mut (), *const (), u32)>>,
-    stop_callback: Option<Box<dyn FnMut(NonNull<Device>)>>,
-}
-
-unsafe extern "C" fn device_callback_proc_trampoline(
-    device: *mut sys::ma_device,
-    output: *mut c_void,
-    input: *const c_void,
-    frame_count: u32,
-) {
-    todo!("device_callback_proc_trampoline"); // FIXME
-}
-
-unsafe extern "C" fn stop_proc_trampoline(device: *mut sys::ma_device) {
-    todo!("stop_proc_trampoline"); // FIXME
-}
-
 #[repr(transparent)]
 pub struct ContextConfig(sys::ma_context_config);
 
@@ -476,6 +434,7 @@ impl ContextConfig {
     pub fn new() -> ContextConfig {
         ContextConfig(unsafe { sys::ma_context_config_init() })
     }
+
     // FIXME implement some stuff for context config.
     //       I just don't need it at the moement, so...
 }
@@ -484,6 +443,10 @@ impl ContextConfig {
 pub struct Context(sys::ma_context);
 
 impl Context {
+    /// - `backends` - A list of backends to try initializing, in priority order. Can be None, in which case it
+    /// uses default priority order.
+    ///
+    /// - `config` - Optional context configuration.
     pub fn alloc(
         backends: Option<&[Backend]>,
         config: Option<&ContextConfig>,
@@ -661,6 +624,42 @@ impl Context {
         return Ok(());
     }
 
+    pub fn enumerate_devices<F>(&mut self, mut callback: F) -> Result<(), Error>
+    where
+        F: for<'r, 's> FnMut(&'r Context, DeviceType, &'s DeviceInfo) -> bool,
+    {
+        let mut callback_ptr: &mut dyn FnMut(&Context, DeviceType, &DeviceInfo) -> bool =
+            &mut callback;
+        let callback_ptr_ptr = &mut callback_ptr;
+
+        let result = unsafe {
+            sys::ma_context_enumerate_devices(
+                &mut self.0,
+                Some(enumerate_devices_inner_trampoline),
+                callback_ptr_ptr as *mut _ as *mut c_void,
+            )
+        };
+
+        return Error::from_c_result(result);
+
+        unsafe extern "C" fn enumerate_devices_inner_trampoline(
+            context: *mut sys::ma_context,
+            device_type: sys::ma_device_type,
+            info: *const sys::ma_device_info,
+            udata: *mut c_void,
+        ) -> u32 {
+            let real_callback =
+                udata as *mut &mut dyn FnMut(&Context, DeviceType, &DeviceInfo) -> bool;
+            let b = (*real_callback)(
+                (context as *mut Context).as_mut().unwrap(),
+                DeviceType::from_c(device_type),
+                (info as *const DeviceInfo).as_ref().unwrap(),
+            );
+
+            to_bool32(b)
+        }
+    }
+
     // FIXME implement ma_context_enumerate_devices
 
     // FIXME implement user data / callbacks
@@ -678,11 +677,25 @@ impl Drop for Context {
 pub struct Device(sys::ma_device);
 
 impl Device {
-    /// Will drop our reference to the user data containing the boxed callbacks and then clear the
-    /// pointer to it.
+    pub fn alloc(config: &DeviceConfig) -> Result<Box<Device>, Error> {
+        todo!();
+    }
+
+    /// Increments the ref count of the user data which should be stored in an Arc.
+    fn increment_user_data_ref(&mut self) {
+        if !self.0.pUserData.is_null() {
+            let user_data = unsafe { Arc::from_raw(self.0.pUserData) };
+            let cloned = Arc::clone(&user_data);
+            std::mem::forget(user_data); // don't drop so that we don't decrement the refcount
+            self.0.pUserData = Arc::into_raw(cloned) as _;
+        }
+    }
+
+    /// This will turn the user data back into an Arc and decrement the reference count and
+    /// eventually drop the Arc.
     fn drop_user_data(&mut self) {
         if !self.0.pUserData.is_null() {
-            let user_data = unsafe { Rc::from_raw(self.0.pUserData as _) };
+            let user_data = unsafe { Arc::from_raw(self.0.pUserData) };
             self.0.pUserData = ptr::null_mut();
             drop(user_data);
         }
