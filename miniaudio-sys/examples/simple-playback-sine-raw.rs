@@ -14,19 +14,20 @@ pub fn main() {
 
 pub unsafe fn enumerate_devices() -> i32 {
     let mut sine_wave = MaybeUninit::<sys::ma_waveform>::uninit();
+    let sine_wave_config = sys::ma_waveform_config_init(
+        DEVICE_FORMAT,
+        DEVICE_CHANNELS,
+        DEVICE_SAMPLE_RATE,
+        sys::ma_waveform_type_sine,
+        0.2,
+        220.0,
+    );
+    sys::ma_waveform_init(&sine_wave_config, sine_wave.as_mut_ptr());
+    let mut sine_wave = sine_wave.assume_init();
 
     // This has to be boxed because it requires a stable address, and Rust's moves basically make
     // that impossible without a heap allocation.
     let mut device = Box::new(MaybeUninit::<sys::ma_device>::uninit());
-
-    sys::ma_waveform_init(
-        sys::ma_waveform_type_sine,
-        0.2,
-        220.0,
-        DEVICE_SAMPLE_RATE,
-        sine_wave.as_mut_ptr(),
-    );
-    let mut sine_wave = sine_wave.assume_init();
 
     let mut device_config = sys::ma_device_config_init(sys::ma_device_type_playback);
 
@@ -90,11 +91,5 @@ unsafe extern "C" fn data_callback(
     let sine_wave = transmute::<_, *mut sys::ma_waveform>((*device_ptr).pUserData);
     assert_ne!(sine_wave, null_mut());
 
-    sys::ma_waveform_read_pcm_frames(
-        sine_wave,
-        output_ptr,
-        frame_count as _,
-        sys::ma_format_f32,
-        DEVICE_CHANNELS,
-    );
+    sys::ma_waveform_read_pcm_frames(sine_wave, output_ptr, frame_count as _);
 }
