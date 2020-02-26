@@ -1,7 +1,7 @@
 use miniaudio::{Context, DeviceType};
 
 pub fn main() {
-    let mut context = Context::alloc(None, None).expect("failed to create context");
+    let context = Context::alloc(None, None).expect("failed to create context");
 
     println!("Devices:");
     context

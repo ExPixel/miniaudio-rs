@@ -2,6 +2,7 @@ use crate::base::*;
 use crate::resampling::ResampleAlgorithm;
 use miniaudio_sys as sys;
 use std::mem::MaybeUninit;
+use std::ops::Deref;
 use std::os::raw::c_void;
 use std::ptr;
 use std::ptr::NonNull;
@@ -156,10 +157,13 @@ impl DeviceInfo {
     }
 }
 
-pub type DataCallbackProc = Option<
-    extern "C" fn(device: NonNull<Device>, output: *mut (), input: *mut (), frame_count: u32),
->;
-pub type StopProc = Option<extern "C" fn(device: NonNull<Device>)>;
+pub type DataCallbackProc = extern "C" fn(
+    device: NonNull<Device>,
+    output: Option<NonNull<()>>,
+    input: Option<NonNull<()>>,
+    frame_count: u32,
+);
+pub type StopProc = extern "C" fn(device: NonNull<Device>);
 
 #[repr(transparent)]
 pub struct DeviceConfig(sys::ma_device_config);
@@ -263,8 +267,8 @@ impl DeviceConfig {
         unsafe { std::mem::transmute(&mut self.0.resampling) }
     }
 
-    pub fn set_data_callback<C: Into<Option<DataCallbackProc>>>(&mut self, callback: C) {
-        self.0.dataCallback = callback.into().map(|c| unsafe {
+    pub fn set_data_callback(&mut self, callback: Option<DataCallbackProc>) {
+        self.0.dataCallback = callback.map(|c| unsafe {
             std::mem::transmute::<
                 _,
                 unsafe extern "C" fn(*mut sys::ma_device, *mut c_void, *const c_void, u32),
@@ -272,8 +276,8 @@ impl DeviceConfig {
         });
     }
 
-    pub fn set_stop_callback<C: Into<Option<StopProc>>>(&mut self, callback: C) {
-        self.0.stopCallback = callback.into().map(|c| unsafe {
+    pub fn set_stop_callback(&mut self, callback: Option<StopProc>) {
+        self.0.stopCallback = callback.map(|c| unsafe {
             std::mem::transmute::<_, unsafe extern "C" fn(*mut sys::ma_device)>(c)
         });
     }
@@ -282,6 +286,60 @@ impl DeviceConfig {
         self.drop_user_data(); // drop any old data if there is any.
         let user_data = Arc::into_raw(Arc::new(data));
         self.0.pUserData = user_data as _;
+    }
+
+    /// Return a pointer to the user data that is stored in this device config.
+    ///
+    /// **NOTE** User data might be accessed at the same time from a different thread (callback or
+    /// main thread depending on where this is called from.)
+    ///
+    /// Behavior is undefined if the type of T does not have the same size and alignment as the
+    /// type passed in using `set_user_data` in `DeviceConfig`.
+    pub unsafe fn user_data_ptr<T>(&mut self) -> Option<NonNull<T>> {
+        NonNull::new(self.0.pUserData.cast::<T>())
+    }
+
+    /// Get a reference to the user data that was stored in this device config.
+    ///
+    /// **NOTE** User data might be accessed at the same time from a different thread (callback or
+    /// main thread depending on where this is called from.)
+    ///
+    /// Behavior is undefined if the type of T does not have the same size and alignment as the
+    /// type passed in using `set_user_data` in `DeviceConfig`.
+    pub unsafe fn user_data_ref<'u, T>(&'u mut self) -> Option<&'u mut T> {
+        self.0.pUserData.cast::<T>().as_mut()
+    }
+
+    /// This will return an Arc containing the user data stored in this device config.
+    ///
+    /// **NOTE** User data might be accessed at the same time from a different thread (callback or
+    /// main thread depending on where this is called from.)
+    ///
+    /// Behavior is undefined if the type of T does not have the same size and alignment as the
+    /// type passed in using `set_user_data` in `DeviceConfig`.
+    pub unsafe fn user_data_arc<T>(&mut self) -> Option<Arc<T>> {
+        if self.0.pUserData.is_null() {
+            return None;
+        }
+
+        let user_data = Arc::from_raw(self.0.pUserData.cast::<T>());
+        let user_data_clone = Arc::clone(&user_data);
+        std::mem::forget(user_data); // no decrement
+        Some(user_data_clone)
+    }
+
+    /// If there is user data contained within this device, this will call the given closure with a
+    /// reference to the user data.
+    ///
+    /// **NOTE** User data might be accessed at the same time from a different thread (callback or
+    /// main thread depending on where this is called from.)
+    ///
+    /// Behavior is undefined if the type of T does not have the same size and alignment as the
+    /// type passed in using `set_user_data` in `DeviceConfig`.
+    pub unsafe fn with_user_data<T, F: FnOnce(&mut T)>(&mut self, f: F) {
+        if let Some(udata) = self.user_data_ref() {
+            f(udata);
+        }
     }
 
     /// This will turn the user data back into an Arc and decrement the reference count and
@@ -450,8 +508,8 @@ impl Context {
     pub fn alloc(
         backends: Option<&[Backend]>,
         config: Option<&ContextConfig>,
-    ) -> Result<Box<Context>, Error> {
-        let mut context = Box::new(MaybeUninit::<sys::ma_context>::uninit());
+    ) -> Result<Arc<Context>, Error> {
+        let context = Arc::new(MaybeUninit::<sys::ma_context>::uninit());
 
         let result = unsafe {
             sys::ma_context_init(
@@ -460,7 +518,7 @@ impl Context {
                     .unwrap_or(ptr::null()),
                 backends.map(|b| b.len() as u32).unwrap_or(0),
                 config.map(|c| &c.0 as *const _).unwrap_or(ptr::null()),
-                context.as_mut_ptr(),
+                Arc::deref(&context).as_ptr() as *mut _,
             )
         };
 
@@ -471,16 +529,8 @@ impl Context {
         Backend::from_c(self.0.backend)
     }
 
-    pub fn set_backend(&mut self, backend: Backend) {
-        self.0.backend = backend as _;
-    }
-
     pub fn thread_priority(&self) -> ThreadPriority {
         ThreadPriority::from_c(self.0.threadPriority)
-    }
-
-    pub fn set_thread_priority(&mut self, priority: ThreadPriority) {
-        self.0.threadPriority = priority as _;
     }
 
     pub fn device_info_capacity(&self) -> u32 {
@@ -522,7 +572,7 @@ impl Context {
     /// Retrieves basic information about every active playback and capture device. This function
     /// will allocate memory internally for device lists.
     /// This function will not call the closure if an error occurred.
-    pub fn with_devices<F>(&mut self, f: F) -> Result<(), Error>
+    pub fn with_devices<F>(&self, f: F) -> Result<(), Error>
     where
         F: FnOnce(&[DeviceInfo], &[DeviceInfo]),
     {
@@ -534,7 +584,7 @@ impl Context {
 
         unsafe {
             let result = sys::ma_context_get_devices(
-                &mut self.0,
+                &self.0 as *const _ as *mut _,
                 &mut playback_ptr,
                 &mut playback_count,
                 &mut capture_ptr,
@@ -563,7 +613,7 @@ impl Context {
     /// Retrieves basic information about every active playback device. This function
     /// will allocate memory internally for device lists.
     /// This function will not call the closure if an error occurred.
-    pub fn with_playback_devices<F>(&mut self, f: F) -> Result<(), Error>
+    pub fn with_playback_devices<F>(&self, f: F) -> Result<(), Error>
     where
         F: FnOnce(&[DeviceInfo]),
     {
@@ -572,7 +622,7 @@ impl Context {
 
         unsafe {
             let result = sys::ma_context_get_devices(
-                &mut self.0,
+                &self.0 as *const _ as *mut _,
                 &mut playback_ptr,
                 &mut playback_count,
                 ptr::null_mut(),
@@ -595,7 +645,7 @@ impl Context {
     /// Retrieves basic information about every active capture device. This function
     /// will allocate memory internally for device lists.
     /// This function will not call the closure if an error occurred.
-    pub fn with_capture_devices<F>(&mut self, f: F) -> Result<(), Error>
+    pub fn with_capture_devices<F>(&self, f: F) -> Result<(), Error>
     where
         F: FnOnce(&[DeviceInfo]),
     {
@@ -604,7 +654,7 @@ impl Context {
 
         unsafe {
             let result = sys::ma_context_get_devices(
-                &mut self.0,
+                &self.0 as *const _ as *mut _,
                 ptr::null_mut(),
                 ptr::null_mut(),
                 &mut capture_ptr,
@@ -624,7 +674,7 @@ impl Context {
         return Ok(());
     }
 
-    pub fn enumerate_devices<F>(&mut self, mut callback: F) -> Result<(), Error>
+    pub fn enumerate_devices<F>(&self, mut callback: F) -> Result<(), Error>
     where
         F: for<'r, 's> FnMut(&'r Context, DeviceType, &'s DeviceInfo) -> bool,
     {
@@ -634,7 +684,7 @@ impl Context {
 
         let result = unsafe {
             sys::ma_context_enumerate_devices(
-                &mut self.0,
+                &self.0 as *const _ as *mut _,
                 Some(enumerate_devices_inner_trampoline),
                 callback_ptr_ptr as *mut _ as *mut c_void,
             )
@@ -677,8 +727,28 @@ impl Drop for Context {
 pub struct Device(sys::ma_device);
 
 impl Device {
-    pub fn alloc(config: &DeviceConfig) -> Result<Box<Device>, Error> {
-        todo!();
+    pub fn alloc(
+        context: Option<Arc<Context>>,
+        config: &DeviceConfig,
+    ) -> Result<Arc<Device>, Error> {
+        let device = Arc::new(MaybeUninit::<sys::ma_device>::uninit());
+
+        let result = unsafe {
+            sys::ma_device_init(
+                context
+                    .map(|c| Arc::into_raw(c) as *mut _)
+                    .unwrap_or(ptr::null_mut()),
+                config as *const DeviceConfig as *const _,
+                Arc::deref(&device).as_ptr() as *mut _,
+            )
+        };
+
+        // The referenfce count to the user data has to be incremented here or else it will be
+        // dropped by the DeviceConfig (if that drops first) adn we will be left with a dangling
+        // pointer.
+        unsafe { (*(Arc::deref(&device).as_ptr() as *mut Device)).increment_user_data_ref() };
+
+        map_result!(result, unsafe { std::mem::transmute(device) })
     }
 
     /// Increments the ref count of the user data which should be stored in an Arc.
@@ -689,6 +759,130 @@ impl Device {
             std::mem::forget(user_data); // don't drop so that we don't decrement the refcount
             self.0.pUserData = Arc::into_raw(cloned) as _;
         }
+    }
+
+    /// Return a pointer to the user data that is stored in this device.
+    ///
+    /// **NOTE** User data might be accessed at the same time from a different thread (callback or
+    /// main thread depending on where this is called from.)
+    ///
+    /// Behavior is undefined if the type of T does not have the same size and alignment as the
+    /// type passed in using `set_user_data` in `DeviceConfig`.
+    pub unsafe fn user_data_ptr<T>(&self) -> Option<NonNull<T>> {
+        NonNull::new(self.0.pUserData.cast::<T>())
+    }
+
+    /// Get a reference to the user data that was stored in this device.
+    ///
+    /// **NOTE** User data might be accessed at the same time from a different thread (callback or
+    /// main thread depending on where this is called from.)
+    ///
+    /// Behavior is undefined if the type of T does not have the same size and alignment as the
+    /// type passed in using `set_user_data` in `DeviceConfig`.
+    pub unsafe fn user_data_ref<'u, T>(&'u self) -> Option<&'u mut T> {
+        self.0.pUserData.cast::<T>().as_mut()
+    }
+
+    /// This will return an Arc containing the user data stored in this device.
+    ///
+    /// **NOTE** User data might be accessed at the same time from a different thread (callback or
+    /// main thread depending on where this is called from.)
+    ///
+    /// Behavior is undefined if the type of T does not have the same size and alignment as the
+    /// type passed in using `set_user_data` in `DeviceConfig`.
+    pub unsafe fn user_data_arc<T>(&self) -> Option<Arc<T>> {
+        if self.0.pUserData.is_null() {
+            return None;
+        }
+
+        let user_data = Arc::from_raw(self.0.pUserData.cast::<T>());
+        let user_data_clone = Arc::clone(&user_data);
+        std::mem::forget(user_data); // no decrement
+        Some(user_data_clone)
+    }
+
+    /// If there is user data contained within this device, this will call the given closure with a
+    /// reference to the user data.
+    ///
+    /// **NOTE** User data might be accessed at the same time from a different thread (callback or
+    /// main thread depending on where this is called from.)
+    ///
+    /// Behavior is undefined if the type of T does not have the same size and alignment as the
+    /// type passed in using `set_user_data` in `DeviceConfig`.
+    pub unsafe fn with_user_data<T, F: FnOnce(&mut T)>(&self, f: F) {
+        if let Some(udata) = self.user_data_ref() {
+            f(udata);
+        }
+    }
+
+    /// Starts the device. For playback devices this begins playback. For capture devices this
+    /// begins recording.
+    /// Use `stop` to stop this device.
+    ///
+    /// **WARNING** This should not be called from a callback.
+    pub fn start(&self) -> Result<(), Error> {
+        Error::from_c_result(unsafe { sys::ma_device_start(&self.0 as *const _ as *mut _) })
+    }
+
+    /// Stops this device. For playback devices this stops playback. For capture devices this stops
+    /// recording. Use `start` to start this device again.
+    ///
+    /// **WARNING** This should not be called from a callback.
+    pub fn stop(&self) -> Result<(), Error> {
+        Error::from_c_result(unsafe { sys::ma_device_stop(&self.0 as *const _ as *mut _) })
+    }
+
+    /// Returns true if this device has started.
+    pub fn is_started(&self) -> bool {
+        from_bool32(unsafe { sys::ma_device_is_started(&self.0 as *const _ as *mut _) })
+    }
+
+    /// Sets the master volume factor for the device.
+    ///
+    /// The volume factor must be between 0 (silence) and 1 (full volume). Use `set_master_gain_db()` to use decibel notation, where 0 is full volume and
+    /// values less than 0 decreases the volume.
+    ///
+    /// Callback Safety
+    /// ---------------
+    /// Safe. If you set the volume in the data callback, that data written to the output buffer will have the new volume applied.
+    pub fn set_master_volume(&self, volume: f32) -> Result<(), Error> {
+        Error::from_c_result(unsafe {
+            sys::ma_device_set_master_volume(&self.0 as *const _ as *mut _, volume)
+        })
+    }
+
+    /// Retrieves the master volume factor for the device.
+    pub fn get_master_volume(&self) -> Result<f32, Error> {
+        let mut out = 0.0;
+        map_result!(
+            unsafe { sys::ma_device_get_master_volume(&self.0 as *const _ as *mut _, &mut out) },
+            out
+        )
+    }
+
+    /// Sets the master volume for the device as gain in decibels.
+    ///
+    /// A gain of 0 is full volume, whereas a gain of < 0 will decrease the volume.
+    ///
+    /// The volume factor must be between 0 (silence) and 1 (full volume). Use `set_master_gain_db()` to use decibel notation, where 0 is full volume and
+    /// values less than 0 decreases the volume.
+    ///
+    /// Callback Safety
+    /// ---------------
+    /// Safe. If you set the volume in the data callback, that data written to the output buffer will have the new volume applied.
+    pub fn set_master_gain_db(&self, gain_db: f32) -> Result<(), Error> {
+        Error::from_c_result(unsafe {
+            sys::ma_device_set_master_gain_db(&self.0 as *const _ as *mut _, gain_db)
+        })
+    }
+
+    /// Retrieves the master gain in decibels.
+    pub fn get_master_gain_db(&self) -> Result<f32, Error> {
+        let mut out = 0.0;
+        map_result!(
+            unsafe { sys::ma_device_get_master_gain_db(&self.0 as *const _ as *mut _, &mut out) },
+            out
+        )
     }
 
     /// This will turn the user data back into an Arc and decrement the reference count and
@@ -704,6 +898,13 @@ impl Device {
 
 impl Drop for Device {
     fn drop(&mut self) {
+        unsafe { sys::ma_device_uninit(&mut self.0) };
+
+        if !self.0.pContext.is_null() {
+            let context_arc = unsafe { Arc::from_raw(self.0.pContext as _) };
+            self.0.pContext = ptr::null_mut();
+            drop(context_arc);
+        }
         self.drop_user_data();
     }
 }

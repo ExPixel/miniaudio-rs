@@ -25,10 +25,12 @@ mod base;
 mod biquad_filtering;
 mod device_io;
 mod frames;
+mod generation;
 mod resampling;
 
 pub use base::*;
 pub use biquad_filtering::*;
 pub use device_io::*;
 pub use frames::*;
+pub use generation::*;
 pub use resampling::*;

@@ -1,7 +1,7 @@
-use miniaudio::{Context, DeviceType};
+use miniaudio::Context;
 
 pub fn main() {
-    let mut context = Context::alloc(None, None).expect("failed to create context");
+    let context = Context::alloc(None, None).expect("failed to create context");
 
     context
         .with_devices(|playback_devices, capture_devices| {
