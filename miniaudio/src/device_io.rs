@@ -267,97 +267,122 @@ impl DeviceConfig {
         unsafe { std::mem::transmute(&mut self.0.resampling) }
     }
 
-    pub fn set_data_callback(&mut self, callback: Option<DataCallbackProc>) {
-        self.0.dataCallback = callback.map(|c| unsafe {
-            std::mem::transmute::<
-                _,
-                unsafe extern "C" fn(*mut sys::ma_device, *mut c_void, *const c_void, u32),
-            >(c)
-        });
+    /// Sets the data callback for this device config.
+    ///
+    /// **IMPORTANT** The function passed in here must be cloneable because each device that uses
+    /// this config will create and use a clone of the given function and its environment. In order
+    /// to share a variable between distinct device instances they have to be wrapped in some sort
+    /// of cloneable thread-safe struct like an Arc.
+    pub fn set_data_callback<F>(&mut self, callback: F)
+    where
+        F: FnMut(NonNull<Device>, Option<NonNull<()>>, Option<NonNull<()>>, u32)
+            + Send
+            + Sync
+            + Clone
+            + 'static,
+    {
+        let user_data = self.ensure_user_data();
+        unsafe {
+            (*user_data).data_callback_factory = Some(Box::new(move || Box::new(callback.clone())));
+        }
+
+        // This is set in here instead of the Device's initialization code because overwritting
+        // the value of the data callback after device initialization is not allowed by miniaudio's
+        // API.
+        self.0.dataCallback = Some(device_data_callback_trampoline);
     }
 
-    pub fn set_stop_callback(&mut self, callback: Option<StopProc>) {
-        self.0.stopCallback = callback.map(|c| unsafe {
-            std::mem::transmute::<_, unsafe extern "C" fn(*mut sys::ma_device)>(c)
-        });
+    /// Sets the stop callback for this device config.
+    ///
+    /// **IMPORTANT** The function passed in here must be cloneable because each device that uses
+    /// this config will create and use a clone of the given function and its environment. In order
+    /// to share a variable between distinct device instances they have to be wrapped in some sort
+    /// of cloneable thread-safe struct like an Arc.
+    pub fn set_stop_callback<F>(&mut self, callback: F)
+    where
+        F: FnMut(NonNull<Device>) + Clone + Send + Sync + 'static,
+    {
+        let user_data = self.ensure_user_data();
+        unsafe {
+            (*user_data).stop_callback_factory = Some(Box::new(move || Box::new(callback.clone())));
+        }
+
+        // This is set in here instead of the Device's initialization code because overwritting
+        // the value of the stop callback after device initialization is not allowed by miniaudio's
+        // API.
+        self.0.stopCallback = Some(device_stop_callback_trampoline);
     }
 
-    pub fn set_user_data<T: Sized>(&mut self, data: T) {
-        self.drop_user_data(); // drop any old data if there is any.
-        let user_data = Arc::into_raw(Arc::new(data));
-        self.0.pUserData = user_data as _;
-    }
-
-    /// Return a pointer to the user data that is stored in this device config.
-    ///
-    /// **NOTE** User data might be accessed at the same time from a different thread (callback or
-    /// main thread depending on where this is called from.)
-    ///
-    /// Behavior is undefined if the type of T does not have the same size and alignment as the
-    /// type passed in using `set_user_data` in `DeviceConfig`.
-    pub unsafe fn user_data_ptr<T>(&mut self) -> Option<NonNull<T>> {
-        NonNull::new(self.0.pUserData.cast::<T>())
-    }
-
-    /// Get a reference to the user data that was stored in this device config.
-    ///
-    /// **NOTE** User data might be accessed at the same time from a different thread (callback or
-    /// main thread depending on where this is called from.)
-    ///
-    /// Behavior is undefined if the type of T does not have the same size and alignment as the
-    /// type passed in using `set_user_data` in `DeviceConfig`.
-    pub unsafe fn user_data_ref<'u, T>(&'u mut self) -> Option<&'u mut T> {
-        self.0.pUserData.cast::<T>().as_mut()
-    }
-
-    /// This will return an Arc containing the user data stored in this device config.
-    ///
-    /// **NOTE** User data might be accessed at the same time from a different thread (callback or
-    /// main thread depending on where this is called from.)
-    ///
-    /// Behavior is undefined if the type of T does not have the same size and alignment as the
-    /// type passed in using `set_user_data` in `DeviceConfig`.
-    pub unsafe fn user_data_arc<T>(&mut self) -> Option<Arc<T>> {
+    /// This will ensure that user data is initialized and return an unsafe mutable pointer to it.
+    fn ensure_user_data(&mut self) -> *mut DeviceConfigUserData {
         if self.0.pUserData.is_null() {
-            return None;
+            self.0.pUserData = Box::into_raw(Box::new(DeviceConfigUserData {
+                data_callback_factory: None,
+                stop_callback_factory: None,
+            })) as *mut _;
         }
-
-        let user_data = Arc::from_raw(self.0.pUserData.cast::<T>());
-        let user_data_clone = Arc::clone(&user_data);
-        std::mem::forget(user_data); // no decrement
-        Some(user_data_clone)
+        self.0.pUserData.cast()
     }
-
-    /// If there is user data contained within this device, this will call the given closure with a
-    /// reference to the user data.
-    ///
-    /// **NOTE** User data might be accessed at the same time from a different thread (callback or
-    /// main thread depending on where this is called from.)
-    ///
-    /// Behavior is undefined if the type of T does not have the same size and alignment as the
-    /// type passed in using `set_user_data` in `DeviceConfig`.
-    pub unsafe fn with_user_data<T, F: FnOnce(&mut T)>(&mut self, f: F) {
-        if let Some(udata) = self.user_data_ref() {
-            f(udata);
-        }
-    }
-
-    /// This will turn the user data back into an Arc and decrement the reference count and
-    /// eventually drop the Arc.
-    fn drop_user_data(&mut self) {
-        if !self.0.pUserData.is_null() {
-            let user_data = unsafe { Arc::from_raw(self.0.pUserData) };
-            self.0.pUserData = ptr::null_mut();
-            drop(user_data);
-        }
-    }
-
     // FIXME implement getters/setters for wasapi/alsa/pulse config structs
+}
+
+pub struct DeviceConfigUserData {
+    data_callback_factory: Option<
+        Box<
+            dyn Fn() -> Box<
+                dyn FnMut(NonNull<Device>, Option<NonNull<()>>, Option<NonNull<()>>, u32),
+            >,
+        >,
+    >,
+    stop_callback_factory: Option<Box<dyn Fn() -> Box<dyn FnMut(NonNull<Device>)>>>,
+}
+
+// FIXME it might be better to just set the callbacks to some noop functions by default
+// to save ourselves the extra in the audio callback code.
+pub struct DeviceUserData {
+    data_callback:
+        Option<Box<dyn FnMut(NonNull<Device>, Option<NonNull<()>>, Option<NonNull<()>>, u32)>>,
+    stop_callback: Option<Box<dyn FnMut(NonNull<Device>)>>,
+}
+
+unsafe extern "C" fn device_data_callback_trampoline(
+    device_ptr: *mut sys::ma_device,
+    output_ptr: *mut c_void,
+    input_ptr: *const c_void,
+    frame_count: u32,
+) {
+    if let Some(device) = NonNull::new(device_ptr.cast::<Device>()) {
+        let output = NonNull::new(output_ptr as *mut ());
+        let input = NonNull::new(input_ptr as *mut ());
+        let user_data = (*device.as_ptr()).0.pUserData.cast::<DeviceUserData>();
+        if user_data.is_null() {
+            return;
+        }
+
+        if let Some(ref mut data_callback) = (*user_data).data_callback {
+            (data_callback)(device, output, input, frame_count);
+        }
+    }
+}
+
+unsafe extern "C" fn device_stop_callback_trampoline(device_ptr: *mut sys::ma_device) {
+    if let Some(device) = NonNull::new(device_ptr.cast::<Device>()) {
+        let user_data = (*device.as_ptr()).0.pUserData.cast::<DeviceUserData>();
+        if user_data.is_null() {
+            return;
+        }
+        if let Some(ref mut stop_callback) = (*user_data).stop_callback {
+            (stop_callback)(device);
+        }
+    }
 }
 
 impl Drop for DeviceConfig {
     fn drop(&mut self) {
-        self.drop_user_data();
+        let user_data = self.0.pUserData;
+        if !user_data.is_null() {
+            unsafe { Box::from_raw(user_data.cast::<DeviceConfigUserData>()) }; // drop it
+        }
     }
 }
 
@@ -743,75 +768,30 @@ impl Device {
             )
         };
 
-        // The referenfce count to the user data has to be incremented here or else it will be
-        // dropped by the DeviceConfig (if that drops first) adn we will be left with a dangling
-        // pointer.
-        unsafe { (*(Arc::deref(&device).as_ptr() as *mut Device)).increment_user_data_ref() };
+        unsafe { (*(Arc::deref(&device).as_ptr() as *mut Device)).create_device_user_data() };
 
         map_result!(result, unsafe { std::mem::transmute(device) })
     }
 
-    /// Increments the ref count of the user data which should be stored in an Arc.
-    fn increment_user_data_ref(&mut self) {
+    fn create_device_user_data(&mut self) {
         if !self.0.pUserData.is_null() {
-            let user_data = unsafe { Arc::from_raw(self.0.pUserData) };
-            let cloned = Arc::clone(&user_data);
-            std::mem::forget(user_data); // don't drop so that we don't decrement the refcount
-            self.0.pUserData = Arc::into_raw(cloned) as _;
-        }
-    }
+            let config_user_data = self.0.pUserData.cast::<DeviceConfigUserData>();
 
-    /// Return a pointer to the user data that is stored in this device.
-    ///
-    /// **NOTE** User data might be accessed at the same time from a different thread (callback or
-    /// main thread depending on where this is called from.)
-    ///
-    /// Behavior is undefined if the type of T does not have the same size and alignment as the
-    /// type passed in using `set_user_data` in `DeviceConfig`.
-    pub unsafe fn user_data_ptr<T>(&self) -> Option<NonNull<T>> {
-        NonNull::new(self.0.pUserData.cast::<T>())
-    }
+            let data_callback = unsafe {
+                ((*config_user_data).data_callback_factory)
+                    .as_ref()
+                    .map(|f| (f)())
+            };
+            let stop_callback = unsafe {
+                ((*config_user_data).stop_callback_factory)
+                    .as_ref()
+                    .map(|f| (f)())
+            };
 
-    /// Get a reference to the user data that was stored in this device.
-    ///
-    /// **NOTE** User data might be accessed at the same time from a different thread (callback or
-    /// main thread depending on where this is called from.)
-    ///
-    /// Behavior is undefined if the type of T does not have the same size and alignment as the
-    /// type passed in using `set_user_data` in `DeviceConfig`.
-    pub unsafe fn user_data_ref<'u, T>(&'u self) -> Option<&'u mut T> {
-        self.0.pUserData.cast::<T>().as_mut()
-    }
-
-    /// This will return an Arc containing the user data stored in this device.
-    ///
-    /// **NOTE** User data might be accessed at the same time from a different thread (callback or
-    /// main thread depending on where this is called from.)
-    ///
-    /// Behavior is undefined if the type of T does not have the same size and alignment as the
-    /// type passed in using `set_user_data` in `DeviceConfig`.
-    pub unsafe fn user_data_arc<T>(&self) -> Option<Arc<T>> {
-        if self.0.pUserData.is_null() {
-            return None;
-        }
-
-        let user_data = Arc::from_raw(self.0.pUserData.cast::<T>());
-        let user_data_clone = Arc::clone(&user_data);
-        std::mem::forget(user_data); // no decrement
-        Some(user_data_clone)
-    }
-
-    /// If there is user data contained within this device, this will call the given closure with a
-    /// reference to the user data.
-    ///
-    /// **NOTE** User data might be accessed at the same time from a different thread (callback or
-    /// main thread depending on where this is called from.)
-    ///
-    /// Behavior is undefined if the type of T does not have the same size and alignment as the
-    /// type passed in using `set_user_data` in `DeviceConfig`.
-    pub unsafe fn with_user_data<T, F: FnOnce(&mut T)>(&self, f: F) {
-        if let Some(udata) = self.user_data_ref() {
-            f(udata);
+            self.0.pUserData = Box::into_raw(Box::new(DeviceUserData {
+                data_callback,
+                stop_callback,
+            })) as *mut _;
         }
     }
 
@@ -885,26 +865,33 @@ impl Device {
         )
     }
 
-    /// This will turn the user data back into an Arc and decrement the reference count and
-    /// eventually drop the Arc.
-    fn drop_user_data(&mut self) {
-        if !self.0.pUserData.is_null() {
-            let user_data = unsafe { Arc::from_raw(self.0.pUserData) };
-            self.0.pUserData = ptr::null_mut();
-            drop(user_data);
-        }
+    /// This is set to true if the context was created by and is managed by the device.
+    /// If this is false, then the context is created by the user and should be cleaned by on the
+    /// Rust side.
+    fn is_owner_of_context(&self) -> bool {
+        from_bool32(self.0.isOwnerOfContext())
     }
 }
 
 impl Drop for Device {
     fn drop(&mut self) {
+        // We have to copy these before the struct is zeroed.
+        let is_owner_of_context = self.is_owner_of_context();
+        let context_ptr = self.0.pContext;
+        let user_data = self.0.pUserData;
+
         unsafe { sys::ma_device_uninit(&mut self.0) };
 
-        if !self.0.pContext.is_null() {
-            let context_arc = unsafe { Arc::from_raw(self.0.pContext as _) };
+        // We drop this AFTER uninit so that the stop callback can execute correctly.
+        if !user_data.is_null() {
+            unsafe { Box::from_raw(user_data.cast::<DeviceUserData>()) }; // drop it
+        }
+
+        // We only decrement the context ref count if we own it and now the device.
+        if !is_owner_of_context && !context_ptr.is_null() {
+            let context_arc = unsafe { Arc::from_raw(context_ptr as *const _) };
             self.0.pContext = ptr::null_mut();
             drop(context_arc);
         }
-        self.drop_user_data();
     }
 }

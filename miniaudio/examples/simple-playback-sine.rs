@@ -1,5 +1,4 @@
 use miniaudio::{Device, DeviceConfig, DeviceType, Format, Waveform, WaveformConfig, WaveformType};
-use std::ptr::NonNull;
 
 pub const DEVICE_FORMAT: Format = Format::F32;
 pub const DEVICE_CHANNELS: u32 = 2;
@@ -14,15 +13,20 @@ pub fn main() {
         0.2,
         220.0,
     );
-    let sine_wave = Waveform::new(&sine_wave_config);
+    let mut sine_wave = Waveform::new(&sine_wave_config);
 
     let mut device_config = DeviceConfig::new(DeviceType::Playback);
     device_config.playback_mut().set_format(DEVICE_FORMAT);
     device_config.playback_mut().set_channels(DEVICE_CHANNELS);
     device_config.set_sample_rate(DEVICE_SAMPLE_RATE);
-    device_config.set_data_callback(Some(device_data_callback));
-    device_config.set_stop_callback(Some(device_stop_callback));
-    device_config.set_user_data(sine_wave);
+
+    device_config.set_data_callback(move |_device, output, _input, frame_count| {
+        sine_wave.read_pcm_frames(output.unwrap(), frame_count as u64);
+    });
+
+    device_config.set_stop_callback(|_device| {
+        println!("Device Stopped.");
+    });
 
     let device = Device::alloc(None, &device_config).expect("failed to open playback device");
     device.start().expect("failed to start device");
@@ -42,19 +46,4 @@ fn wait_for_enter() {
     std::io::stdin()
         .read_line(&mut String::new())
         .expect("failed to wait for line");
-}
-
-extern "C" fn device_data_callback(
-    device: NonNull<Device>,
-    output: Option<NonNull<()>>,
-    _input: Option<NonNull<()>>,
-    frame_count: u32,
-) {
-    let output = output.unwrap();
-    let waveform = unsafe { (*device.as_ptr()).user_data_ref::<Waveform>() }.unwrap();
-    waveform.read_pcm_frames(output, frame_count as u64);
-}
-
-extern "C" fn device_stop_callback(_device: NonNull<Device>) {
-    println!("Device Stopped.");
 }
