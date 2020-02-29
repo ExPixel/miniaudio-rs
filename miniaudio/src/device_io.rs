@@ -795,6 +795,27 @@ impl Device {
         }
     }
 
+    /// This will return the context **owned** by this device. A context that was passed into this
+    /// device via `new` is **not** owned by this device and if you need a reference to that just
+    /// keep a reference to it instead. The purpose of this function is to provide a reference to a
+    /// context when one was not initially provided. If you want a function that will return
+    /// whatever context this is using whether it owns it or now, use `context_ptr` instead which
+    /// will just return the same raw pointer to a context that this device uses internally.
+    pub fn owned_context(&self) -> Option<&'static Context> {
+        if self.is_owner_of_context() {
+            assert!(!self.0.pContext.is_null());
+            unsafe { Some(self.0.pContext.cast::<Context>().as_mut().unwrap()) }
+        } else {
+            None
+        }
+    }
+
+    /// This will return a pointer to the context being used by this device.
+    pub fn context_ptr(&self) -> NonNull<Context> {
+        assert!(!self.0.pContext.is_null());
+        NonNull::new(self.0.pContext).unwrap().cast::<Context>()
+    }
+
     /// Starts the device. For playback devices this begins playback. For capture devices this
     /// begins recording.
     /// Use `stop` to stop this device.
