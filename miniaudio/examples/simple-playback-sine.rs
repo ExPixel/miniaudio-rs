@@ -2,7 +2,7 @@ use miniaudio::{Device, DeviceConfig, DeviceType, Format, Waveform, WaveformConf
 
 pub const DEVICE_FORMAT: Format = Format::F32;
 pub const DEVICE_CHANNELS: u32 = 2;
-pub const DEVICE_SAMPLE_RATE: u32 = 44100;
+pub const DEVICE_SAMPLE_RATE: u32 = miniaudio::SAMPLE_RATE_48000;
 
 pub fn main() {
     let sine_wave_config = WaveformConfig::new(
@@ -31,6 +31,10 @@ pub fn main() {
     let device = Device::alloc(None, &device_config).expect("failed to open playback device");
     device.start().expect("failed to start device");
 
+    println!(
+        "Device Backend: {:?}",
+        device.owned_context().unwrap().backend()
+    );
     wait_for_enter();
     println!("Shutting Down...");
 }
