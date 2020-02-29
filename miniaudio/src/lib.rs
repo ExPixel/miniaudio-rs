@@ -26,6 +26,7 @@ mod biquad_filtering;
 mod device_io;
 mod frames;
 mod generation;
+mod low_pass_filtering;
 mod resampling;
 
 pub use base::*;
@@ -33,4 +34,5 @@ pub use biquad_filtering::*;
 pub use device_io::*;
 pub use frames::*;
 pub use generation::*;
+pub use low_pass_filtering::*;
 pub use resampling::*;

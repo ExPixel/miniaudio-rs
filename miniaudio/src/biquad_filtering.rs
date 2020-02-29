@@ -1,7 +1,9 @@
 use crate::base::*;
-use crate::frames::*;
 use miniaudio_sys as sys;
+use std::ptr::NonNull;
 
+#[repr(transparent)]
+#[derive(Clone)]
 pub struct BiquadConfig(sys::ma_biquad_config);
 
 impl BiquadConfig {
@@ -91,6 +93,8 @@ impl BiquadConfig {
     }
 }
 
+#[repr(transparent)]
+#[derive(Clone)]
 pub struct Biquad(sys::ma_biquad);
 
 impl Biquad {
@@ -107,21 +111,19 @@ impl Biquad {
         Error::from_c_result(result)
     }
 
-    pub fn process_pcm_frames<'o, 'i, O: Into<FramesMut<'o>>, I: Into<Frames<'i>>>(
+    pub fn process_pcm_frames(
         &mut self,
-        frames_out: O,
-        frames_in: I,
+        frames_out: NonNull<()>,
+        frames_in: NonNull<()>,
+        frame_count: u64,
     ) -> Result<(), Error> {
-        let frames_out = frames_out.into();
-        let frames_in = frames_in.into();
-
         // FIXME bounds check the frame lengths (???)
         let result = unsafe {
             sys::ma_biquad_process_pcm_frames(
                 &mut self.0,
-                frames_out.data_ptr as _,
-                frames_in.data_ptr as _,
-                frames_in.count as _,
+                frames_out.as_ptr() as _,
+                frames_in.as_ptr() as *mut _ as *const _,
+                frame_count,
             )
         };
         Error::from_c_result(result)

@@ -92,6 +92,10 @@ impl<'f> Frames<'f> {
         }
     }
 
+    pub fn data_ptr(&self) -> *const std::os::raw::c_void {
+        self.data_ptr
+    }
+
     #[inline]
     pub fn format(&self) -> Format {
         self.format
@@ -158,6 +162,10 @@ impl<'f> FramesMut<'f> {
             channels: channels,
             phantom: std::marker::PhantomData,
         }
+    }
+
+    pub fn data_ptr(&self) -> *const std::os::raw::c_void {
+        self.data_ptr
     }
 
     #[inline]
