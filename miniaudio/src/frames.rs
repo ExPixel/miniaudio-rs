@@ -1,11 +1,12 @@
 use std::marker::PhantomData;
+use std::ptr::NonNull;
 
 use crate::base::*;
 
 /// A frame is a groups of samples equal to the number of channels. For a stereo stream a frame is 2 samples, a mono frame is 1 sample, a 5.1 surround sound frame
 /// is 6 samples, etc. The terms "frame" and "PCM frame" are the same thing in miniaudio. Note that this is different to a compressed frame. If ever miniaudio
 /// needs to refer to a compressed frame, such as a FLAC frame, it will always clarify what it's referring to with something like "FLAC frame" or whatnot.
-pub struct Frames<'f> {
+pub struct Frames<'f, T: Sized> {
     /// Pointer to the slice containing frame data.
     pub(crate) data_ptr: *const std::os::raw::c_void,
 
@@ -19,12 +20,12 @@ pub struct Frames<'f> {
     pub(crate) channels: u32,
 
     /// For lifetime.
-    phantom: PhantomData<&'f ()>,
+    phantom: PhantomData<&'f T>,
 }
 
-impl<'f> Frames<'f> {
+impl<'f, T> Frames<'f, T> {
     #[inline]
-    pub fn new<T: Sized>(data: &[T], format: Format, channels: u32) -> Frames<'f> {
+    pub fn new(data: &[T], format: Format, channels: u32) -> Frames<'f, T> {
         assert!(
             std::mem::size_of::<T>() == format.size_in_bytes(),
             "format size in bytes does not match sample size in bytes"
@@ -40,7 +41,7 @@ impl<'f> Frames<'f> {
     }
 
     #[inline]
-    pub unsafe fn new_unchecked<T>(data: &[T], format: Format, channels: u32) -> Frames<'f> {
+    pub unsafe fn new_unchecked(data: &[T], format: Format, channels: u32) -> Frames<'f, T> {
         Frames {
             data_ptr: data.as_ptr() as _,
             format: format,
@@ -51,17 +52,12 @@ impl<'f> Frames<'f> {
     }
 
     #[inline]
-    pub fn from_samples<S: FrameSample>(samples: &[S], channels: u32) -> Frames<'f> {
-        Self::new(samples, S::FORMAT, channels)
-    }
-
-    #[inline]
-    pub fn from_ptr<T: Sized>(
+    pub fn from_ptr(
         data: *const T,
         frames_count: usize,
         format: Format,
         channels: u32,
-    ) -> Frames<'f> {
+    ) -> Frames<'f, T> {
         assert!(
             std::mem::size_of::<T>() == format.size_in_bytes(),
             "format size in bytes does not match sample size in bytes"
@@ -77,12 +73,12 @@ impl<'f> Frames<'f> {
     }
 
     #[inline]
-    pub unsafe fn from_ptr_unchecked<T: Sized>(
+    pub unsafe fn from_ptr_unchecked(
         data: *const T,
         frames_count: usize,
         format: Format,
         channels: u32,
-    ) -> Frames<'f> {
+    ) -> Frames<'f, T> {
         Frames {
             data_ptr: data as _,
             format: format,
@@ -130,7 +126,7 @@ impl<'f> Frames<'f> {
 /// A frame is a groups of samples equal to the number of channels. For a stereo stream a frame is 2 samples, a mono frame is 1 sample, a 5.1 surround sound frame
 /// is 6 samples, etc. The terms "frame" and "PCM frame" are the same thing in miniaudio. Note that this is different to a compressed frame. If ever miniaudio
 /// needs to refer to a compressed frame, such as a FLAC frame, it will always clarify what it's referring to with something like "FLAC frame" or whatnot.
-pub struct FramesMut<'f> {
+pub struct FramesMut<'f, T: Sized> {
     /// Pointer to the slice containing frame data.
     pub(crate) data_ptr: *mut std::os::raw::c_void,
 
@@ -144,12 +140,12 @@ pub struct FramesMut<'f> {
     channels: u32,
 
     /// For lifetime.
-    phantom: PhantomData<&'f ()>,
+    phantom: PhantomData<&'f T>,
 }
 
-impl<'f> FramesMut<'f> {
+impl<'f, T: Sized> FramesMut<'f, T> {
     #[inline]
-    pub fn new<T: Sized>(data: &mut [T], format: Format, channels: u32) -> FramesMut<'f> {
+    pub fn new(data: &mut [T], format: Format, channels: u32) -> FramesMut<'f, T> {
         assert!(
             std::mem::size_of::<T>() == format.size_in_bytes(),
             "format size in bytes does not match sample size in bytes"
@@ -168,13 +164,33 @@ impl<'f> FramesMut<'f> {
         self.data_ptr
     }
 
+    pub fn from_nonnull(
+        data: NonNull<T>,
+        frames_count: usize,
+        format: Format,
+        channels: u32,
+    ) -> FramesMut<'f, T> {
+        assert!(
+            std::mem::size_of::<T>() == format.size_in_bytes(),
+            "format size in bytes does not match sample size in bytes"
+        );
+
+        FramesMut {
+            data_ptr: data.as_ptr() as _,
+            format: format,
+            count: frames_count,
+            channels: channels,
+            phantom: std::marker::PhantomData,
+        }
+    }
+
     #[inline]
-    pub fn from_ptr<T: Sized>(
+    pub fn from_ptr(
         data: *mut T,
         frames_count: usize,
         format: Format,
         channels: u32,
-    ) -> FramesMut<'f> {
+    ) -> FramesMut<'f, T> {
         assert!(
             std::mem::size_of::<T>() == format.size_in_bytes(),
             "format size in bytes does not match sample size in bytes"
@@ -190,12 +206,12 @@ impl<'f> FramesMut<'f> {
     }
 
     #[inline]
-    pub unsafe fn from_ptr_unchecked<T: Sized>(
+    pub unsafe fn from_ptr_unchecked(
         data: *mut T,
         frames_count: usize,
         format: Format,
         channels: u32,
-    ) -> FramesMut<'f> {
+    ) -> FramesMut<'f, T> {
         FramesMut {
             data_ptr: data as _,
             format: format,
@@ -205,9 +221,11 @@ impl<'f> FramesMut<'f> {
         }
     }
 
+    /// Writes a sample at a given (frame, channel) offset.
     #[inline]
-    pub fn from_samples<S: FrameSample>(samples: &mut [S], channels: u32) -> FramesMut<'f> {
-        Self::new(samples, S::FORMAT, channels)
+    pub fn write_sample(&mut self, frame: usize, channel: usize, sample: T) {
+        let offset = (frame * self.channels as usize) + channel;
+        unsafe { *self.data_ptr.cast::<T>().add(offset) = sample };
     }
 
     #[inline]
@@ -241,8 +259,8 @@ impl<'f> FramesMut<'f> {
     }
 }
 
-impl<'f> From<FramesMut<'f>> for Frames<'f> {
-    fn from(mutable: FramesMut<'f>) -> Frames<'f> {
+impl<'f, T> From<FramesMut<'f, T>> for Frames<'f, T> {
+    fn from(mutable: FramesMut<'f, T>) -> Frames<'f, T> {
         Frames {
             data_ptr: mutable.data_ptr,
             format: mutable.format,

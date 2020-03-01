@@ -28,6 +28,7 @@ mod frames;
 mod generation;
 mod low_pass_filtering;
 mod resampling;
+mod ring_buffers;
 
 pub use base::*;
 pub use biquad_filtering::*;
@@ -36,3 +37,4 @@ pub use frames::*;
 pub use generation::*;
 pub use low_pass_filtering::*;
 pub use resampling::*;
+pub use ring_buffers::*;
