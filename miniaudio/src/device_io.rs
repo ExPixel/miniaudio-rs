@@ -323,7 +323,6 @@ impl DeviceConfig {
         }
         self.0.pUserData.cast()
     }
-    // FIXME implement getters/setters for wasapi/alsa/pulse config structs
 }
 
 pub struct DeviceConfigUserData {
