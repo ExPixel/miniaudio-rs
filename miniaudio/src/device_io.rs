@@ -337,23 +337,36 @@ unsafe extern "C" fn device_data_callback_trampoline(
     frame_count: u32,
 ) {
     if let Some(device) = NonNull::new(device_ptr.cast::<Device>()) {
-        // let mut empty = [0u8; 0];
-        // let output = if output_ptr.is_null() {
-        //     &mut empty
-        // } else {
-        //     std::slice::from_raw_parts_mut(
-        //         output_ptr,
-        //         (*device.as_ptr()).playback().format().size_in_bytes(),
-        //     )
-        // };
+        let mut empty_output = [0u8; 0];
+        let empty_input = [0u8; 0];
 
-        // let user_data = (*device.as_ptr()).0.pUserData.cast::<DeviceUserData>();
-        // if user_data.is_null() {
-        //     return;
-        // }
-        // if let Some(ref mut data_callback) = (*user_data).data_callback {
-        //     (data_callback)(device, output, input, frame_count);
-        // }
+        let output = if output_ptr.is_null() {
+            &mut empty_output
+        } else {
+            let bytes_per_frame = (*device.as_ptr()).playback().format().size_in_bytes()
+                * (*device.as_ptr()).playback().channels() as usize;
+            std::slice::from_raw_parts_mut(
+                output_ptr.cast(),
+                frame_count as usize * bytes_per_frame,
+            )
+        };
+
+        let input: &[u8] = if input_ptr.is_null() {
+            &empty_input
+        } else {
+            let bytes_per_frame = (*device.as_ptr()).capture().format().size_in_bytes()
+                * (*device.as_ptr()).capture().channels() as usize;
+            std::slice::from_raw_parts(input_ptr.cast(), frame_count as usize * bytes_per_frame)
+        };
+
+        let user_data = (*device.as_ptr()).0.pUserData.cast::<DeviceUserData>();
+        if user_data.is_null() {
+            return;
+        }
+
+        if let Some(ref mut data_callback) = (*user_data).data_callback {
+            (data_callback)(device, output, input, frame_count);
+        }
     }
 }
 

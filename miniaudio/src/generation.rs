@@ -1,4 +1,5 @@
 use crate::base::Format;
+use crate::frames::{Frames, Sample};
 use miniaudio_sys as sys;
 use std::ptr::NonNull;
 
@@ -111,12 +112,20 @@ impl Waveform {
         }
     }
 
-    pub fn read_pcm_frames(&mut self, output: NonNull<()>, frame_count: u64) -> u64 {
+    pub fn read_pcm_frames<S: Sample + Copy + Sized, F: Sized + Copy>(
+        &mut self,
+        output: &mut Frames<S, F>,
+    ) -> u64 {
+        assert!(
+            S::format() == self.config().format(),
+            "output format not the same as waveform format"
+        );
+
         unsafe {
             sys::ma_waveform_read_pcm_frames(
                 &mut self.0 as *mut _,
-                output.as_ptr() as *mut _,
-                frame_count,
+                output.frames_ptr_mut() as *mut _,
+                output.count() as u64,
             )
         }
     }

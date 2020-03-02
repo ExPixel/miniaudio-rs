@@ -20,8 +20,9 @@ pub fn main() {
     device_config.playback_mut().set_channels(DEVICE_CHANNELS);
     device_config.set_sample_rate(DEVICE_SAMPLE_RATE);
 
-    device_config.set_data_callback(move |_device, output, _input, frame_count| {
-        sine_wave.read_pcm_frames(output.unwrap(), frame_count as u64);
+    device_config.set_data_callback(move |_device, output, _input, _frame_count| {
+        let output = miniaudio::as_frames_mut!(output, f32, 2);
+        sine_wave.read_pcm_frames(output);
     });
 
     device_config.set_stop_callback(|_device| {

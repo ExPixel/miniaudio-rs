@@ -20,6 +20,9 @@ impl<SampleType: Sample + Copy + Sized, FrameType: Copy + Sized> Frames<SampleTy
     pub fn new<'d>(data: &'d [u8]) -> &'d Frames<SampleType, FrameType> {
         // FIXME I should probably assert here that the size of FrameType is a multiple of the
         // size of SampleType.
+        //
+        // FIXME should also add some checks to make sure that FrameType fits into the data byte
+        // slice.
         unsafe {
             std::mem::transmute::<_, &'d Frames<SampleType, FrameType>>(
                 std::slice::from_raw_parts::<'d, FrameType>(
@@ -33,6 +36,9 @@ impl<SampleType: Sample + Copy + Sized, FrameType: Copy + Sized> Frames<SampleTy
     pub fn new_mut<'d>(data: &'d mut [u8]) -> &'d mut Frames<SampleType, FrameType> {
         // FIXME I should probably assert here that the size of FrameType is a multiple of the
         // size of SampleType.
+        //
+        // FIXME should also add some checks to make sure that FrameType fits into the data byte
+        // slice.
         unsafe {
             std::mem::transmute::<_, &'d mut Frames<SampleType, FrameType>>(
                 std::slice::from_raw_parts_mut::<'d, FrameType>(
@@ -43,17 +49,38 @@ impl<SampleType: Sample + Copy + Sized, FrameType: Copy + Sized> Frames<SampleTy
         }
     }
 
+    /// Returns the number of frames contained in here.
+    #[inline]
+    pub fn count(&self) -> usize {
+        self.data.len()
+    }
+
+    /// Returns the number of samples contained.
+    #[inline]
+    pub fn sample_count(&self) -> usize {
+        self.data.len() * self.channel_count()
+    }
+
+    /// Returns the number of channels contained in each frame.
+    #[inline(always)]
+    pub fn channel_count(&self) -> usize {
+        std::mem::size_of::<FrameType>() / std::mem::size_of::<SampleType>()
+    }
+
     /// Returns a reference to the frame at the given index.
+    #[inline]
     pub fn frame(&self, index: usize) -> &FrameType {
         &self.data[index]
     }
 
     /// Returns a mutable reference to the frame at the given index.
+    #[inline]
     pub fn frame_mut(&mut self, index: usize) -> &mut FrameType {
         &mut self.data[index]
     }
 
     /// Returns the value of sample for a channel at a given frame.
+    #[inline]
     pub fn sample(&self, frame_index: usize, channel_index: usize) -> &SampleType {
         let frame_ref = self.frame(frame_index);
         let frame_ptr = frame_ref as *const FrameType;
@@ -62,11 +89,32 @@ impl<SampleType: Sample + Copy + Sized, FrameType: Copy + Sized> Frames<SampleTy
     }
 
     /// Returns a mutable reference to a sample for a channel at a given frame.
+    #[inline]
     pub fn sample_mut(&mut self, frame_index: usize, channel_index: usize) -> &mut SampleType {
         let frame_ref = self.frame_mut(frame_index);
         let frame_ptr = frame_ref as *mut FrameType;
         let samples = frame_ptr as *mut SampleType;
         unsafe { samples.add(channel_index).as_mut().unwrap() }
+    }
+
+    #[inline]
+    pub fn frames_ptr(&self) -> *const FrameType {
+        self.data.as_ptr()
+    }
+
+    #[inline]
+    pub fn frames_ptr_mut(&mut self) -> *mut FrameType {
+        self.data.as_mut_ptr()
+    }
+
+    #[inline]
+    pub fn samples_ptr(&self) -> *const SampleType {
+        self.data.as_ptr().cast()
+    }
+
+    #[inline]
+    pub fn samples_ptr_mut(&mut self) -> *mut SampleType {
+        self.data.as_mut_ptr().cast()
     }
 }
 

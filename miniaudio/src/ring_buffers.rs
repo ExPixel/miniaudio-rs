@@ -202,6 +202,8 @@ impl<T> Drop for RingBuffer<T> {
     }
 }
 
+// FIXME remove this since it's probably useless (in Rust anyway).
+#[deprecated = "Instead of using this, just use RingBuffer with the frame type as the type parameter."]
 #[repr(transparent)]
 #[derive(Debug)]
 pub struct PCMRingBuffer(sys::ma_pcm_rb);
