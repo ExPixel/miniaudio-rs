@@ -58,6 +58,16 @@ impl LPF1Config {
     pub fn set_cutoff_frequency(&mut self, cutoff_frequency: f64) {
         self.0.cutoffFrequency = cutoff_frequency;
     }
+
+    #[inline]
+    pub fn q(&self) -> f64 {
+        self.0.q
+    }
+
+    #[inline]
+    pub fn set_q(&mut self, q: f64) {
+        self.0.q = q;
+    }
 }
 
 #[repr(transparent)]
@@ -70,9 +80,10 @@ impl LPF2Config {
         channels: u32,
         sample_rate: u32,
         cutoff_frequency: f64,
+        q: f64,
     ) -> LPF2Config {
         LPF2Config(unsafe {
-            sys::ma_lpf2_config_init(format as _, channels, sample_rate, cutoff_frequency)
+            sys::ma_lpf2_config_init(format as _, channels, sample_rate, cutoff_frequency, q)
         })
     }
 
@@ -114,6 +125,16 @@ impl LPF2Config {
     #[inline]
     pub fn set_cutoff_frequency(&mut self, cutoff_frequency: f64) {
         self.0.cutoffFrequency = cutoff_frequency;
+    }
+
+    #[inline]
+    pub fn q(&self) -> f64 {
+        self.0.q
+    }
+
+    #[inline]
+    pub fn set_q(&mut self, q: f64) {
+        self.0.q = q;
     }
 }
 
@@ -212,16 +233,16 @@ impl LPF2 {
 pub struct LPFConfig(sys::ma_lpf_config);
 
 impl LPFConfig {
-    /// If poles is set to 0, this will be treated as a passthrough (no filtering will be applied).
+    /// If order is set to 0, this will be treated as a passthrough (no filtering will be applied).
     pub fn new(
         format: Format,
         channels: u32,
         sample_rate: u32,
         cutoff_frequency: f64,
-        poles: u32,
+        order: u32,
     ) -> LPFConfig {
         LPFConfig(unsafe {
-            sys::ma_lpf_config_init(format as _, channels, sample_rate, cutoff_frequency, poles)
+            sys::ma_lpf_config_init(format as _, channels, sample_rate, cutoff_frequency, order)
         })
     }
 
@@ -266,13 +287,13 @@ impl LPFConfig {
     }
 
     #[inline]
-    pub fn poles(&self) -> u32 {
-        self.0.poles
+    pub fn order(&self) -> u32 {
+        self.0.order
     }
 
     #[inline]
-    pub fn set_poles(&mut self, poles: u32) {
-        self.0.poles = poles;
+    pub fn set_order(&mut self, order: u32) {
+        self.0.order = order;
     }
 }
 

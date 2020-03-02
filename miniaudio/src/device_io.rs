@@ -497,12 +497,12 @@ impl DeviceConfigResampling {
         self.0.algorithm = algorithm as _;
     }
 
-    pub fn linear_lpf_poles(&self) -> u32 {
-        self.0.linear.lpfPoles
+    pub fn linear_lpf_order(&self) -> u32 {
+        self.0.linear.lpfOrder
     }
 
-    pub fn set_linear_lpf_poles(&mut self, lpf_poles: u32) {
-        self.0.linear.lpfPoles = lpf_poles;
+    pub fn set_linear_lpf_order(&mut self, lpf_order: u32) {
+        self.0.linear.lpfOrder = lpf_order;
     }
 
     pub fn speex_quality(&self) -> i32 {
@@ -945,8 +945,8 @@ impl DeviceResampling {
         ResampleAlgorithm::from_c(self.0.algorithm)
     }
 
-    pub fn linear_lpf_poles(&self) -> u32 {
-        self.0.linear.lpfPoles
+    pub fn linear_lpf_order(&self) -> u32 {
+        self.0.linear.lpfOrder
     }
 
     pub fn speex_quality(&self) -> i32 {
