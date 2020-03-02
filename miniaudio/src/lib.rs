@@ -21,6 +21,20 @@ macro_rules! impl_from_c {
     };
 }
 
+#[macro_export]
+macro_rules! as_frames {
+    ($Slice:expr, $SampleType:ty, $Channels:expr) => {
+        $crate::Frames::<$SampleType, [$SampleType; $Channels]>::new($Slice)
+    };
+}
+
+#[macro_export]
+macro_rules! as_frames_mut {
+    ($Slice:expr, $SampleType:ty, $Channels:expr) => {
+        $crate::Frames::<$SampleType, [$SampleType; $Channels]>::new_mut($Slice)
+    };
+}
+
 mod base;
 mod biquad_filtering;
 mod device_io;
