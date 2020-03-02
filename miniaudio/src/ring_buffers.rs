@@ -196,7 +196,6 @@ impl<T> Drop for RingBuffer<T> {
             if !owns_buffer && !buffer_ptr.is_null() {
                 let preallocated_slice = std::slice::from_raw_parts_mut(buffer_ptr, count as usize);
                 let _preallocated_box = Box::from_raw(preallocated_slice.as_mut_ptr());
-                std::mem::forget(preallocated_slice); // we don't care about that :P
             }
         };
     }
