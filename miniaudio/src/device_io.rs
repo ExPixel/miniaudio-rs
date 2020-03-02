@@ -12,6 +12,10 @@ type MADeviceConfigResampling = sys::ma_device_config__bindgen_ty_1;
 type MADeviceConfigPlayback = sys::ma_device_config__bindgen_ty_2;
 type MADeviceConfigCapture = sys::ma_device_config__bindgen_ty_3;
 
+type MADeviceResampling = sys::ma_device__bindgen_ty_1;
+type MADevicePlayback = sys::ma_device__bindgen_ty_2;
+type MADeviceCapture = sys::ma_device__bindgen_ty_3;
+
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Backend {
@@ -157,14 +161,6 @@ impl DeviceInfo {
     }
 }
 
-pub type DataCallbackProc = extern "C" fn(
-    device: NonNull<Device>,
-    output: Option<NonNull<()>>,
-    input: Option<NonNull<()>>,
-    frame_count: u32,
-);
-pub type StopProc = extern "C" fn(device: NonNull<Device>);
-
 #[repr(transparent)]
 pub struct DeviceConfig(sys::ma_device_config);
 
@@ -275,11 +271,7 @@ impl DeviceConfig {
     /// of cloneable thread-safe struct like an Arc.
     pub fn set_data_callback<F>(&mut self, callback: F)
     where
-        F: FnMut(NonNull<Device>, Option<NonNull<()>>, Option<NonNull<()>>, u32)
-            + Send
-            + Sync
-            + Clone
-            + 'static,
+        F: FnMut(NonNull<Device>, &mut [u8], &[u8], u32) + Send + Sync + Clone + 'static,
     {
         let user_data = self.ensure_user_data();
         unsafe {
@@ -326,21 +318,15 @@ impl DeviceConfig {
 }
 
 pub struct DeviceConfigUserData {
-    data_callback_factory: Option<
-        Box<
-            dyn Fn() -> Box<
-                dyn FnMut(NonNull<Device>, Option<NonNull<()>>, Option<NonNull<()>>, u32),
-            >,
-        >,
-    >,
+    data_callback_factory:
+        Option<Box<dyn Fn() -> Box<dyn FnMut(NonNull<Device>, &mut [u8], &[u8], u32)>>>,
     stop_callback_factory: Option<Box<dyn Fn() -> Box<dyn FnMut(NonNull<Device>)>>>,
 }
 
 // FIXME it might be better to just set the callbacks to some noop functions by default
 // to save ourselves the extra in the audio callback code.
 pub struct DeviceUserData {
-    data_callback:
-        Option<Box<dyn FnMut(NonNull<Device>, Option<NonNull<()>>, Option<NonNull<()>>, u32)>>,
+    data_callback: Option<Box<dyn FnMut(NonNull<Device>, &mut [u8], &[u8], u32)>>,
     stop_callback: Option<Box<dyn FnMut(NonNull<Device>)>>,
 }
 
@@ -351,16 +337,23 @@ unsafe extern "C" fn device_data_callback_trampoline(
     frame_count: u32,
 ) {
     if let Some(device) = NonNull::new(device_ptr.cast::<Device>()) {
-        let output = NonNull::new(output_ptr as *mut ());
-        let input = NonNull::new(input_ptr as *mut ());
-        let user_data = (*device.as_ptr()).0.pUserData.cast::<DeviceUserData>();
-        if user_data.is_null() {
-            return;
-        }
+        // let mut empty = [0u8; 0];
+        // let output = if output_ptr.is_null() {
+        //     &mut empty
+        // } else {
+        //     std::slice::from_raw_parts_mut(
+        //         output_ptr,
+        //         (*device.as_ptr()).playback().format().size_in_bytes(),
+        //     )
+        // };
 
-        if let Some(ref mut data_callback) = (*user_data).data_callback {
-            (data_callback)(device, output, input, frame_count);
-        }
+        // let user_data = (*device.as_ptr()).0.pUserData.cast::<DeviceUserData>();
+        // if user_data.is_null() {
+        //     return;
+        // }
+        // if let Some(ref mut data_callback) = (*user_data).data_callback {
+        //     (data_callback)(device, output, input, frame_count);
+        // }
     }
 }
 
@@ -891,6 +884,21 @@ impl Device {
     fn is_owner_of_context(&self) -> bool {
         from_bool32(self.0.isOwnerOfContext())
     }
+
+    #[inline]
+    pub fn resampling(&self) -> &DeviceResampling {
+        unsafe { std::mem::transmute(&self.0.resampling) }
+    }
+
+    #[inline]
+    pub fn capture(&self) -> &DeviceCapture {
+        unsafe { std::mem::transmute(&self.0.capture) }
+    }
+
+    #[inline]
+    pub fn playback(&self) -> &DevicePlayback {
+        unsafe { std::mem::transmute(&self.0.playback) }
+    }
 }
 
 impl Drop for Device {
@@ -914,4 +922,132 @@ impl Drop for Device {
             drop(context_arc);
         }
     }
+}
+
+#[repr(transparent)]
+pub struct DeviceResampling(MADeviceResampling);
+
+impl DeviceResampling {
+    pub fn algorithm(&self) -> ResampleAlgorithm {
+        ResampleAlgorithm::from_c(self.0.algorithm)
+    }
+
+    pub fn linear_lpf_poles(&self) -> u32 {
+        self.0.linear.lpfPoles
+    }
+
+    pub fn speex_quality(&self) -> i32 {
+        self.0.speex.quality as i32
+    }
+}
+
+#[repr(transparent)]
+pub struct DeviceCapture(MADeviceCapture);
+
+impl DeviceCapture {
+    pub fn name(&self) -> &str {
+        let cstr = unsafe { std::ffi::CStr::from_ptr(self.0.name.as_ptr()) };
+
+        // FIXME at the moment we just return a blank string instead of invalid UTF-8
+        cstr.to_str().unwrap_or("")
+    }
+
+    pub fn share_mode(&self) -> ShareMode {
+        ShareMode::from_c(self.0.shareMode)
+    }
+
+    pub fn using_default_format(&self) -> bool {
+        from_bool32(self.0.usingDefaultFormat())
+    }
+
+    pub fn using_default_channels(&self) -> bool {
+        from_bool32(self.0.usingDefaultChannels())
+    }
+
+    pub fn using_default_channel_map(&self) -> bool {
+        from_bool32(self.0.usingDefaultChannelMap())
+    }
+
+    pub fn format(&self) -> Format {
+        Format::from_c(self.0.format)
+    }
+
+    pub fn channels(&self) -> u32 {
+        self.0.channels
+    }
+
+    pub fn channel_map(&self) -> &[Channel; sys::MA_MAX_CHANNELS as usize] {
+        unsafe { std::mem::transmute(&self.0.channelMap) }
+    }
+}
+
+#[repr(transparent)]
+pub struct DevicePlayback(MADevicePlayback);
+
+impl DevicePlayback {
+    pub fn name(&self) -> &str {
+        let cstr = unsafe { std::ffi::CStr::from_ptr(self.0.name.as_ptr()) };
+
+        // FIXME at the moment we just return a blank string instead of invalid UTF-8
+        cstr.to_str().unwrap_or("")
+    }
+
+    pub fn share_mode(&self) -> ShareMode {
+        ShareMode::from_c(self.0.shareMode)
+    }
+
+    pub fn using_default_format(&self) -> bool {
+        from_bool32(self.0.usingDefaultFormat())
+    }
+
+    pub fn using_default_channels(&self) -> bool {
+        from_bool32(self.0.usingDefaultChannels())
+    }
+
+    pub fn using_default_channel_map(&self) -> bool {
+        from_bool32(self.0.usingDefaultChannelMap())
+    }
+
+    pub fn format(&self) -> Format {
+        Format::from_c(self.0.format)
+    }
+
+    pub fn channels(&self) -> u32 {
+        self.0.channels
+    }
+
+    pub fn channel_map(&self) -> &[Channel; sys::MA_MAX_CHANNELS as usize] {
+        unsafe { std::mem::transmute(&self.0.channelMap) }
+    }
+
+    // FIXME I'm not sure if these are supposed to be public.
+    //       If they are, they should be implemented in here as well as `DeviceCapture`.
+
+    // pub fn internal_format(&self) -> Format {
+    //     Format::from_c(self.0.internalFormat)
+    // }
+
+    // pub fn internal_channels(&self) -> u32 {
+    //     self.0.internalChannels
+    // }
+
+    // pub fn internal_sample_rate(&self) -> u32 {
+    //     self.0.internalSampleRate
+    // }
+
+    // pub fn internal_channel_map(&self) -> &[Channel; sys::MA_MAX_CHANNELS as usize] {
+    //     unsafe { std::mem::transmute(&self.0.internalChannelMap) }
+    // }
+
+    // pub fn internal_period_size_in_frames(&self) -> u32 {
+    //     self.0.internalPeriodSizeInFrames
+    // }
+
+    // pub fn internal_periods(&self) -> u32 {
+    //     self.0.internalPeriods
+    // }
+
+    // pub fn converter(&self) -> &DataConverter {
+    //     // FIXME implement this
+    // }
 }
