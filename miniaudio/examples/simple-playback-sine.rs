@@ -34,7 +34,10 @@ pub fn main() {
 
     println!(
         "Device Backend: {:?}",
-        device.owned_context().unwrap().backend()
+        device
+            .owned_context()
+            .expect("the context is not owned by the device")
+            .backend()
     );
     wait_for_enter();
     println!("Shutting Down...");
