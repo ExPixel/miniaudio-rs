@@ -36,21 +36,14 @@ macro_rules! as_frames_mut {
 }
 
 mod base;
-mod biquad_filtering;
 mod device_io;
 mod frames;
-mod generation;
-mod high_pass_filtering;
-mod low_pass_filtering;
-mod resampling;
-mod ring_buffers;
+
+pub mod filters;
+pub mod generation;
+pub mod resampling;
+pub mod ring_buffers;
 
 pub use base::*;
-pub use biquad_filtering::*;
 pub use device_io::*;
 pub use frames::*;
-pub use generation::*;
-pub use high_pass_filtering::*;
-pub use low_pass_filtering::*;
-pub use resampling::*;
-pub use ring_buffers::*;

@@ -517,4 +517,4 @@ pub const MIN_CHANNELS: usize = sys::MA_MIN_CHANNELS as usize;
 /// Maximum number of channels in a channel map.
 pub const MAX_CHANNELS: usize = sys::MA_MAX_CHANNELS as usize;
 
-pub const MAX_FILTER_POLES: usize = 8;
+pub const MAX_FILTER_ORDER: usize = sys::MA_MAX_FILTER_ORDER as _;

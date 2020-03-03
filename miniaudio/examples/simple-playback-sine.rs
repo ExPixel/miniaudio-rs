@@ -1,4 +1,5 @@
-use miniaudio::{Device, DeviceConfig, DeviceType, Format, Waveform, WaveformConfig, WaveformType};
+use miniaudio::generation::{Waveform, WaveformConfig, WaveformType};
+use miniaudio::{Device, DeviceConfig, DeviceType, Format};
 
 pub const DEVICE_FORMAT: Format = Format::F32;
 pub const DEVICE_CHANNELS: u32 = 2;
