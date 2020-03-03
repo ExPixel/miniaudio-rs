@@ -16,7 +16,7 @@ pub struct Frames<SampleType: Sample + Copy + Sized, FrameType: Copy + Sized> {
     data: [FrameType],
 }
 
-impl<SampleType: Sample + Copy + Sized, FrameType: Copy + Sized> Frames<SampleType, FrameType> {
+impl<SampleType: Sample, FrameType: Frame> Frames<SampleType, FrameType> {
     pub fn new<'d>(data: &'d [u8]) -> &'d Frames<SampleType, FrameType> {
         // FIXME I should probably assert here that the size of FrameType is a multiple of the
         // size of SampleType.
@@ -118,9 +118,24 @@ impl<SampleType: Sample + Copy + Sized, FrameType: Copy + Sized> Frames<SampleTy
     }
 }
 
+pub trait Frame: Copy + Sized {
+    /// Returns the number of channels that this frame has when using the given type for samples.
+    fn channels<S: Sample>() -> usize {
+        std::mem::size_of::<Self>() / std::mem::size_of::<S>()
+    }
+}
+
+// implemented for all copy and sized types
+impl<T: Copy + Sized> Frame for T {}
+
 /// The type of a sample which corresponds to a `Format`.
-pub trait Sample {
+pub trait Sample: Copy + Sized {
     fn format() -> Format;
+
+    /// Returns the number of channels that a frame has when using this type for samples.
+    fn channels<F: Frame>() -> usize {
+        std::mem::size_of::<F>() / std::mem::size_of::<Self>()
+    }
 }
 
 impl Sample for u8 {

@@ -1,6 +1,7 @@
 use crate::base::{from_bool32, to_bool32, Format};
-use crate::frames::{Frames, Sample};
+use crate::frames::{Frame, Frames, Sample};
 use miniaudio_sys as sys;
+use std::marker::PhantomData;
 
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -14,28 +15,34 @@ impl_from_c!(WaveformType, sys::ma_waveform_type);
 
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct WaveformConfig(sys::ma_waveform_config);
+pub struct WaveformConfig<S: Sample, F: Frame>(
+    sys::ma_waveform_config,
+    PhantomData<S>,
+    PhantomData<F>,
+);
 
-impl WaveformConfig {
+impl<S: Sample, F: Frame> WaveformConfig<S, F> {
     #[inline]
     pub fn new(
-        format: Format,
-        channels: u32,
         sample_rate: u32,
         waveform_type: WaveformType,
         amplitude: f64,
         frequency: f64,
-    ) -> WaveformConfig {
-        WaveformConfig(unsafe {
-            sys::ma_waveform_config_init(
-                format as _,
-                channels,
-                sample_rate,
-                waveform_type as _,
-                amplitude,
-                frequency,
-            )
-        })
+    ) -> WaveformConfig<S, F> {
+        WaveformConfig(
+            unsafe {
+                sys::ma_waveform_config_init(
+                    S::format() as _,
+                    S::channels::<F>() as _,
+                    sample_rate,
+                    waveform_type as _,
+                    amplitude,
+                    frequency,
+                )
+            },
+            PhantomData,
+            PhantomData,
+        )
     }
 
     #[inline]
@@ -96,17 +103,17 @@ impl WaveformConfig {
 
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Waveform(sys::ma_waveform);
+pub struct Waveform<S: Sample, F: Frame>(sys::ma_waveform, PhantomData<S>, PhantomData<F>);
 
-impl Waveform {
+impl<S: Sample, F: Frame> Waveform<S, F> {
     #[inline]
-    pub fn new(config: &WaveformConfig) -> Waveform {
-        let mut waveform = std::mem::MaybeUninit::<Waveform>::uninit();
+    pub fn new(config: &WaveformConfig<S, F>) -> Waveform<S, F> {
+        let mut waveform = std::mem::MaybeUninit::<Waveform<S, F>>::uninit();
 
         // NOTE: This only really fails if config is NULL which can't happen in Rust.
         unsafe {
             sys::ma_waveform_init(
-                config as *const WaveformConfig as *const _,
+                config as *const WaveformConfig<S, F> as *const _,
                 waveform.as_mut_ptr() as *mut _,
             );
             waveform.assume_init()
@@ -114,10 +121,7 @@ impl Waveform {
     }
 
     #[inline]
-    pub fn read_pcm_frames<S: Sample + Copy + Sized, F: Sized + Copy>(
-        &mut self,
-        output: &mut Frames<S, F>,
-    ) -> u64 {
+    pub fn read_pcm_frames(&mut self, output: &mut Frames<S, F>) -> u64 {
         assert!(
             S::format() == self.config().format(),
             "output format not the same as waveform format"
@@ -133,10 +137,10 @@ impl Waveform {
     }
 
     #[inline]
-    pub fn config(&mut self) -> &WaveformConfig {
+    pub fn config(&mut self) -> &WaveformConfig<S, F> {
         unsafe {
             (&self.0.config as *const sys::ma_waveform_config)
-                .cast::<WaveformConfig>()
+                .cast::<WaveformConfig<S, F>>()
                 .as_ref()
                 .unwrap()
         }
@@ -190,20 +194,24 @@ impl_from_c!(NoiseType, sys::ma_noise_type);
 
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct NoiseConfig(sys::ma_noise_config);
+pub struct NoiseConfig<S: Sample, F: Frame>(sys::ma_noise_config, PhantomData<S>, PhantomData<F>);
 
-impl NoiseConfig {
+impl<S: Sample, F: Frame> NoiseConfig<S, F> {
     #[inline]
-    pub fn new(
-        format: Format,
-        channels: u32,
-        noise_type: NoiseType,
-        seed: i32,
-        amplitude: f64,
-    ) -> NoiseConfig {
-        NoiseConfig(unsafe {
-            sys::ma_noise_config_init(format as _, channels, noise_type as _, seed, amplitude)
-        })
+    pub fn new(noise_type: NoiseType, seed: i32, amplitude: f64) -> NoiseConfig<S, F> {
+        NoiseConfig(
+            unsafe {
+                sys::ma_noise_config_init(
+                    S::format() as _,
+                    S::channels::<F>() as _,
+                    noise_type as _,
+                    seed,
+                    amplitude,
+                )
+            },
+            PhantomData,
+            PhantomData,
+        )
     }
 
     #[inline]
@@ -269,34 +277,31 @@ impl NoiseConfig {
 
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Noise(sys::ma_noise);
+pub struct Noise<S: Sample, F: Frame>(sys::ma_noise, PhantomData<S>, PhantomData<F>);
 
-impl Noise {
-    pub fn new(config: &NoiseConfig) -> Noise {
-        let mut noise = std::mem::MaybeUninit::<Noise>::uninit();
+impl<S: Sample, F: Frame> Noise<S, F> {
+    pub fn new(config: &NoiseConfig<S, F>) -> Noise<S, F> {
+        let mut noise = std::mem::MaybeUninit::<Noise<S, F>>::uninit();
         // NOTE: This only really fails if config is NULL which can't happen in Rust.
         unsafe {
             sys::ma_noise_init(
-                config as *const NoiseConfig as *const _,
+                config as *const NoiseConfig<S, F> as *const _,
                 noise.as_mut_ptr() as *mut _,
             );
             noise.assume_init()
         }
     }
 
-    pub fn config(&mut self) -> &NoiseConfig {
+    pub fn config(&mut self) -> &NoiseConfig<S, F> {
         unsafe {
             (&self.0.config as *const sys::ma_noise_config)
-                .cast::<NoiseConfig>()
+                .cast::<NoiseConfig<S, F>>()
                 .as_ref()
                 .unwrap()
         }
     }
 
-    pub fn read_pcm_frames<S: Sample + Copy + Sized, F: Sized + Copy>(
-        &mut self,
-        output: &mut Frames<S, F>,
-    ) -> u64 {
+    pub fn read_pcm_frames(&mut self, output: &mut Frames<S, F>) -> u64 {
         assert!(
             S::format() == self.config().format(),
             "output format not the same as waveform format"

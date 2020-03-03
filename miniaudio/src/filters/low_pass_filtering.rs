@@ -1,23 +1,28 @@
 use super::biquad_filtering::Biquad;
 use crate::base::{Error, Format};
-use crate::frames::{Frames, Sample};
+use crate::frames::{Frame, Frames, Sample};
 use miniaudio_sys as sys;
+use std::marker::PhantomData;
 
 /// Configuration for a first order low-pass filter.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct LPF1Config(sys::ma_lpf1_config);
+pub struct LPF1Config<S: Sample, F: Frame>(sys::ma_lpf1_config, PhantomData<S>, PhantomData<F>);
 
-impl LPF1Config {
-    pub fn new(
-        format: Format,
-        channels: u32,
-        sample_rate: u32,
-        cutoff_frequency: f64,
-    ) -> LPF1Config {
-        LPF1Config(unsafe {
-            sys::ma_lpf1_config_init(format as _, channels, sample_rate, cutoff_frequency)
-        })
+impl<S: Sample, F: Frame> LPF1Config<S, F> {
+    pub fn new(sample_rate: u32, cutoff_frequency: f64) -> LPF1Config<S, F> {
+        LPF1Config(
+            unsafe {
+                sys::ma_lpf1_config_init(
+                    S::format() as _,
+                    S::channels::<F>() as u32,
+                    sample_rate,
+                    cutoff_frequency,
+                )
+            },
+            PhantomData,
+            PhantomData,
+        )
     }
 
     #[inline]
@@ -74,19 +79,23 @@ impl LPF1Config {
 /// Configuration for a second order low-pass filter.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct LPF2Config(sys::ma_lpf1_config);
+pub struct LPF2Config<S: Sample, F: Frame>(sys::ma_lpf1_config, PhantomData<S>, PhantomData<F>);
 
-impl LPF2Config {
-    pub fn new(
-        format: Format,
-        channels: u32,
-        sample_rate: u32,
-        cutoff_frequency: f64,
-        q: f64,
-    ) -> LPF2Config {
-        LPF2Config(unsafe {
-            sys::ma_lpf2_config_init(format as _, channels, sample_rate, cutoff_frequency, q)
-        })
+impl<S: Sample, F: Frame> LPF2Config<S, F> {
+    pub fn new(sample_rate: u32, cutoff_frequency: f64, q: f64) -> LPF2Config<S, F> {
+        LPF2Config(
+            unsafe {
+                sys::ma_lpf2_config_init(
+                    S::format() as _,
+                    S::channels::<F>() as u32,
+                    sample_rate,
+                    cutoff_frequency,
+                    q,
+                )
+            },
+            PhantomData,
+            PhantomData,
+        )
     }
 
     #[inline]
@@ -143,28 +152,28 @@ impl LPF2Config {
 /// First order low-pass filter.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct LPF1(sys::ma_lpf1);
+pub struct LPF1<S: Sample, F: Frame>(sys::ma_lpf1, PhantomData<S>, PhantomData<F>);
 
-impl LPF1 {
-    pub fn new(config: &LPF1Config) -> Result<LPF1, Error> {
-        let mut lpf1 = std::mem::MaybeUninit::<LPF1>::uninit();
+impl<S: Sample, F: Frame> LPF1<S, F> {
+    pub fn new(config: &LPF1Config<S, F>) -> Result<LPF1<S, F>, Error> {
+        let mut lpf1 = std::mem::MaybeUninit::<LPF1<S, F>>::uninit();
         unsafe {
             Error::from_c_result(sys::ma_lpf1_init(
-                config as *const LPF1Config as *const _,
+                config as *const LPF1Config<S, F> as *const _,
                 lpf1.as_mut_ptr() as *mut _,
             ))?;
             Ok(lpf1.assume_init())
         }
     }
 
-    pub fn reinit(&mut self, config: &LPF1Config) -> Result<(), Error> {
+    pub fn reinit(&mut self, config: &LPF1Config<S, F>) -> Result<(), Error> {
         Error::from_c_result(unsafe {
-            sys::ma_lpf1_reinit(config as *const LPF1Config as *const _, &mut self.0)
+            sys::ma_lpf1_reinit(config as *const LPF1Config<S, F> as *const _, &mut self.0)
         })
     }
 
     #[inline]
-    pub fn process_pcm_frames<S: Sample + Copy + Sized, F: Copy + Sized>(
+    pub fn process_pcm_frames(
         &mut self,
         output: &mut Frames<S, F>,
         input: &Frames<S, F>,
@@ -191,32 +200,36 @@ impl LPF1 {
 /// Second order low-pass filter.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct LPF2(sys::ma_lpf2);
+pub struct LPF2<S: Sample, F: Frame>(sys::ma_lpf2, PhantomData<S>, PhantomData<F>);
 
-impl LPF2 {
-    pub fn new(config: &LPF2Config) -> Result<LPF2, Error> {
-        let mut lpf2 = std::mem::MaybeUninit::<LPF2>::uninit();
+impl<S: Sample, F: Frame> LPF2<S, F> {
+    pub fn new(config: &LPF2Config<S, F>) -> Result<LPF2<S, F>, Error> {
+        let mut lpf2 = std::mem::MaybeUninit::<LPF2<S, F>>::uninit();
         unsafe {
             Error::from_c_result(sys::ma_lpf2_init(
-                config as *const LPF2Config as *const _,
+                config as *const LPF2Config<S, F> as *const _,
                 lpf2.as_mut_ptr() as *mut _,
             ))?;
             Ok(lpf2.assume_init())
         }
     }
 
-    pub fn reinit(&mut self, config: &LPF2Config) -> Result<(), Error> {
+    pub fn reinit(&mut self, config: &LPF2Config<S, F>) -> Result<(), Error> {
         Error::from_c_result(unsafe {
-            sys::ma_lpf2_reinit(config as *const LPF2Config as *const _, &mut self.0)
+            sys::ma_lpf2_reinit(config as *const LPF2Config<S, F> as *const _, &mut self.0)
         })
     }
 
-    pub fn biquad(&self) -> &Biquad {
-        unsafe { (&self.0.bq as *const _ as *const Biquad).as_ref().unwrap() }
+    pub fn biquad(&self) -> &Biquad<S, F> {
+        unsafe {
+            (&self.0.bq as *const _ as *const Biquad<S, F>)
+                .as_ref()
+                .unwrap()
+        }
     }
 
     #[inline]
-    pub fn process_pcm_frames<S: Sample + Copy + Sized, F: Copy + Sized>(
+    pub fn process_pcm_frames(
         &mut self,
         output: &mut Frames<S, F>,
         input: &Frames<S, F>,

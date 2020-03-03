@@ -1,23 +1,28 @@
 use super::biquad_filtering::Biquad;
 use crate::base::{Error, Format};
-use crate::frames::{Frames, Sample};
+use crate::frames::{Frame, Frames, Sample};
 use miniaudio_sys as sys;
+use std::marker::PhantomData;
 
 /// Configuration for a first order high-pass filter.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct HPF1Config(sys::ma_hpf1_config);
+pub struct HPF1Config<S: Sample, F: Frame>(sys::ma_hpf1_config, PhantomData<S>, PhantomData<F>);
 
-impl HPF1Config {
-    pub fn new(
-        format: Format,
-        channels: u32,
-        sample_rate: u32,
-        cutoff_frequency: f64,
-    ) -> HPF1Config {
-        HPF1Config(unsafe {
-            sys::ma_hpf1_config_init(format as _, channels, sample_rate, cutoff_frequency)
-        })
+impl<S: Sample, F: Frame> HPF1Config<S, F> {
+    pub fn new(sample_rate: u32, cutoff_frequency: f64) -> HPF1Config<S, F> {
+        HPF1Config(
+            unsafe {
+                sys::ma_hpf1_config_init(
+                    S::format() as _,
+                    S::channels::<F>() as _,
+                    sample_rate,
+                    cutoff_frequency,
+                )
+            },
+            PhantomData,
+            PhantomData,
+        )
     }
 
     #[inline]
@@ -74,19 +79,23 @@ impl HPF1Config {
 /// Configuration for a second order high-pass filter.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct HPF2Config(sys::ma_hpf1_config);
+pub struct HPF2Config<S: Sample, F: Frame>(sys::ma_hpf1_config, PhantomData<S>, PhantomData<F>);
 
-impl HPF2Config {
-    pub fn new(
-        format: Format,
-        channels: u32,
-        sample_rate: u32,
-        cutoff_frequency: f64,
-        q: f64,
-    ) -> HPF2Config {
-        HPF2Config(unsafe {
-            sys::ma_hpf2_config_init(format as _, channels, sample_rate, cutoff_frequency, q)
-        })
+impl<S: Sample, F: Frame> HPF2Config<S, F> {
+    pub fn new(sample_rate: u32, cutoff_frequency: f64, q: f64) -> HPF2Config<S, F> {
+        HPF2Config(
+            unsafe {
+                sys::ma_hpf2_config_init(
+                    S::format() as _,
+                    S::channels::<F>() as _,
+                    sample_rate,
+                    cutoff_frequency,
+                    q,
+                )
+            },
+            PhantomData,
+            PhantomData,
+        )
     }
 
     #[inline]
@@ -143,28 +152,28 @@ impl HPF2Config {
 /// First order high-pass filter.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct HPF1(sys::ma_hpf1);
+pub struct HPF1<S: Sample, F: Frame>(sys::ma_hpf1, PhantomData<S>, PhantomData<F>);
 
-impl HPF1 {
-    pub fn new(config: &HPF1Config) -> Result<HPF1, Error> {
-        let mut hpf1 = std::mem::MaybeUninit::<HPF1>::uninit();
+impl<S: Sample, F: Frame> HPF1<S, F> {
+    pub fn new(config: &HPF1Config<S, F>) -> Result<HPF1<S, F>, Error> {
+        let mut hpf1 = std::mem::MaybeUninit::<HPF1<S, F>>::uninit();
         unsafe {
             Error::from_c_result(sys::ma_hpf1_init(
-                config as *const HPF1Config as *const _,
+                config as *const HPF1Config<S, F> as *const _,
                 hpf1.as_mut_ptr() as *mut _,
             ))?;
             Ok(hpf1.assume_init())
         }
     }
 
-    pub fn reinit(&mut self, config: &HPF1Config) -> Result<(), Error> {
+    pub fn reinit(&mut self, config: &HPF1Config<S, F>) -> Result<(), Error> {
         Error::from_c_result(unsafe {
-            sys::ma_hpf1_reinit(config as *const HPF1Config as *const _, &mut self.0)
+            sys::ma_hpf1_reinit(config as *const HPF1Config<S, F> as *const _, &mut self.0)
         })
     }
 
     #[inline]
-    pub fn process_pcm_frames<S: Sample + Copy + Sized, F: Copy + Sized>(
+    pub fn process_pcm_frames(
         &mut self,
         output: &mut Frames<S, F>,
         input: &Frames<S, F>,
@@ -191,32 +200,36 @@ impl HPF1 {
 /// Second order high-pass filter.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct HPF2(sys::ma_hpf2);
+pub struct HPF2<S: Sample, F: Frame>(sys::ma_hpf2, PhantomData<S>, PhantomData<F>);
 
-impl HPF2 {
-    pub fn new(config: &HPF2Config) -> Result<HPF2, Error> {
-        let mut hpf2 = std::mem::MaybeUninit::<HPF2>::uninit();
+impl<S: Sample, F: Frame> HPF2<S, F> {
+    pub fn new(config: &HPF2Config<S, F>) -> Result<HPF2<S, F>, Error> {
+        let mut hpf2 = std::mem::MaybeUninit::<HPF2<S, F>>::uninit();
         unsafe {
             Error::from_c_result(sys::ma_hpf2_init(
-                config as *const HPF2Config as *const _,
+                config as *const HPF2Config<S, F> as *const _,
                 hpf2.as_mut_ptr() as *mut _,
             ))?;
             Ok(hpf2.assume_init())
         }
     }
 
-    pub fn reinit(&mut self, config: &HPF2Config) -> Result<(), Error> {
+    pub fn reinit(&mut self, config: &HPF2Config<S, F>) -> Result<(), Error> {
         Error::from_c_result(unsafe {
-            sys::ma_hpf2_reinit(config as *const HPF2Config as *const _, &mut self.0)
+            sys::ma_hpf2_reinit(config as *const HPF2Config<S, F> as *const _, &mut self.0)
         })
     }
 
-    pub fn biquad(&self) -> &Biquad {
-        unsafe { (&self.0.bq as *const _ as *const Biquad).as_ref().unwrap() }
+    pub fn biquad(&self) -> &Biquad<S, F> {
+        unsafe {
+            (&self.0.bq as *const _ as *const Biquad<S, F>)
+                .as_ref()
+                .unwrap()
+        }
     }
 
     #[inline]
-    pub fn process_pcm_frames<S: Sample + Copy + Sized, F: Copy + Sized>(
+    pub fn process_pcm_frames(
         &mut self,
         output: &mut Frames<S, F>,
         input: &Frames<S, F>,
@@ -243,20 +256,24 @@ impl HPF2 {
 /// Configuration for a high-pass filter with configurable order (up to 8)
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct HPFConfig(sys::ma_hpf_config);
+pub struct HPFConfig<S: Sample, F: Frame>(sys::ma_hpf_config, PhantomData<S>, PhantomData<F>);
 
-impl HPFConfig {
+impl<S: Sample, F: Frame> HPFConfig<S, F> {
     /// If order is set to 0, this will be treated as a passthrough (no filtering will be applied).
-    pub fn new(
-        format: Format,
-        channels: u32,
-        sample_rate: u32,
-        cutoff_frequency: f64,
-        order: u32,
-    ) -> HPFConfig {
-        HPFConfig(unsafe {
-            sys::ma_hpf_config_init(format as _, channels, sample_rate, cutoff_frequency, order)
-        })
+    pub fn new(sample_rate: u32, cutoff_frequency: f64, order: u32) -> HPFConfig<S, F> {
+        HPFConfig(
+            unsafe {
+                sys::ma_hpf_config_init(
+                    S::format() as _,
+                    S::channels::<F>() as _,
+                    sample_rate,
+                    cutoff_frequency,
+                    order,
+                )
+            },
+            PhantomData,
+            PhantomData,
+        )
     }
 
     #[inline]
@@ -313,28 +330,28 @@ impl HPFConfig {
 /// High-pass filter with configurable order (up to 8)
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct HPF(sys::ma_hpf);
+pub struct HPF<S: Sample, F: Frame>(sys::ma_hpf, PhantomData<S>, PhantomData<F>);
 
-impl HPF {
-    pub fn new(config: &HPFConfig) -> Result<HPF, Error> {
-        let mut hpf = std::mem::MaybeUninit::<HPF>::uninit();
+impl<S: Sample, F: Frame> HPF<S, F> {
+    pub fn new(config: &HPFConfig<S, F>) -> Result<HPF<S, F>, Error> {
+        let mut hpf = std::mem::MaybeUninit::<HPF<S, F>>::uninit();
         unsafe {
             Error::from_c_result(sys::ma_hpf_init(
-                config as *const HPFConfig as *const _,
+                config as *const HPFConfig<S, F> as *const _,
                 hpf.as_mut_ptr() as *mut _,
             ))?;
             Ok(hpf.assume_init())
         }
     }
 
-    pub fn reinit(&mut self, config: &HPFConfig) -> Result<(), Error> {
+    pub fn reinit(&mut self, config: &HPFConfig<S, F>) -> Result<(), Error> {
         Error::from_c_result(unsafe {
-            sys::ma_hpf_reinit(config as *const HPFConfig as *const _, &mut self.0)
+            sys::ma_hpf_reinit(config as *const HPFConfig<S, F> as *const _, &mut self.0)
         })
     }
 
     #[inline]
-    pub fn process_pcm_frames<S: Sample + Copy + Sized, F: Copy + Sized>(
+    pub fn process_pcm_frames(
         &mut self,
         output: &mut Frames<S, F>,
         input: &Frames<S, F>,

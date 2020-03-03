@@ -1,30 +1,30 @@
 use crate::base::*;
-use crate::frames::{Frames, Sample};
+use crate::frames::{Frame, Frames, Sample};
 use miniaudio_sys as sys;
+use std::marker::PhantomData;
 
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct BiquadConfig(sys::ma_biquad_config);
+pub struct BiquadConfig<S: Sample, F: Frame>(sys::ma_biquad_config, PhantomData<S>, PhantomData<F>);
 
-impl BiquadConfig {
+impl<S: Sample, F: Frame> BiquadConfig<S, F> {
     #[inline]
-    pub fn new(
-        format: Format,
-        channels: u32,
-        numerators: [f64; 3],
-        denominators: [f64; 3],
-    ) -> BiquadConfig {
+    pub fn new(numerators: [f64; 3], denominators: [f64; 3]) -> BiquadConfig<S, F> {
         unsafe {
-            BiquadConfig(sys::ma_biquad_config_init(
-                format as _,
-                channels,
-                numerators[0],
-                numerators[1],
-                numerators[2],
-                denominators[0],
-                denominators[1],
-                denominators[2],
-            ))
+            BiquadConfig(
+                sys::ma_biquad_config_init(
+                    S::format() as _,
+                    S::channels::<F>() as _,
+                    numerators[0],
+                    numerators[1],
+                    numerators[2],
+                    denominators[0],
+                    denominators[1],
+                    denominators[2],
+                ),
+                PhantomData,
+                PhantomData,
+            )
         }
     }
 
@@ -95,26 +95,29 @@ impl BiquadConfig {
 
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Biquad(sys::ma_biquad);
+pub struct Biquad<S: Sample, F: Frame>(sys::ma_biquad, PhantomData<S>, PhantomData<F>);
 
-impl Biquad {
+impl<S: Sample, F: Frame> Biquad<S, F> {
     #[inline]
-    pub fn new(config: BiquadConfig) -> Result<Biquad, Error> {
+    pub fn new(config: &BiquadConfig<S, F>) -> Result<Biquad<S, F>, Error> {
         let mut biquad = std::mem::MaybeUninit::uninit();
         unsafe {
             let result = sys::ma_biquad_init(&config.0, biquad.as_mut_ptr());
-            map_result!(result, Biquad(biquad.assume_init()))
+            map_result!(
+                result,
+                Biquad(biquad.assume_init(), PhantomData, PhantomData)
+            )
         }
     }
 
     #[inline]
-    pub fn reinit(&mut self, config: BiquadConfig) -> Result<(), Error> {
+    pub fn reinit(&mut self, config: &BiquadConfig<S, F>) -> Result<(), Error> {
         let result = unsafe { sys::ma_biquad_reinit(&config.0, &mut self.0) };
         Error::from_c_result(result)
     }
 
     #[inline]
-    pub fn process_pcm_frames<S: Sample + Copy + Sized, F: Copy + Sized>(
+    pub fn process_pcm_frames(
         &mut self,
         output: &mut Frames<S, F>,
         input: &Frames<S, F>,
