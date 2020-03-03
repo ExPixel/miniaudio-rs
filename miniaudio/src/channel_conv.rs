@@ -1,4 +1,4 @@
-use crate::base::{Channel, ChannelMixMode, Format};
+use crate::base::{from_bool32, Channel, ChannelMixMode, Error, Format, MAX_CHANNELS};
 use crate::frames::{Frame, Frames, Sample};
 use miniaudio_sys as sys;
 use std::marker::PhantomData;
@@ -116,6 +116,19 @@ pub struct ChannelConverter<S: Sample, Fin: Frame, Fout: Frame>(
 );
 
 impl<S: Sample, Fin: Frame, Fout: Frame> ChannelConverter<S, Fin, Fout> {
+    pub fn new(
+        config: &ChannelConverterConfig<S, Fin, Fout>,
+    ) -> Result<ChannelConverter<S, Fin, Fout>, Error> {
+        let mut converter = std::mem::MaybeUninit::<ChannelConverter<S, Fin, Fout>>::uninit();
+        unsafe {
+            Error::from_c_result(sys::ma_channel_converter_init(
+                &config.0 as *const _,
+                converter.as_mut_ptr().cast(),
+            ))?;
+            Ok(converter.assume_init())
+        }
+    }
+
     #[inline]
     pub fn format(&self) -> Format {
         Format::from_c(self.0.format)
@@ -144,5 +157,51 @@ impl<S: Sample, Fin: Frame, Fout: Frame> ChannelConverter<S, Fin, Fout> {
     #[inline]
     pub fn mixing_mode(&self) -> ChannelMixMode {
         ChannelMixMode::from_c(self.0.mixingMode)
+    }
+
+    #[inline]
+    pub fn is_passthrough(&self) -> bool {
+        from_bool32(self.0.isPassthrough())
+    }
+
+    #[inline]
+    pub fn is_simple_shuffle(&self) -> bool {
+        from_bool32(self.0.isSimpleShuffle())
+    }
+
+    #[inline]
+    pub fn is_simple_mono_expansion(&self) -> bool {
+        from_bool32(self.0.isSimpleMonoExpansion())
+    }
+
+    #[inline]
+    pub fn is_stereo_to_mono(&self) -> bool {
+        from_bool32(self.0.isStereoToMono())
+    }
+
+    #[inline]
+    pub fn shuffle_table(&self) -> &[u8; MAX_CHANNELS] {
+        unsafe { std::mem::transmute(&self.0.shuffleTable) }
+    }
+
+    #[inline]
+    pub fn process_pcm_frames(
+        &mut self,
+        output: &mut Frames<S, Fout>,
+        input: &Frames<S, Fin>,
+    ) -> Result<(), Error> {
+        if output.count() != input.count() {
+            ma_debug_panic!("output and input buffers did not have the same frame count (output: {}, input: {})", output.count(), input.count());
+            return Err(Error::InvalidArgs);
+        }
+
+        return Error::from_c_result(unsafe {
+            sys::ma_channel_converter_process_pcm_frames(
+                &mut self.0,
+                output.frames_ptr_mut() as *mut _,
+                input.frames_ptr() as *const _,
+                output.count() as u64,
+            )
+        });
     }
 }

@@ -122,6 +122,7 @@ impl<S: Sample, F: Frame> HighShelf2<S, F> {
         input: &Frames<S, F>,
     ) -> Result<(), Error> {
         if output.count() != input.count() {
+            ma_debug_panic!("output and input buffers did not have the same frame count (output: {}, input: {})", output.count(), input.count());
             return Err(Error::InvalidArgs);
         }
 

@@ -1,3 +1,23 @@
+/// This is a panic which only occurs in debug mode.
+#[cfg(debug_assertions)]
+const MA_DEBUG_PANIC: bool = true;
+#[cfg(not(debug_assertions))]
+const MA_DEBUG_PANIC: bool = false;
+
+macro_rules! ma_debug_panic {
+    ($($Arg:expr,)*) => {
+        if $crate::MA_DEBUG_PANIC {
+            panic!($($Arg,)*)
+        }
+    };
+
+    ($($Arg:expr),*) => {
+        if $crate::MA_DEBUG_PANIC {
+            panic!($($Arg,)*)
+        }
+    };
+}
+
 /// This macro will execute a success block if a result is a MA_SUCCESS block
 /// and return the value of that block wrapped in a Result::Ok. If $Result is an error this will
 /// return an Error enum wrapped in a Result::Err.

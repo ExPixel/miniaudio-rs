@@ -116,6 +116,7 @@ impl<S: Sample, F: Frame> Biquad<S, F> {
         // basically assert that the number of channels and the format type for both streams are
         // equal for free. Still have to check the number of frames in each one though.
         if output.count() != input.count() {
+            ma_debug_panic!("output and input buffers did not have the same frame count (output: {}, input: {})", output.count(), input.count());
             return Err(Error::InvalidArgs);
         }
 
