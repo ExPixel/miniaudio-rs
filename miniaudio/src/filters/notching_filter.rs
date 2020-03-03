@@ -33,18 +33,8 @@ impl<S: Sample, F: Frame> Notch2Config<S, F> {
     }
 
     #[inline]
-    pub fn set_format(&mut self, format: Format) {
-        self.0.format = format as _;
-    }
-
-    #[inline]
     pub fn channels(&self) -> u32 {
         self.0.channels
-    }
-
-    #[inline]
-    pub fn set_channels(&mut self, channels: u32) {
-        self.0.channels = channels;
     }
 
     #[inline]
