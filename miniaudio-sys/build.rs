@@ -2,7 +2,7 @@ extern crate bindgen;
 extern crate cc;
 
 use std::env;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 pub fn main() {
     let mut cc_builder = cc::Build::new();
@@ -18,8 +18,30 @@ pub fn main() {
 
     emit_supported_features();
 
-    let header_contents = generate_miniaudio_header("./miniaudio/miniaudio.h");
+    let mut included_headers = Vec::new();
+    included_headers.push("./miniaudio/miniaudio.h");
+
+    if cfg!(feature = "ma-enable-dr-flac") {
+        included_headers.push("./miniaudio/extras/dr_flac.h");
+    }
+
+    if cfg!(feature = "ma-enable-dr-mp3") {
+        included_headers.push("./miniaudio/extras/dr_mp3.h");
+    }
+
+    if cfg!(feature = "ma-enable-dr-wav") {
+        included_headers.push("./miniaudio/extras/dr_wav.h");
+    }
+
+    let header_contents = generate_miniaudio_header(&included_headers);
+
     let bindings = bindgen::Builder::default()
+        // Make sure to only whitelist miniaudio's API.
+        .whitelist_type("ma_.*")
+        .whitelist_function("ma_.*")
+        .whitelist_var("ma_.*")
+        .whitelist_var("MA_.*")
+        // We just use one big generated header created by concatenating what we need.
         .header_contents("miniaudio.h", &header_contents)
         .size_t_is_usize(true)
         .rustfmt_bindings(true)
@@ -42,7 +64,7 @@ pub fn main() {
     println!("cargo:rerun-if-env-changed=CC");
 }
 
-fn generate_miniaudio_header<P: AsRef<Path>>(header_path: P) -> String {
+fn generate_miniaudio_header(headers: &[&str]) -> String {
     use std::io::prelude::*;
 
     let mut contents = String::new();
@@ -50,14 +72,33 @@ fn generate_miniaudio_header<P: AsRef<Path>>(header_path: P) -> String {
         contents.push_str(&format!("#define {} {}\n", name, value));
     });
 
-    let mut file = std::fs::File::open(header_path).expect("failed to open header file");
-    file.read_to_string(&mut contents)
-        .expect("failed to read header contents");
+    for header in headers.iter() {
+        // Insert a line break before each new header file.
+        if contents.len() > 0 {
+            contents.push_str("\n");
+        }
+
+        let mut file = std::fs::File::open(*header).expect("failed to open header file");
+        file.read_to_string(&mut contents)
+            .expect("failed to read header contents");
+    }
 
     return contents;
 }
 
 fn apply_definitions<F: FnMut(&str, &str)>(mut define: F) {
+    if cfg!(feature = "ma-enable-dr-flac") {
+        define("DR_FLAC_IMPLEMENTATION", "1");
+    }
+
+    if cfg!(feature = "ma-enable-dr-mp3") {
+        define("DR_MP3_IMPLEMENTATION", "1");
+    }
+
+    if cfg!(feature = "ma-enable-dr-wav") {
+        define("DR_WAV_IMPLEMENTATION", "1");
+    }
+
     if cfg!(feature = "ma-no-wasapi") {
         define("MA_NO_WASAPI", "1");
     }

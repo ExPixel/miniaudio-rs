@@ -1,6 +1,6 @@
 use crate::base::*;
+use crate::frames::{Frames, Sample};
 use miniaudio_sys as sys;
-use std::ptr::NonNull;
 
 #[repr(transparent)]
 #[derive(Clone)]
@@ -98,6 +98,7 @@ impl BiquadConfig {
 pub struct Biquad(sys::ma_biquad);
 
 impl Biquad {
+    #[inline]
     pub fn new(config: BiquadConfig) -> Result<Biquad, Error> {
         let mut biquad = std::mem::MaybeUninit::uninit();
         unsafe {
@@ -106,27 +107,44 @@ impl Biquad {
         }
     }
 
+    #[inline]
     pub fn reinit(&mut self, config: BiquadConfig) -> Result<(), Error> {
         let result = unsafe { sys::ma_biquad_reinit(&config.0, &mut self.0) };
         Error::from_c_result(result)
     }
 
-    pub fn process_pcm_frames(
+    #[inline]
+    pub fn process_pcm_frames<S: Sample + Copy + Sized, F: Copy + Sized>(
         &mut self,
-        frames_out: NonNull<()>,
-        frames_in: NonNull<()>,
-        frame_count: u64,
+        output: &mut Frames<S, F>,
+        input: &Frames<S, F>,
     ) -> Result<(), Error> {
-        // FIXME bounds check the frame lengths (???)
+        // NOTE FrameType and SampleType being equal for both input and output frames means that we
+        // basically assert that the number of channels and the format type for both streams are
+        // equal for free. Still have to check the number of frames in each one though.
+        if output.count() != input.count() {
+            return Err(Error::InvalidArgs);
+        }
+
         let result = unsafe {
             sys::ma_biquad_process_pcm_frames(
                 &mut self.0,
-                frames_out.as_ptr() as _,
-                frames_in.as_ptr() as *mut _ as *const _,
-                frame_count,
+                output.frames_ptr_mut() as *mut _,
+                input.frames_ptr() as *const _,
+                output.count() as u64,
             )
         };
         Error::from_c_result(result)
+    }
+
+    #[inline]
+    pub fn format(&self) -> Format {
+        Format::from_c(self.0.format)
+    }
+
+    #[inline]
+    pub fn channels(&self) -> u32 {
+        self.0.channels
     }
 
     // FIXME the pointer is not marked as const in the C source even though it could be. I should

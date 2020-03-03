@@ -9,6 +9,10 @@ edition = "2018"
 [features]
 default = ["ma-log-level-error"]
 
+ma-enable-dr-flac = []
+ma-enable-dr-mp3 = []
+ma-enable-dr-wav = []
+
 ma-no-wasapi = []
 ma-no-dsound = []
 ma-no-winmm = []

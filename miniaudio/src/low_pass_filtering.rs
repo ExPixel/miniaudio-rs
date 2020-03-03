@@ -1,7 +1,7 @@
 use super::biquad_filtering::Biquad;
 use crate::base::{Error, Format};
+use crate::frames::{Frames, Sample};
 use miniaudio_sys as sys;
-use std::ptr::NonNull;
 
 #[repr(transparent)]
 #[derive(Clone)]
@@ -160,18 +160,22 @@ impl LPF1 {
         })
     }
 
-    pub fn process_pcm_frames(
+    #[inline]
+    pub fn process_pcm_frames<S: Sample + Copy + Sized, F: Copy + Sized>(
         &mut self,
-        output: NonNull<()>,
-        input: NonNull<()>,
-        frame_count: u64,
+        output: &mut Frames<S, F>,
+        input: &Frames<S, F>,
     ) -> Result<(), Error> {
+        if output.count() != input.count() {
+            return Err(Error::InvalidArgs);
+        }
+
         Error::from_c_result(unsafe {
             sys::ma_lpf1_process_pcm_frames(
                 &mut self.0 as *mut _,
-                output.as_ptr() as *mut _,
-                input.as_ptr() as *const _,
-                frame_count,
+                output.frames_ptr_mut() as *mut _,
+                input.frames_ptr() as *const _,
+                output.count() as u64,
             )
         })
     }
@@ -207,18 +211,22 @@ impl LPF2 {
         unsafe { (&self.0.bq as *const _ as *const Biquad).as_ref().unwrap() }
     }
 
-    pub fn process_pcm_frames(
+    #[inline]
+    pub fn process_pcm_frames<S: Sample + Copy + Sized, F: Copy + Sized>(
         &mut self,
-        output: NonNull<()>,
-        input: NonNull<()>,
-        frame_count: u64,
+        output: &mut Frames<S, F>,
+        input: &Frames<S, F>,
     ) -> Result<(), Error> {
+        if output.count() != input.count() {
+            return Err(Error::InvalidArgs);
+        }
+
         Error::from_c_result(unsafe {
             sys::ma_lpf2_process_pcm_frames(
                 &mut self.0 as *mut _,
-                output.as_ptr() as *mut _,
-                input.as_ptr() as *const _,
-                frame_count,
+                output.frames_ptr_mut() as *mut _,
+                input.frames_ptr() as *const _,
+                output.count() as u64,
             )
         })
     }
@@ -319,18 +327,22 @@ impl LPF {
         })
     }
 
-    pub fn process_pcm_frames(
+    #[inline]
+    pub fn process_pcm_frames<S: Sample + Copy + Sized, F: Copy + Sized>(
         &mut self,
-        output: NonNull<()>,
-        input: NonNull<()>,
-        frame_count: u64,
+        output: &mut Frames<S, F>,
+        input: &Frames<S, F>,
     ) -> Result<(), Error> {
+        if output.count() != input.count() {
+            return Err(Error::InvalidArgs);
+        }
+
         Error::from_c_result(unsafe {
             sys::ma_lpf_process_pcm_frames(
                 &mut self.0 as *mut _,
-                output.as_ptr() as *mut _,
-                input.as_ptr() as *const _,
-                frame_count,
+                output.frames_ptr_mut() as *mut _,
+                input.frames_ptr() as *const _,
+                output.count() as u64,
             )
         })
     }
