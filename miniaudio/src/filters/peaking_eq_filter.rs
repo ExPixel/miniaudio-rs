@@ -3,6 +3,7 @@ use crate::base::{Error, Format};
 use crate::frames::{Frames, Sample};
 use miniaudio_sys as sys;
 
+/// Configuration for a second order peaking filter.
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct Peak2Config(sys::ma_peak2_config);
@@ -83,6 +84,7 @@ impl Peak2Config {
     }
 }
 
+/// Second order peaking filter.
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct Peak2(sys::ma_peak2);

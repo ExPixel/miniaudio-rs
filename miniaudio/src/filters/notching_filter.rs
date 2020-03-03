@@ -3,6 +3,7 @@ use crate::base::{Error, Format};
 use crate::frames::{Frames, Sample};
 use miniaudio_sys as sys;
 
+/// Configuration for a second order notching filter.
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct Notch2Config(sys::ma_notch2_config);
@@ -72,6 +73,7 @@ impl Notch2Config {
     }
 }
 
+/// Second order notching filter.
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct Notch2(sys::ma_notch2);

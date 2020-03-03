@@ -3,6 +3,7 @@ use crate::base::{Error, Format};
 use crate::frames::{Frames, Sample};
 use miniaudio_sys as sys;
 
+/// Configuration for a first order low-pass filter.
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct LPF1Config(sys::ma_lpf1_config);
@@ -70,6 +71,7 @@ impl LPF1Config {
     }
 }
 
+/// Configuration for a second order low-pass filter.
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct LPF2Config(sys::ma_lpf1_config);
@@ -138,6 +140,7 @@ impl LPF2Config {
     }
 }
 
+/// First order low-pass filter.
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct LPF1(sys::ma_lpf1);
@@ -185,6 +188,7 @@ impl LPF1 {
     }
 }
 
+/// Second order low-pass filter.
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct LPF2(sys::ma_lpf2);

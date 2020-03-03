@@ -3,6 +3,7 @@ use crate::base::{Error, Format};
 use crate::frames::{Frames, Sample};
 use miniaudio_sys as sys;
 
+/// Configuration for a second order high shelf filter.
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct HighShelf2Config(sys::ma_hishelf2_config);
@@ -90,6 +91,7 @@ impl HighShelf2Config {
     }
 }
 
+/// Second order high pass filter.
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct HighShelf2(sys::ma_hishelf2);

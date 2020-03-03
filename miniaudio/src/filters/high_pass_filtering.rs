@@ -3,6 +3,7 @@ use crate::base::{Error, Format};
 use crate::frames::{Frames, Sample};
 use miniaudio_sys as sys;
 
+/// Configuration for a first order high-pass filter.
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct HPF1Config(sys::ma_hpf1_config);
@@ -70,6 +71,7 @@ impl HPF1Config {
     }
 }
 
+/// Configuration for a second order high-pass filter.
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct HPF2Config(sys::ma_hpf1_config);
@@ -138,6 +140,7 @@ impl HPF2Config {
     }
 }
 
+/// First order high-pass filter.
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct HPF1(sys::ma_hpf1);
@@ -185,6 +188,7 @@ impl HPF1 {
     }
 }
 
+/// Second order high-pass filter.
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct HPF2(sys::ma_hpf2);
@@ -236,6 +240,7 @@ impl HPF2 {
     }
 }
 
+/// Configuration for a high-pass filter with configurable order (up to 8)
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct HPFConfig(sys::ma_hpf_config);
@@ -305,6 +310,7 @@ impl HPFConfig {
     }
 }
 
+/// High-pass filter with configurable order (up to 8)
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct HPF(sys::ma_hpf);
