@@ -3,6 +3,7 @@ use crate::frames::{Frame, Frames, Sample};
 use miniaudio_sys as sys;
 use std::marker::PhantomData;
 
+/// Configuration for `ChannelConverter`.
 #[repr(transparent)]
 pub struct ChannelConverterConfig<S: Sample, Fin: Frame, Fout: Frame>(
     sys::ma_channel_converter_config,
@@ -107,7 +108,38 @@ impl<S: Sample, Fin: Frame, Fout: Frame> ChannelConverterConfig<S, Fin, Fout> {
     }
 }
 
+// FIXME For now this can use the default clone implementation because as far as I can tell
+// ma_channel_converter_uninit does nothing, and there are no allocations to clean up. This may
+// change in the future though so I should figure out a better cloning method.
+
+/// channel conversion is used for channel rearrangement and conversion from one channel count to
+/// another. The ChannelConverter API is used for channel conversion.
+///
+/// In addition to converting from one channel count to another the channel converter can also be
+/// used to rearrange channels. When initializing the channel converter, you can optionally pass in
+/// channel maps for both the input and output frames. If the channel counts are the same, each
+/// channel map contains teh same channel positions with the exception that they're in a different
+/// order, a simple shuffling of the channels will be performed. If, however, there is not a 1:1
+/// mapping of channel positions, or the channel counts differ, the input channels will be mixed
+/// based on a mixing mode which is specified when initializing the ChannelConverterConfig object.
+///
+/// When converting from mono to multi-channel, the mono channel is simply copied to each output
+/// channel. When going the other way around, the audio of each output channel is simply averaged
+/// and copied to the mono channel.
+///
+/// In more complicated cases blending is used. `ChannelMixMode::Simple` mode will drop excess
+/// channels and silence extra channels. For example, convertion from 4 to 2 channels, the 3rd and
+/// 4th channels will be dropped, whereas converting from 2 to 4 channels will put silence into the
+/// 3rd and 4th channels.
+///
+/// `ChannelModeMode::Rectangle` mode uses spacial locality based on a rectangle to compute a
+/// simple distribution between input and output. Imaging sitting in the middle of a root, with
+/// speakers on the walls representing channel positions. Channel::FrontLeft position can be
+/// thought of as being in the corder of the front and left walls.
+///
+/// Finally, `ChannelMixMode::CustomWeights` mode can be used to use custom user-defined weights.
 #[repr(transparent)]
+#[derive(Clone)]
 pub struct ChannelConverter<S: Sample, Fin: Frame, Fout: Frame>(
     sys::ma_channel_converter,
     PhantomData<S>,
