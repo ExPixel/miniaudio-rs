@@ -1,32 +1,68 @@
-use crate::base::{Error, Format, MAX_FILTER_ORDER};
-use crate::frames::{Frame, Frames, Sample};
+use crate::base::{Error, Format};
+use crate::frames::{Frames, FramesMut};
 use crate::resampling::ResampleAlgorithm;
 use miniaudio_sys as sys;
-use std::marker::PhantomData;
 
-pub struct DataConverterConfig<Sin: Sample, Fin: Frame, Sout: Sample, Fout: Frame>(
-    sys::ma_data_converter_config,
-    PhantomData<(Sin, Fin, Sout, Fout)>,
-);
+pub struct DataConverterConfig(sys::ma_data_converter_config);
 
-impl<Sin: Sample, Fin: Frame, Sout: Sample, Fout: Frame> DataConverterConfig<Sin, Fin, Sout, Fout> {
+impl DataConverterConfig {
     pub fn new(
+        format_in: Format,
+        format_out: Format,
+        channels_in: u32,
+        channels_out: u32,
         sample_rate_in: u32,
         sample_rate_out: u32,
-    ) -> DataConverterConfig<Sin, Fin, Sout, Fout> {
-        DataConverterConfig(
-            unsafe {
-                sys::ma_data_converter_config_init(
-                    Sin::format() as _,
-                    Sout::format() as _,
-                    Sin::channels::<Fin>() as _,
-                    Sout::channels::<Fout>() as _,
-                    sample_rate_in,
-                    sample_rate_out,
-                )
-            },
-            PhantomData,
-        )
+    ) -> DataConverterConfig {
+        DataConverterConfig(unsafe {
+            sys::ma_data_converter_config_init(
+                format_in as _,
+                format_out as _,
+                channels_in,
+                channels_out,
+                sample_rate_in,
+                sample_rate_out,
+            )
+        })
+    }
+
+    #[inline]
+    pub fn format_in(&self) -> Format {
+        Format::from_c(self.0.formatIn)
+    }
+
+    #[inline]
+    pub fn set_format_in(&mut self, format: Format) {
+        self.0.formatIn = format as _;
+    }
+    #[inline]
+    pub fn format_out(&self) -> Format {
+        Format::from_c(self.0.formatOut)
+    }
+
+    #[inline]
+    pub fn set_format_out(&mut self, format: Format) {
+        self.0.formatOut = format as _;
+    }
+
+    #[inline]
+    pub fn channels_in(&self) -> u32 {
+        self.0.channelsIn
+    }
+
+    #[inline]
+    pub fn set_channels_in(&mut self, channels: u32) {
+        self.0.channelsIn = channels;
+    }
+
+    #[inline]
+    pub fn channels_out(&self) -> u32 {
+        self.0.channelsOut
+    }
+
+    #[inline]
+    pub fn set_channels_out(&mut self, channels: u32) {
+        self.0.channelsOut = channels;
     }
 
     pub fn sample_rate_in(&self) -> u32 {
@@ -75,15 +111,8 @@ impl<Sin: Sample, Fin: Frame, Sout: Sample, Fout: Frame> DataConverterConfig<Sin
     }
 }
 
-impl<Sin: Sample, Fin: Frame, Sout: Sample, Fout: Frame> Default
-    for DataConverterConfig<Sin, Fin, Sout, Fout>
-{
+impl Default for DataConverterConfig {
     fn default() -> Self {
-        let mut raw_config = unsafe { sys::ma_data_converter_config_init_default() };
-        raw_config.formatIn = Sin::format() as _;
-        raw_config.channelsIn = Sin::channels::<Fin>() as _;
-        raw_config.formatOut = Sout::format() as _;
-        raw_config.channelsOut = Sout::channels::<Fout>() as _;
-        DataConverterConfig(raw_config, PhantomData)
+        DataConverterConfig(unsafe { sys::ma_data_converter_config_init_default() })
     }
 }

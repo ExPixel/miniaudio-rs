@@ -43,7 +43,7 @@ macro_rules! impl_from_c {
 
 mod base;
 mod channel_conv;
-// mod data_conv;
+mod data_conv;
 mod device_io;
 mod frames;
 
@@ -54,6 +54,6 @@ pub mod ring_buffers;
 
 pub use base::*;
 pub use channel_conv::*;
-// pub use data_conv::*;
+pub use data_conv::*;
 pub use device_io::*;
 pub use frames::*;
