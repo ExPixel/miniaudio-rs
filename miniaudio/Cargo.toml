@@ -25,4 +25,4 @@ ma-log-level-error = []
 ma-debug-output = []
 
 [dependencies]
-ep-miniaudio-sys = { path = "../miniaudio-sys" }
+ep-miniaudio-sys = { version = "0.1.0", path = "../miniaudio-sys" }
