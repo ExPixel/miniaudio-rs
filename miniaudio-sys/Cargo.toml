@@ -1,10 +1,31 @@
 [package]
-name = "miniaudio-sys"
+name = "ep-miniaudio-sys"
 version = "0.1.0"
-authors = ["Adolph C. <adolphc@outlook.com>"]
+authors = ["ExPixel <adolphc@outlook.com>"]
 edition = "2018"
+description = "Raw bindings to the miniaudio C library."
+documentation = "https://docs.rs/ep-miniaudio-sys"
+repository = "https://github.com/ExPixel/miniaudio-rs"
+homepage = "https://github.com/ExPixel/miniaudio-rs"
+license = "MIT"
+keywords = ["audio", "miniaudio", "sound", "pcm"]
+publish = true
+categories = ["multimedia::audio", "multimedia"]
+exclude = [
+    "miniaudio/examples/*",
+    "miniaudio/extras/*",
+    "miniaudio/research/*",
+    "miniaudio/resources/*",
+    "miniaudio/test/*",
+    "miniaudio/tools/*",
+    "miniaudio/CONTRIBUTING.md",
+    "miniaudio/README.md",
+]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "miniaudio_sys"
+path = "src/lib.rs"
+crate_type = ["lib"]
 
 [features]
 default = ["ma-log-level-error"]
