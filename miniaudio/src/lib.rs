@@ -47,7 +47,7 @@ mod channel_conv;
 mod device_io;
 mod frames;
 
-// pub mod filters;
+pub mod filters;
 pub mod generation;
 pub mod resampling;
 pub mod ring_buffers;
