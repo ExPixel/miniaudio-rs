@@ -16,7 +16,7 @@ exclude = [
     "miniaudio/extras/*",
     "miniaudio/research/*",
     "miniaudio/resources/*",
-    "miniaudio/test/*",
+    "miniaudio/tests/*",
     "miniaudio/tools/*",
     "miniaudio/CONTRIBUTING.md",
     "miniaudio/README.md",
