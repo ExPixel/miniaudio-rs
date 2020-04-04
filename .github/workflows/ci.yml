@@ -32,7 +32,9 @@ jobs:
         - uses: actions-rs/toolchain@v1
           with:
               toolchain: ${{ matrix.rust_channel }}
+              profile: default
               override: true
+              components: rustfmt, clippy
 
         - name: Cache Cargo Registry
           uses: actions/cache@v1
