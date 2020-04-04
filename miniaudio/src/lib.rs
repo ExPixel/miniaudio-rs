@@ -43,17 +43,22 @@ macro_rules! impl_from_c {
 
 mod base;
 mod channel_conv;
+mod conversion;
 mod data_conv;
 mod device_io;
+mod filters;
 mod frames;
-
-pub mod filters;
-pub mod generation;
-pub mod resampling;
-pub mod ring_buffers;
+mod generation;
+mod resampling;
+mod ring_buffers;
 
 pub use base::*;
 pub use channel_conv::*;
+pub use conversion::*;
 pub use data_conv::*;
 pub use device_io::*;
+pub use filters::*;
 pub use frames::*;
+pub use generation::*;
+pub use resampling::*;
+pub use ring_buffers::*;
