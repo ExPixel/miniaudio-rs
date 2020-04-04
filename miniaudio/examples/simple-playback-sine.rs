@@ -1,5 +1,5 @@
-use miniaudio::generation::{Waveform, WaveformConfig, WaveformType};
 use miniaudio::{Device, DeviceConfig, DeviceType, Format};
+use miniaudio::{Waveform, WaveformConfig, WaveformType};
 
 pub type DeviceFormatType = f32;
 pub const DEVICE_FORMAT: Format = Format::F32;
