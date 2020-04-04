@@ -1,7 +1,6 @@
 use crate::base::{Error, Format};
-use crate::frames::{Frame, Frames, Sample};
+use crate::frames::{Frames, FramesMut};
 use miniaudio_sys as sys;
-use std::marker::PhantomData;
 
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -39,27 +38,24 @@ impl ResampleAlgorithm {
 
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct LinearResamplerConfig<S: Sample, F: Frame>(
-    sys::ma_linear_resampler_config,
-    PhantomData<S>,
-    PhantomData<F>,
-);
+pub struct LinearResamplerConfig(sys::ma_linear_resampler_config);
 
-impl<S: Sample, F: Frame> LinearResamplerConfig<S, F> {
+impl LinearResamplerConfig {
     #[inline]
-    pub fn new(sample_rate_in: u32, sample_rate_out: u32) -> LinearResamplerConfig<S, F> {
-        LinearResamplerConfig(
-            unsafe {
-                sys::ma_linear_resampler_config_init(
-                    S::format() as _,
-                    S::channels::<F>() as _,
-                    sample_rate_in,
-                    sample_rate_out,
-                )
-            },
-            PhantomData,
-            PhantomData,
-        )
+    pub fn new(
+        format: Format,
+        channels: u32,
+        sample_rate_in: u32,
+        sample_rate_out: u32,
+    ) -> LinearResamplerConfig {
+        LinearResamplerConfig(unsafe {
+            sys::ma_linear_resampler_config_init(
+                format as _,
+                channels,
+                sample_rate_in,
+                sample_rate_out,
+            )
+        })
     }
 
     #[inline]
@@ -113,19 +109,15 @@ impl<S: Sample, F: Frame> LinearResamplerConfig<S, F> {
 }
 
 #[repr(transparent)]
-pub struct LinearResampler<S: Sample, F: Frame>(
-    sys::ma_linear_resampler,
-    PhantomData<S>,
-    PhantomData<F>,
-);
+pub struct LinearResampler(sys::ma_linear_resampler);
 
-impl<S: Sample, F: Frame> LinearResampler<S, F> {
+impl LinearResampler {
     #[inline]
-    pub fn new(config: &LinearResamplerConfig<S, F>) -> Result<LinearResampler<S, F>, Error> {
-        let mut lr = std::mem::MaybeUninit::<LinearResampler<S, F>>::uninit();
+    pub fn new(config: &LinearResamplerConfig) -> Result<LinearResampler, Error> {
+        let mut lr = std::mem::MaybeUninit::<LinearResampler>::uninit();
         unsafe {
             Error::from_c_result(sys::ma_linear_resampler_init(
-                config as *const LinearResamplerConfig<S, F> as *const _,
+                config as *const LinearResamplerConfig as *const _,
                 lr.as_mut_ptr() as *mut _,
             ))?;
             Ok(lr.assume_init())
@@ -133,7 +125,7 @@ impl<S: Sample, F: Frame> LinearResampler<S, F> {
     }
 
     #[inline]
-    pub fn config(&self) -> &LinearResamplerConfig<S, F> {
+    pub fn config(&self) -> &LinearResamplerConfig {
         unsafe { std::mem::transmute(&self.0.config) }
     }
 
@@ -152,18 +144,18 @@ impl<S: Sample, F: Frame> LinearResampler<S, F> {
     #[inline]
     pub fn process_pcm_frames(
         &mut self,
-        output: &mut Frames<S, F>,
-        input: &Frames<S, F>,
+        output: &FramesMut,
+        input: &Frames,
     ) -> Result<(u64, u64), Error> {
-        let mut output_frames = output.count() as u64;
-        let mut input_frames = input.count() as u64;
+        let mut output_frames = output.frame_count() as u64;
+        let mut input_frames = input.frame_count() as u64;
 
         Error::from_c_result(unsafe {
             sys::ma_linear_resampler_process_pcm_frames(
                 &mut self.0,
-                input.frames_ptr() as *const _,
+                input.as_ptr() as *const _,
                 &mut input_frames,
-                output.frames_ptr_mut() as *mut _,
+                output.as_mut_ptr() as *mut _,
                 &mut output_frames,
             )
         })?;
@@ -250,13 +242,13 @@ impl<S: Sample, F: Frame> LinearResampler<S, F> {
     }
 }
 
-impl<S: Sample, F: Frame> Drop for LinearResampler<S, F> {
+impl Drop for LinearResampler {
     fn drop(&mut self) {
-        unsafe { sys::ma_linear_resampler_uninit(self as *mut LinearResampler<S, F> as *mut _) };
+        unsafe { sys::ma_linear_resampler_uninit(self as *mut LinearResampler as *mut _) };
     }
 }
 
-impl<S: Sample, F: Frame> Clone for LinearResampler<S, F> {
+impl Clone for LinearResampler {
     fn clone(&self) -> Self {
         // This shouldn't fail assuming this was initialized properly to start with.
         Self::new(self.config()).expect("failed to clone linear resampler")
@@ -265,31 +257,25 @@ impl<S: Sample, F: Frame> Clone for LinearResampler<S, F> {
 
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct ResamplerConfig<S: Sample, F: Frame>(
-    sys::ma_resampler_config,
-    PhantomData<S>,
-    PhantomData<F>,
-);
+pub struct ResamplerConfig(sys::ma_resampler_config);
 
-impl<S: Sample, F: Frame> ResamplerConfig<S, F> {
+impl ResamplerConfig {
     pub fn new(
+        format: Format,
+        channels: u32,
         sample_rate_in: u32,
         sample_rate_out: u32,
         algorithm: ResampleAlgorithmType,
-    ) -> ResamplerConfig<S, F> {
-        ResamplerConfig(
-            unsafe {
-                sys::ma_resampler_config_init(
-                    S::format() as _,
-                    S::channels::<F>() as _,
-                    sample_rate_in,
-                    sample_rate_out,
-                    algorithm as _,
-                )
-            },
-            PhantomData,
-            PhantomData,
-        )
+    ) -> ResamplerConfig {
+        ResamplerConfig(unsafe {
+            sys::ma_resampler_config_init(
+                format as _,
+                channels,
+                sample_rate_in,
+                sample_rate_out,
+                algorithm as _,
+            )
+        })
     }
 
     #[inline]
@@ -357,11 +343,11 @@ impl<S: Sample, F: Frame> ResamplerConfig<S, F> {
 }
 
 #[repr(transparent)]
-pub struct Resampler<S: Sample, F: Frame>(sys::ma_resampler, PhantomData<S>, PhantomData<F>);
+pub struct Resampler(sys::ma_resampler);
 
-impl<S: Sample, F: Frame> Resampler<S, F> {
-    pub fn new(config: &ResamplerConfig<S, F>) -> Result<Resampler<S, F>, Error> {
-        let mut resampler = std::mem::MaybeUninit::<Resampler<S, F>>::uninit();
+impl Resampler {
+    pub fn new(config: &ResamplerConfig) -> Result<Resampler, Error> {
+        let mut resampler = std::mem::MaybeUninit::<Resampler>::uninit();
         unsafe {
             sys::ma_resampler_init(&config.0, resampler.as_mut_ptr() as *mut _);
             Ok(resampler.assume_init())
@@ -369,7 +355,7 @@ impl<S: Sample, F: Frame> Resampler<S, F> {
     }
 
     #[inline]
-    pub fn config(&self) -> &ResamplerConfig<S, F> {
+    pub fn config(&self) -> &ResamplerConfig {
         unsafe { std::mem::transmute(&self.0.config) }
     }
 
@@ -388,18 +374,27 @@ impl<S: Sample, F: Frame> Resampler<S, F> {
     #[inline]
     pub fn process_pcm_frames(
         &mut self,
-        output: &mut Frames<S, F>,
-        input: &Frames<S, F>,
+        output: &FramesMut,
+        input: &Frames,
     ) -> Result<(u64, u64), Error> {
-        let mut output_frames = output.count() as u64;
-        let mut input_frames = input.count() as u64;
+        if output.format() != input.format() {
+            ma_debug_panic!(
+                "output and input format did not match (output: {:?}, input: {:?}",
+                output.format(),
+                input.format()
+            );
+            return Err(Error::InvalidArgs);
+        }
+
+        let mut output_frames = output.frame_count() as u64;
+        let mut input_frames = input.frame_count() as u64;
 
         Error::from_c_result(unsafe {
             sys::ma_resampler_process_pcm_frames(
                 &mut self.0,
-                input.frames_ptr() as *const _,
+                input.as_ptr() as *const _,
                 &mut input_frames,
-                output.frames_ptr_mut() as *mut _,
+                output.as_mut_ptr() as *mut _,
                 &mut output_frames,
             )
         })?;
@@ -464,14 +459,14 @@ impl<S: Sample, F: Frame> Resampler<S, F> {
     }
 }
 
-impl<S: Sample, F: Frame> Clone for Resampler<S, F> {
+impl Clone for Resampler {
     fn clone(&self) -> Self {
         // This should not fail if the resampler was properly initialized.
         Self::new(self.config()).expect("failed to clone resampler")
     }
 }
 
-impl<S: Sample, F: Frame> Drop for Resampler<S, F> {
+impl Drop for Resampler {
     fn drop(&mut self) {
         unsafe { sys::ma_resampler_uninit(&mut self.0) };
     }

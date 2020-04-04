@@ -1,4 +1,5 @@
 use crate::base::*;
+use crate::frames::{Frames, FramesMut};
 use crate::resampling::ResampleAlgorithm;
 use miniaudio_sys as sys;
 use std::mem::MaybeUninit;
@@ -294,7 +295,7 @@ impl DeviceConfig {
     /// of cloneable thread-safe struct like an Arc.
     pub fn set_data_callback<F>(&mut self, callback: F)
     where
-        F: FnMut(NonNull<Device>, &mut [u8], &[u8], u32) + Send + Sync + Clone + 'static,
+        F: FnMut(NonNull<Device>, &FramesMut, &Frames) + Send + Sync + Clone + 'static,
     {
         let user_data = self.ensure_user_data();
         unsafe {
@@ -342,14 +343,14 @@ impl DeviceConfig {
 
 pub struct DeviceConfigUserData {
     data_callback_factory:
-        Option<Box<dyn Fn() -> Box<dyn FnMut(NonNull<Device>, &mut [u8], &[u8], u32)>>>,
+        Option<Box<dyn Fn() -> Box<dyn FnMut(NonNull<Device>, &FramesMut, &Frames)>>>,
     stop_callback_factory: Option<Box<dyn Fn() -> Box<dyn FnMut(NonNull<Device>)>>>,
 }
 
 // FIXME it might be better to just set the callbacks to some noop functions by default
 // to save ourselves the extra in the audio callback code.
 pub struct DeviceUserData {
-    data_callback: Option<Box<dyn FnMut(NonNull<Device>, &mut [u8], &[u8], u32)>>,
+    data_callback: Option<Box<dyn FnMut(NonNull<Device>, &FramesMut, &Frames)>>,
     stop_callback: Option<Box<dyn FnMut(NonNull<Device>)>>,
 }
 
@@ -363,23 +364,37 @@ unsafe extern "C" fn device_data_callback_trampoline(
         let mut empty_output = [0u8; 0];
         let empty_input = [0u8; 0];
 
+        let output_format = (*device.as_ptr()).playback().format();
+        let output_channels = (*device.as_ptr()).playback().channels();
+
         let output = if output_ptr.is_null() {
-            &mut empty_output
+            FramesMut::wrap(&mut empty_output, output_format, output_channels)
         } else {
-            let bytes_per_frame = (*device.as_ptr()).playback().format().size_in_bytes()
-                * (*device.as_ptr()).playback().channels() as usize;
-            std::slice::from_raw_parts_mut(
-                output_ptr.cast(),
-                frame_count as usize * bytes_per_frame,
+            let bytes_per_frame = output_format.size_in_bytes() * output_channels as usize;
+            FramesMut::wrap(
+                std::slice::from_raw_parts_mut(
+                    output_ptr.cast(),
+                    frame_count as usize * bytes_per_frame,
+                ),
+                output_format,
+                output_channels,
             )
         };
 
-        let input: &[u8] = if input_ptr.is_null() {
-            &empty_input
+        let input_format = (*device.as_ptr()).capture().format();
+        let input_channels = (*device.as_ptr()).capture().channels();
+        let input = if input_ptr.is_null() {
+            Frames::wrap(&empty_input, output_format, output_channels)
         } else {
-            let bytes_per_frame = (*device.as_ptr()).capture().format().size_in_bytes()
-                * (*device.as_ptr()).capture().channels() as usize;
-            std::slice::from_raw_parts(input_ptr.cast(), frame_count as usize * bytes_per_frame)
+            let bytes_per_frame = input_format.size_in_bytes() * input_channels as usize;
+            Frames::wrap(
+                std::slice::from_raw_parts(
+                    input_ptr.cast(),
+                    frame_count as usize * bytes_per_frame,
+                ),
+                input_format,
+                input_channels,
+            )
         };
 
         let user_data = (*device.as_ptr()).0.pUserData.cast::<DeviceUserData>();
@@ -388,7 +403,7 @@ unsafe extern "C" fn device_data_callback_trampoline(
         }
 
         if let Some(ref mut data_callback) = (*user_data).data_callback {
-            (data_callback)(device, output, input, frame_count);
+            (data_callback)(device, &output, &input);
         }
     }
 }

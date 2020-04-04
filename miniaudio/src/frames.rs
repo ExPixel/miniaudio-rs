@@ -1,173 +1,101 @@
-use std::marker::PhantomData;
-
 use crate::base::*;
 
-// FIXME when const generics becomes stable use that instead
-// so that we can just have Frames<const channels: u32, SampleType>
-/// Contains multiple frames.
-///
-/// A frame is a group of samples equal to the number of channels out of an output or input stream
-/// of samples. For a stereo stream (e.g. left/right channels) a frame is 2 samples, a mono stream
-/// has a frame size of 1 sample, and a 5.1 surround sound stream is 6 samples per frame. The terms
-/// "frame" and "PCM frame" are the same thing in miniaudio. Note that this is different from a
-/// compressed frame.
-pub struct Frames<SampleType: Sample + Copy + Sized, FrameType: Copy + Sized> {
-    _sample_phantom: PhantomData<SampleType>,
-    data: [FrameType],
+pub struct Frames<'s> {
+    data: &'s [u8],
+    format: Format,
+    channels: u32,
 }
 
-impl<SampleType: Sample, FrameType: Frame> Frames<SampleType, FrameType> {
-    pub fn new<'d>(data: &'d [u8]) -> &'d Frames<SampleType, FrameType> {
-        // FIXME I should probably assert here that the size of FrameType is a multiple of the
-        // size of SampleType.
-        //
-        // FIXME should also add some checks to make sure that FrameType fits into the data byte
-        // slice.
-        unsafe {
-            std::mem::transmute::<_, &'d Frames<SampleType, FrameType>>(
-                std::slice::from_raw_parts::<'d, FrameType>(
-                    data.as_ptr().cast::<FrameType>(),
-                    data.len() / std::mem::size_of::<FrameType>(),
-                ),
-            )
+impl<'s> Frames<'s> {
+    pub fn wrap(data: &'s [u8], format: Format, channels: u32) -> Frames<'s> {
+        Frames {
+            data,
+            format,
+            channels,
         }
     }
 
-    pub fn new_mut<'d>(data: &'d mut [u8]) -> &'d mut Frames<SampleType, FrameType> {
-        // FIXME I should probably assert here that the size of FrameType is a multiple of the
-        // size of SampleType.
-        //
-        // FIXME should also add some checks to make sure that FrameType fits into the data byte
-        // slice.
-        unsafe {
-            std::mem::transmute::<_, &'d mut Frames<SampleType, FrameType>>(
-                std::slice::from_raw_parts_mut::<'d, FrameType>(
-                    data.as_mut_ptr().cast::<FrameType>(),
-                    data.len() / std::mem::size_of::<FrameType>(),
-                ),
-            )
-        }
-    }
-
-    /// Returns the number of frames contained in here.
-    #[inline]
-    pub fn count(&self) -> usize {
-        self.data.len()
-    }
-
-    /// Returns the number of samples contained.
-    #[inline]
-    pub fn sample_count(&self) -> usize {
-        self.data.len() * self.channel_count()
-    }
-
-    /// Returns the number of channels contained in each frame.
-    #[inline(always)]
-    pub fn channel_count(&self) -> usize {
-        std::mem::size_of::<FrameType>() / std::mem::size_of::<SampleType>()
-    }
-
-    /// Returns a reference to the frame at the given index.
-    #[inline]
-    pub fn frame(&self, index: usize) -> &FrameType {
-        &self.data[index]
-    }
-
-    /// Returns a mutable reference to the frame at the given index.
-    #[inline]
-    pub fn frame_mut(&mut self, index: usize) -> &mut FrameType {
-        &mut self.data[index]
-    }
-
-    /// Returns the value of sample for a channel at a given frame.
-    #[inline]
-    pub fn sample(&self, frame_index: usize, channel_index: usize) -> &SampleType {
-        let frame_ref = self.frame(frame_index);
-        let frame_ptr = frame_ref as *const FrameType;
-        let samples = frame_ptr as *const SampleType;
-        unsafe { samples.add(channel_index).as_ref().unwrap() }
-    }
-
-    /// Returns a mutable reference to a sample for a channel at a given frame.
-    #[inline]
-    pub fn sample_mut(&mut self, frame_index: usize, channel_index: usize) -> &mut SampleType {
-        let frame_ref = self.frame_mut(frame_index);
-        let frame_ptr = frame_ref as *mut FrameType;
-        let samples = frame_ptr as *mut SampleType;
-        unsafe { samples.add(channel_index).as_mut().unwrap() }
-    }
-
-    #[inline]
-    pub fn frames_ptr(&self) -> *const FrameType {
+    pub(crate) fn as_ptr(&self) -> *const u8 {
         self.data.as_ptr()
     }
 
-    #[inline]
-    pub fn frames_ptr_mut(&mut self) -> *mut FrameType {
-        self.data.as_mut_ptr()
+    pub fn data(&self) -> &[u8] {
+        self.data
     }
 
-    #[inline]
-    pub fn samples_ptr(&self) -> *const SampleType {
-        self.data.as_ptr().cast()
+    pub fn byte_count(&self) -> usize {
+        self.data.len()
     }
 
-    #[inline]
-    pub fn samples_ptr_mut(&mut self) -> *mut SampleType {
-        self.data.as_mut_ptr().cast()
+    /// Returns the number of frames contained.
+    pub fn frame_count(&self) -> usize {
+        self.sample_count() / self.channels as usize
     }
-}
 
-pub trait Frame: Copy + Sized {
-    /// Returns the number of channels that this frame has when using the given type for samples.
-    fn channels<S: Sample>() -> usize {
-        std::mem::size_of::<Self>() / std::mem::size_of::<S>()
+    /// Returns the number of samples contained.
+    pub fn sample_count(&self) -> usize {
+        self.data.len() / self.format.size_in_bytes()
     }
-}
 
-// implemented for all copy and sized types
-impl<T: Copy + Sized> Frame for T {}
+    pub fn format(&self) -> Format {
+        self.format
+    }
 
-/// The type of a sample which corresponds to a `Format`.
-pub trait Sample: Copy + Sized {
-    fn format() -> Format;
-
-    /// Returns the number of channels that a frame has when using this type for samples.
-    fn channels<F: Frame>() -> usize {
-        std::mem::size_of::<F>() / std::mem::size_of::<Self>()
+    pub fn channels(&self) -> u32 {
+        self.channels
     }
 }
 
-impl Sample for u8 {
-    fn format() -> Format {
-        Format::U8
-    }
+pub struct FramesMut<'s> {
+    data: &'s mut [u8],
+    format: Format,
+    channels: u32,
 }
 
-impl Sample for i16 {
-    fn format() -> Format {
-        Format::S16
+impl<'s> FramesMut<'s> {
+    pub fn wrap(data: &'s mut [u8], format: Format, channels: u32) -> FramesMut<'s> {
+        FramesMut {
+            data,
+            format,
+            channels,
+        }
     }
-}
 
-// ## NOTE
-// Can't implement this for a tuple as well because there are no guarantees for tuple alignment.
-// Arrays are however guaranteed to be packed and have the same alignment as the type that they are
-// an array of.
-impl Sample for [u8; 3] {
-    fn format() -> Format {
-        Format::S24
+    // pub(crate) fn as_ptr(&self) -> *const u8 {
+    //     self.data.as_ptr()
+    // }
+
+    pub(crate) fn as_mut_ptr(&self) -> *mut u8 {
+        self.data.as_ptr() as *mut u8
     }
-}
 
-impl Sample for i32 {
-    fn format() -> Format {
-        Format::S32
+    pub fn data(&self) -> &[u8] {
+        self.data
     }
-}
 
-impl Sample for f32 {
-    fn format() -> Format {
-        Format::F32
+    pub fn data_mut(&mut self) -> &mut [u8] {
+        self.data
+    }
+
+    pub fn byte_count(&self) -> usize {
+        self.data.len()
+    }
+
+    /// Returns the number of frames contained.
+    pub fn frame_count(&self) -> usize {
+        self.sample_count() / self.channels as usize
+    }
+
+    /// Returns the number of samples contained.
+    pub fn sample_count(&self) -> usize {
+        self.data.len() / self.format.size_in_bytes()
+    }
+
+    pub fn format(&self) -> Format {
+        self.format
+    }
+
+    pub fn channels(&self) -> u32 {
+        self.channels
     }
 }

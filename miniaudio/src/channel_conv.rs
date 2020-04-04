@@ -1,55 +1,43 @@
 use crate::base::{from_bool32, Channel, ChannelMixMode, Error, Format, MAX_CHANNELS};
-use crate::frames::{Frame, Frames, Sample};
+use crate::frames::{Frames, FramesMut};
 use miniaudio_sys as sys;
-use std::marker::PhantomData;
 
 /// Configuration for `ChannelConverter`.
 #[repr(transparent)]
-pub struct ChannelConverterConfig<S: Sample, Fin: Frame, Fout: Frame>(
-    sys::ma_channel_converter_config,
-    PhantomData<S>,
-    PhantomData<Fin>,
-    PhantomData<Fout>,
-);
+pub struct ChannelConverterConfig(sys::ma_channel_converter_config);
 
-impl<S: Sample, Fin: Frame, Fout: Frame> ChannelConverterConfig<S, Fin, Fout> {
+impl ChannelConverterConfig {
     pub fn new(
+        format: Format,
         channel_map_in: &[Channel],
         channel_map_out: &[Channel],
         mixing_mode: ChannelMixMode,
-    ) -> ChannelConverterConfig<S, Fin, Fout> {
-        let channel_count_in = S::channels::<Fin>();
-        assert!(
-            channel_count_in == channel_map_in.len(),
-            "input channel count mismatch"
-        );
-
-        let channel_count_out = S::channels::<Fout>();
-        assert!(
-            channel_count_out == channel_map_out.len(),
-            "output channel count mismatch"
-        );
-
-        ChannelConverterConfig(
-            unsafe {
-                sys::ma_channel_converter_config_init(
-                    S::format() as _,
-                    channel_count_in as _,
-                    channel_map_in.as_ptr().cast(),
-                    channel_count_out as _,
-                    channel_map_out.as_ptr().cast(),
-                    mixing_mode as _,
-                )
-            },
-            PhantomData,
-            PhantomData,
-            PhantomData,
-        )
+    ) -> ChannelConverterConfig {
+        ChannelConverterConfig(unsafe {
+            sys::ma_channel_converter_config_init(
+                format as _,
+                channel_map_in.len() as u32,
+                channel_map_in.as_ptr().cast(),
+                channel_map_out.len() as u32,
+                channel_map_out.as_ptr().cast(),
+                mixing_mode as _,
+            )
+        })
     }
 
     #[inline]
     pub fn format(&self) -> Format {
         Format::from_c(self.0.format)
+    }
+
+    #[inline]
+    pub fn channels_in(&self) -> u32 {
+        self.0.channelsIn
+    }
+
+    #[inline]
+    pub fn channels_out(&self) -> u32 {
+        self.0.channelsOut
     }
 
     #[inline]
@@ -82,10 +70,9 @@ impl<S: Sample, Fin: Frame, Fout: Frame> ChannelConverterConfig<S, Fin, Fout> {
     /// These weights are only used when mixing mode is set to `ChannelMixMode::CustomWeights`.
     #[inline]
     pub fn weight(&self, channel_in_index: usize, channel_out_index: usize) -> f32 {
-        // we use S::channels instead of self.0.channelsIn/Out here because it can be derived at
-        // compile time and this bounds check can be eliminated.
         assert!(
-            channel_in_index < S::channels::<Fin>() && channel_out_index < S::channels::<Fout>(),
+            channel_in_index < self.0.channelsIn as usize
+                && channel_out_index < self.0.channelsOut as usize,
             "channel in/out index out of bounds"
         );
 
@@ -97,10 +84,9 @@ impl<S: Sample, Fin: Frame, Fout: Frame> ChannelConverterConfig<S, Fin, Fout> {
     /// These weights are only used when mixing mode is set to `ChannelMixMode::CustomWeights`.
     #[inline]
     pub fn set_weight(&mut self, channel_in_index: usize, channel_out_index: usize, weight: f32) {
-        // we use S::channels instead of self.0.channelsIn/Out here because it can be derived at
-        // compile time and this bounds check can be eliminated.
         assert!(
-            channel_in_index < S::channels::<Fin>() && channel_out_index < S::channels::<Fout>(),
+            channel_in_index < self.0.channelsIn as usize
+                && channel_out_index < self.0.channelsOut as usize,
             "channel in/out index out of bounds"
         );
 
@@ -140,18 +126,11 @@ impl<S: Sample, Fin: Frame, Fout: Frame> ChannelConverterConfig<S, Fin, Fout> {
 /// Finally, `ChannelMixMode::CustomWeights` mode can be used to use custom user-defined weights.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct ChannelConverter<S: Sample, Fin: Frame, Fout: Frame>(
-    sys::ma_channel_converter,
-    PhantomData<S>,
-    PhantomData<Fin>,
-    PhantomData<Fout>,
-);
+pub struct ChannelConverter(sys::ma_channel_converter);
 
-impl<S: Sample, Fin: Frame, Fout: Frame> ChannelConverter<S, Fin, Fout> {
-    pub fn new(
-        config: &ChannelConverterConfig<S, Fin, Fout>,
-    ) -> Result<ChannelConverter<S, Fin, Fout>, Error> {
-        let mut converter = std::mem::MaybeUninit::<ChannelConverter<S, Fin, Fout>>::uninit();
+impl ChannelConverter {
+    pub fn new(config: &ChannelConverterConfig) -> Result<ChannelConverter, Error> {
+        let mut converter = std::mem::MaybeUninit::<ChannelConverter>::uninit();
         unsafe {
             Error::from_c_result(sys::ma_channel_converter_init(
                 &config.0 as *const _,
@@ -164,6 +143,16 @@ impl<S: Sample, Fin: Frame, Fout: Frame> ChannelConverter<S, Fin, Fout> {
     #[inline]
     pub fn format(&self) -> Format {
         Format::from_c(self.0.format)
+    }
+
+    #[inline]
+    pub fn channels_in(&self) -> u32 {
+        self.0.channelsIn
+    }
+
+    #[inline]
+    pub fn channels_out(&self) -> u32 {
+        self.0.channelsOut
     }
 
     #[inline]
@@ -217,22 +206,27 @@ impl<S: Sample, Fin: Frame, Fout: Frame> ChannelConverter<S, Fin, Fout> {
     }
 
     #[inline]
-    pub fn process_pcm_frames(
-        &mut self,
-        output: &mut Frames<S, Fout>,
-        input: &Frames<S, Fin>,
-    ) -> Result<(), Error> {
-        if output.count() != input.count() {
-            ma_debug_panic!("output and input buffers did not have the same frame count (output: {}, input: {})", output.count(), input.count());
+    pub fn process_pcm_frames(&mut self, output: &FramesMut, input: &Frames) -> Result<(), Error> {
+        if output.format() != input.format() {
+            ma_debug_panic!(
+                "output and input format did not match (output: {:?}, input: {:?}",
+                output.format(),
+                input.format()
+            );
+            return Err(Error::InvalidArgs);
+        }
+
+        if output.byte_count() != input.byte_count() {
+            ma_debug_panic!("output and input buffers did not have the same frame count (output: {}, input: {})", output.frame_count(), input.frame_count());
             return Err(Error::InvalidArgs);
         }
 
         return Error::from_c_result(unsafe {
             sys::ma_channel_converter_process_pcm_frames(
                 &mut self.0,
-                output.frames_ptr_mut() as *mut _,
-                input.frames_ptr() as *const _,
-                output.count() as u64,
+                output.as_mut_ptr() as *mut _,
+                input.as_ptr() as *const _,
+                output.frame_count() as u64,
             )
         });
     }

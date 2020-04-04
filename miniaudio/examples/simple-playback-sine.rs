@@ -7,7 +7,14 @@ pub const DEVICE_CHANNELS: u32 = 2;
 pub const DEVICE_SAMPLE_RATE: u32 = miniaudio::SAMPLE_RATE_48000;
 
 pub fn main() {
-    let sine_wave_config = WaveformConfig::new(DEVICE_SAMPLE_RATE, WaveformType::Sine, 0.2, 220.0);
+    let sine_wave_config = WaveformConfig::new(
+        DEVICE_FORMAT,
+        DEVICE_CHANNELS,
+        DEVICE_SAMPLE_RATE,
+        WaveformType::Sine,
+        0.2,
+        220.0,
+    );
     let mut sine_wave = Waveform::new(&sine_wave_config);
 
     let mut device_config = DeviceConfig::new(DeviceType::Playback);
@@ -15,8 +22,7 @@ pub fn main() {
     device_config.playback_mut().set_channels(DEVICE_CHANNELS);
     device_config.set_sample_rate(DEVICE_SAMPLE_RATE);
 
-    device_config.set_data_callback(move |_device, output, _input, _frame_count| {
-        let output = miniaudio::as_frames_mut!(output, f32, 2);
+    device_config.set_data_callback(move |_device, output, _input| {
         sine_wave.read_pcm_frames(output);
     });
 
