@@ -1,4 +1,5 @@
 use crate::base::*;
+use crate::conversion::conversion_fn_for;
 
 pub struct Frames<'s> {
     data: &'s [u8],
@@ -12,6 +13,27 @@ impl<'s> Frames<'s> {
             data,
             format,
             channels,
+        }
+    }
+
+    /// Convert this frames samples into another format, placing the new converted
+    /// frames into `dest`.
+    pub fn convert(&self, dest: &FramesMut, dither_mode: DitherMode) {
+        assert!(
+            self.frame_count() == dest.frame_count(),
+            "frame conversion with different frame counts (input: {}, output: {})",
+            self.frame_count(),
+            dest.frame_count()
+        );
+
+        let convert_fn = conversion_fn_for(self.format, dest.format);
+        unsafe {
+            convert_fn(
+                dest.as_mut_ptr() as *mut _,
+                self.as_ptr() as *const _,
+                self.frame_count() as u64,
+                dither_mode as _,
+            );
         }
     }
 
@@ -61,12 +83,33 @@ impl<'s> FramesMut<'s> {
         }
     }
 
-    // pub(crate) fn as_ptr(&self) -> *const u8 {
-    //     self.data.as_ptr()
-    // }
+    pub(crate) fn as_ptr(&self) -> *const u8 {
+        self.data.as_ptr()
+    }
 
     pub(crate) fn as_mut_ptr(&self) -> *mut u8 {
         self.data.as_ptr() as *mut u8
+    }
+
+    /// Convert this frames samples into another format, placing the new converted
+    /// frames into `dest`.
+    pub fn convert(&self, dest: &FramesMut, dither_mode: DitherMode) {
+        assert!(
+            self.frame_count() == dest.frame_count(),
+            "frame conversion with different frame counts (input: {}, output: {})",
+            self.frame_count(),
+            dest.frame_count()
+        );
+
+        let convert_fn = conversion_fn_for(self.format, dest.format);
+        unsafe {
+            convert_fn(
+                dest.as_mut_ptr() as *mut _,
+                self.as_ptr() as *const _,
+                self.frame_count() as u64,
+                dither_mode as _,
+            );
+        }
     }
 
     pub fn data(&self) -> &[u8] {
