@@ -3,23 +3,37 @@ use crate::frames::{Frame, Frames, Sample};
 use miniaudio_sys as sys;
 use std::marker::PhantomData;
 
+#[repr(C)]
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum ResampleAlgorithmType {
+    Linear = sys::ma_resample_algorithm_linear as _,
+    Speex = sys::ma_resample_algorithm_speex as _,
+}
+impl_from_c!(ResampleAlgorithmType, sys::ma_resample_algorithm);
+
 /// The choice of resampling algorithm depends on your situation and requirements.
 /// The linear resampler is the most efficient and has the least amount of latency,
 /// but at the expense of poorer quality. The Speex resampler is higher quality,
 /// but slower with more latency. It also performs several heap allocations internally
 /// for memory management.
-#[repr(C)]
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum ResampleAlgorithm {
-    /// Fastest, lowest quality, optional low-pass filtering. Default.
-    Linear = sys::ma_resample_algorithm_linear as _,
-    Speex = sys::ma_resample_algorithm_speex as _,
-}
-impl_from_c!(ResampleAlgorithm, sys::ma_resample_algorithm);
+    Linear {
+        lpf_order: u32,
+        lpf_nyquist_factor: f64,
+    },
 
-impl Default for ResampleAlgorithm {
-    fn default() -> ResampleAlgorithm {
-        ResampleAlgorithm::Linear
+    Speex {
+        quality: u32,
+    },
+}
+
+impl ResampleAlgorithm {
+    pub fn algorithm_type(&self) -> ResampleAlgorithmType {
+        match self {
+            &ResampleAlgorithm::Linear { .. } => ResampleAlgorithmType::Linear,
+            &ResampleAlgorithm::Speex { .. } => ResampleAlgorithmType::Speex,
+        }
     }
 }
 
@@ -77,30 +91,24 @@ impl<S: Sample, F: Frame> LinearResamplerConfig<S, F> {
         self.0.sampleRateOut = sample_rate;
     }
 
-    /// The low pass filter order. If this is set to 0, low pass filtering will be disabled.
-    #[inline]
-    pub fn lpf_order(&self) -> u32 {
-        self.0.lpfOrder
-    }
-
-    /// The low pass filter order. If this is set to 0, low pass filtering will be disabled.
-    #[inline]
-    pub fn set_lpf_order(&mut self, lpf_order: u32) {
-        self.0.lpfOrder = lpf_order;
-    }
-
-    /// 0..1. Defaults to 1. 1 = Half the sampling frequency (Nyquist Frequency),
-    /// 0.5 = Quarter the sampling frequency (half Nyquest Frequency), etc.
     #[inline]
     pub fn lpf_nyquist_factor(&self) -> f64 {
         self.0.lpfNyquistFactor
     }
 
-    /// 0..1. Defaults to 1. 1 = Half the sampling frequency (Nyquist Frequency),
-    /// 0.5 = Quarter the sampling frequency (half Nyquest Frequency), etc.
     #[inline]
     pub fn set_lpf_nyquist_factor(&mut self, factor: f64) {
         self.0.lpfNyquistFactor = factor;
+    }
+
+    #[inline]
+    pub fn lpf_order(&self) -> u32 {
+        self.0.lpfOrder
+    }
+
+    #[inline]
+    pub fn set_lpf_order(&mut self, order: u32) {
+        self.0.lpfOrder = order;
     }
 }
 
@@ -267,7 +275,7 @@ impl<S: Sample, F: Frame> ResamplerConfig<S, F> {
     pub fn new(
         sample_rate_in: u32,
         sample_rate_out: u32,
-        algorithm: ResampleAlgorithm,
+        algorithm: ResampleAlgorithmType,
     ) -> ResamplerConfig<S, F> {
         ResamplerConfig(
             unsafe {
@@ -314,46 +322,37 @@ impl<S: Sample, F: Frame> ResamplerConfig<S, F> {
         self.0.sampleRateOut = sample_rate;
     }
 
-    #[inline]
+    pub fn set_algorithm(&mut self, algo: ResampleAlgorithm) {
+        match algo {
+            ResampleAlgorithm::Linear {
+                lpf_order,
+                lpf_nyquist_factor,
+            } => {
+                self.0.algorithm = sys::ma_resample_algorithm_linear;
+                self.0.linear.lpfOrder = lpf_order;
+                self.0.linear.lpfNyquistFactor = lpf_nyquist_factor;
+            }
+
+            ResampleAlgorithm::Speex { quality } => {
+                self.0.algorithm = sys::ma_resample_algorithm_speex;
+                self.0.speex.quality = quality as _;
+            }
+        }
+    }
+
     pub fn algorithm(&self) -> ResampleAlgorithm {
-        ResampleAlgorithm::from_c(self.0.algorithm)
-    }
+        match self.0.algorithm {
+            sys::ma_resample_algorithm_linear => ResampleAlgorithm::Linear {
+                lpf_order: self.0.linear.lpfOrder,
+                lpf_nyquist_factor: self.0.linear.lpfNyquistFactor,
+            },
 
-    #[inline]
-    pub fn set_algorithm(&mut self, algorithm: ResampleAlgorithm) {
-        self.0.algorithm = algorithm as _;
-    }
+            sys::ma_resample_algorithm_speex => ResampleAlgorithm::Speex {
+                quality: self.0.speex.quality as _,
+            },
 
-    #[inline]
-    pub fn linear_lpf_order(&self) -> u32 {
-        self.0.linear.lpfOrder
-    }
-
-    #[inline]
-    pub fn set_linear_lpf_order(&mut self, order: u32) {
-        self.0.linear.lpfOrder = order;
-    }
-
-    #[inline]
-    pub fn linear_lpf_nyquist_factor(&self) -> f64 {
-        self.0.linear.lpfNyquistFactor
-    }
-
-    #[inline]
-    pub fn set_linear_lpf_nyquist_factor(&mut self, factor: f64) {
-        self.0.linear.lpfNyquistFactor = factor;
-    }
-
-    /// From 0 to 10. Defaults to 3.
-    #[inline]
-    pub fn speex_quality(&mut self) -> u32 {
-        self.0.speex.quality as u32
-    }
-
-    /// From 0 to 10. Defaults to 3.
-    #[inline]
-    pub fn set_speex_quality(&mut self, quality: u32) {
-        self.0.speex.quality = std::cmp::min(quality, 10) as i32;
+            _ => unreachable!(),
+        }
     }
 }
 

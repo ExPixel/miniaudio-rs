@@ -8,11 +8,9 @@ use std::ptr;
 use std::ptr::NonNull;
 use std::sync::Arc;
 
-type MADeviceConfigResampling = sys::ma_device_config__bindgen_ty_1;
 type MADeviceConfigPlayback = sys::ma_device_config__bindgen_ty_2;
 type MADeviceConfigCapture = sys::ma_device_config__bindgen_ty_3;
 
-type MADeviceResampling = sys::ma_device__bindgen_ty_1;
 type MADevicePlayback = sys::ma_device__bindgen_ty_2;
 type MADeviceCapture = sys::ma_device__bindgen_ty_3;
 
@@ -254,13 +252,38 @@ impl DeviceConfig {
     }
 
     #[inline]
-    pub fn resampling(&self) -> &DeviceConfigResampling {
-        unsafe { std::mem::transmute(&self.0.resampling) }
+    pub fn resampling(&self) -> ResampleAlgorithm {
+        match self.0.resampling.algorithm {
+            sys::ma_resample_algorithm_linear => ResampleAlgorithm::Linear {
+                lpf_order: self.0.resampling.linear.lpfOrder,
+                lpf_nyquist_factor: 1.0,
+            },
+
+            sys::ma_resample_algorithm_speex => ResampleAlgorithm::Speex {
+                quality: self.0.resampling.speex.quality as u32,
+            },
+
+            _ => unreachable!(),
+        }
     }
 
     #[inline]
-    pub fn resampling_mut(&mut self) -> &mut DeviceConfigResampling {
-        unsafe { std::mem::transmute(&mut self.0.resampling) }
+    pub fn set_resampling(&mut self, algo: ResampleAlgorithm) {
+        match algo {
+            ResampleAlgorithm::Linear {
+                lpf_order,
+                lpf_nyquist_factor,
+            } => {
+                let _ = lpf_nyquist_factor;
+                self.0.resampling.algorithm = sys::ma_resample_algorithm_linear;
+                self.0.resampling.linear.lpfOrder = lpf_order;
+            }
+
+            ResampleAlgorithm::Speex { quality } => {
+                self.0.resampling.algorithm = sys::ma_resample_algorithm_speex;
+                self.0.resampling.speex.quality = quality as _;
+            }
+        }
     }
 
     /// Sets the data callback for this device config.
@@ -482,35 +505,6 @@ impl DeviceConfigCapture {
 
     pub fn set_share_mode(&mut self, share_mode: ShareMode) {
         self.0.shareMode = share_mode as _
-    }
-}
-
-#[repr(transparent)]
-pub struct DeviceConfigResampling(MADeviceConfigResampling);
-
-impl DeviceConfigResampling {
-    pub fn algorithm(&self) -> ResampleAlgorithm {
-        ResampleAlgorithm::from_c(self.0.algorithm)
-    }
-
-    pub fn set_algorithm(&mut self, algorithm: ResampleAlgorithm) {
-        self.0.algorithm = algorithm as _;
-    }
-
-    pub fn linear_lpf_order(&self) -> u32 {
-        self.0.linear.lpfOrder
-    }
-
-    pub fn set_linear_lpf_order(&mut self, lpf_order: u32) {
-        self.0.linear.lpfOrder = lpf_order;
-    }
-
-    pub fn speex_quality(&self) -> i32 {
-        self.0.speex.quality as i32
-    }
-
-    pub fn set_speex_quality(&mut self, quality: i32) {
-        self.0.speex.quality = quality as _;
     }
 }
 
@@ -899,8 +893,19 @@ impl Device {
     }
 
     #[inline]
-    pub fn resampling(&self) -> &DeviceResampling {
-        unsafe { std::mem::transmute(&self.0.resampling) }
+    pub fn resampling(&self) -> ResampleAlgorithm {
+        match self.0.resampling.algorithm {
+            sys::ma_resample_algorithm_linear => ResampleAlgorithm::Linear {
+                lpf_order: self.0.resampling.linear.lpfOrder,
+                lpf_nyquist_factor: 1.0,
+            },
+
+            sys::ma_resample_algorithm_speex => ResampleAlgorithm::Speex {
+                quality: self.0.resampling.speex.quality as u32,
+            },
+
+            _ => unreachable!(),
+        }
     }
 
     #[inline]
@@ -934,23 +939,6 @@ impl Drop for Device {
             self.0.pContext = ptr::null_mut();
             drop(context_arc);
         }
-    }
-}
-
-#[repr(transparent)]
-pub struct DeviceResampling(MADeviceResampling);
-
-impl DeviceResampling {
-    pub fn algorithm(&self) -> ResampleAlgorithm {
-        ResampleAlgorithm::from_c(self.0.algorithm)
-    }
-
-    pub fn linear_lpf_order(&self) -> u32 {
-        self.0.linear.lpfOrder
-    }
-
-    pub fn speex_quality(&self) -> i32 {
-        self.0.speex.quality as i32
     }
 }
 
