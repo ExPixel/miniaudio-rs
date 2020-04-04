@@ -231,3 +231,11 @@ impl ChannelConverter {
         });
     }
 }
+
+impl Drop for ChannelConverter {
+    fn drop(&mut self) {
+        unsafe {
+            sys::ma_channel_converter_uninit(&mut self.0);
+        }
+    }
+}
