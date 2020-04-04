@@ -3,6 +3,26 @@ name = "miniaudio"
 version = "0.1.0"
 authors = ["Adolph C. <adolphc@outlook.com>"]
 edition = "2018"
+description = "Bindings to the miniaudio C library."
+documentation = "https://docs.rs/miniaudio"
+repository = "https://github.com/ExPixel/miniaudio-rs"
+homepage = "https://github.com/ExPixel/miniaudio-rs"
+license = "MIT"
+keywords = ["audio", "miniaudio", "sound", "pcm"]
+publish = true
+categories = ["multimedia::audio", "multimedia"]
+
+[lib]
+name = "miniaudio"
+path = "src/lib.rs"
+crate_type = ["lib"]
+
+[features]
+ma-log-level-verbose = []
+ma-log-level-info = []
+ma-log-level-warning = []
+ma-log-level-error = []
+ma-debug-output = []
 
 [dependencies]
 ep-miniaudio-sys = { path = "../miniaudio-sys" }
