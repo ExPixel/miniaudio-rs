@@ -136,7 +136,7 @@ impl DataConverter {
     #[inline]
     pub fn process_pcm_frames(
         &mut self,
-        output: &FramesMut,
+        output: &mut FramesMut,
         input: &Frames,
     ) -> Result<(u64, u64), Error> {
         if output.format() != input.format() {

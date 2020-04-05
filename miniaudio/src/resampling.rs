@@ -144,7 +144,7 @@ impl LinearResampler {
     #[inline]
     pub fn process_pcm_frames(
         &mut self,
-        output: &FramesMut,
+        output: &mut FramesMut,
         input: &Frames,
     ) -> Result<(u64, u64), Error> {
         let mut output_frames = output.frame_count() as u64;
@@ -374,7 +374,7 @@ impl Resampler {
     #[inline]
     pub fn process_pcm_frames(
         &mut self,
-        output: &FramesMut,
+        output: &mut FramesMut,
         input: &Frames,
     ) -> Result<(u64, u64), Error> {
         if output.format() != input.format() {

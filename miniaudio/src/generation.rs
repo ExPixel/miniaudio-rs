@@ -114,7 +114,7 @@ impl Waveform {
     }
 
     #[inline]
-    pub fn read_pcm_frames(&mut self, output: &FramesMut) -> u64 {
+    pub fn read_pcm_frames(&mut self, output: &mut FramesMut) -> u64 {
         assert!(
             output.format() == self.config().format(),
             "output format not the same as waveform format"
@@ -290,7 +290,7 @@ impl Noise {
         }
     }
 
-    pub fn read_pcm_frames(&mut self, output: &FramesMut) -> u64 {
+    pub fn read_pcm_frames(&mut self, output: &mut FramesMut) -> u64 {
         assert!(
             output.format() == self.config().format(),
             "output format not the same as waveform format"

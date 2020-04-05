@@ -98,7 +98,11 @@ impl Notch2 {
     }
 
     #[inline]
-    pub fn process_pcm_frames(&mut self, output: &FramesMut, input: &Frames) -> Result<(), Error> {
+    pub fn process_pcm_frames(
+        &mut self,
+        output: &mut FramesMut,
+        input: &Frames,
+    ) -> Result<(), Error> {
         if output.format() != input.format() {
             ma_debug_panic!(
                 "output and input format did not match (output: {:?}, input: {:?}",

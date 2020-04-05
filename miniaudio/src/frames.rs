@@ -20,7 +20,7 @@ impl<'s> Frames<'s> {
     /// Convert this frames samples into another format, placing the new converted
     /// frames into `dest`.
     #[inline]
-    pub fn convert(&self, dest: &FramesMut, dither_mode: DitherMode) {
+    pub fn convert(&self, dest: &mut FramesMut, dither_mode: DitherMode) {
         assert!(
             self.frame_count() == dest.frame_count(),
             "frame conversion with different frame counts (input: {}, output: {})",
@@ -118,14 +118,14 @@ impl<'s> FramesMut<'s> {
         self.data.as_ptr()
     }
 
-    pub(crate) fn as_mut_ptr(&self) -> *mut u8 {
+    pub(crate) fn as_mut_ptr(&mut self) -> *mut u8 {
         self.data.as_ptr() as *mut u8
     }
 
     /// Convert this frames samples into another format, placing the new converted
     /// frames into `dest`.
     #[inline]
-    pub fn convert(&self, dest: &FramesMut, dither_mode: DitherMode) {
+    pub fn convert(&self, dest: &mut FramesMut, dither_mode: DitherMode) {
         assert!(
             self.frame_count() == dest.frame_count(),
             "frame conversion with different frame counts (input: {}, output: {})",
@@ -197,12 +197,12 @@ impl<'s> FramesMut<'s> {
     }
 
     #[inline]
-    pub fn data(&self) -> &[u8] {
+    pub fn as_bytes(&self) -> &[u8] {
         self.data
     }
 
     #[inline]
-    pub fn data_mut(&mut self) -> &mut [u8] {
+    pub fn as_bytes_mut(&mut self) -> &mut [u8] {
         self.data
     }
 

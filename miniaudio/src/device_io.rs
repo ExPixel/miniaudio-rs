@@ -295,7 +295,7 @@ impl DeviceConfig {
     /// of cloneable thread-safe struct like an Arc.
     pub fn set_data_callback<F>(&mut self, callback: F)
     where
-        F: FnMut(NonNull<Device>, &FramesMut, &Frames) + Send + Sync + Clone + 'static,
+        F: FnMut(NonNull<Device>, &mut FramesMut, &Frames) + Send + Sync + Clone + 'static,
     {
         let user_data = self.ensure_user_data();
         unsafe {
@@ -343,14 +343,14 @@ impl DeviceConfig {
 
 pub struct DeviceConfigUserData {
     data_callback_factory:
-        Option<Box<dyn Fn() -> Box<dyn FnMut(NonNull<Device>, &FramesMut, &Frames)>>>,
+        Option<Box<dyn Fn() -> Box<dyn FnMut(NonNull<Device>, &mut FramesMut, &Frames)>>>,
     stop_callback_factory: Option<Box<dyn Fn() -> Box<dyn FnMut(NonNull<Device>)>>>,
 }
 
 // FIXME it might be better to just set the callbacks to some noop functions by default
 // to save ourselves the extra in the audio callback code.
 pub struct DeviceUserData {
-    data_callback: Option<Box<dyn FnMut(NonNull<Device>, &FramesMut, &Frames)>>,
+    data_callback: Option<Box<dyn FnMut(NonNull<Device>, &mut FramesMut, &Frames)>>,
     stop_callback: Option<Box<dyn FnMut(NonNull<Device>)>>,
 }
 
@@ -367,7 +367,7 @@ unsafe extern "C" fn device_data_callback_trampoline(
         let output_format = (*device.as_ptr()).playback().format();
         let output_channels = (*device.as_ptr()).playback().channels();
 
-        let output = if output_ptr.is_null() {
+        let mut output = if output_ptr.is_null() {
             FramesMut::wrap(&mut empty_output, output_format, output_channels)
         } else {
             let bytes_per_frame = output_format.size_in_bytes() * output_channels as usize;
@@ -403,7 +403,7 @@ unsafe extern "C" fn device_data_callback_trampoline(
         }
 
         if let Some(ref mut data_callback) = (*user_data).data_callback {
-            (data_callback)(device, &output, &input);
+            (data_callback)(device, &mut output, &input);
         }
     }
 }
