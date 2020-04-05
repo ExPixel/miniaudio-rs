@@ -463,7 +463,11 @@ impl DeviceConfigPlayback {
         unsafe { std::mem::transmute(self.0.pDeviceID) }
     }
 
-    pub fn set_device_id(&mut self, device_id: Option<NonNull<DeviceId>>) {
+    // FIXME this sucks, but I don't really have a better way.
+    /// Unfortunately the device id passed in here has to be a pointer, and this is unsafe because
+    /// you have to ensure that the device ID will live longer than the `DeviceConfig` that owns this
+    /// `DeviceConfigPlayback`.
+    pub unsafe fn set_device_id(&mut self, device_id: Option<NonNull<DeviceId>>) {
         self.0.pDeviceID = device_id
             .map(|id| id.cast().as_ptr())
             .unwrap_or(ptr::null_mut());
