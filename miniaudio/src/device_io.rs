@@ -160,9 +160,13 @@ impl DeviceInfo {
     }
 
     #[inline]
-    pub fn formats(&self) -> [Format; sys::ma_format_count as usize] {
-        // FIXME this should truncate the array and return a slice with length `format_count`
-        unsafe { std::mem::transmute(self.0.formats) }
+    pub fn formats<'r>(&'r self) -> &'r [Format] {
+        unsafe {
+            std::slice::from_raw_parts(
+                &self.0.formats as *const sys::ma_format as *const Format,
+                self.format_count() as usize,
+            )
+        }
     }
 
     #[inline]

@@ -41,4 +41,6 @@ pub fn print_device_info(context: &Context, device_type: DeviceType, device_id: 
         info.min_channels(),
         info.max_channels()
     );
+
+    println!("\t\tFormats: {:?}", info.formats());
 }
