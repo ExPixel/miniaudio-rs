@@ -9,6 +9,7 @@ repository = "https://github.com/ExPixel/miniaudio-rs"
 homepage = "https://github.com/ExPixel/miniaudio-rs"
 license = "MIT"
 keywords = ["audio", "miniaudio", "sound", "pcm"]
+readme = "README.md"
 publish = true
 categories = ["multimedia::audio", "multimedia"]
 
