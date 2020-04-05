@@ -1,6 +1,6 @@
 [package]
 name = "miniaudio"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Adolph C. <adolphc@outlook.com>"]
 edition = "2018"
 description = "Bindings to the miniaudio C library."
@@ -26,4 +26,4 @@ ma-log-level-error = []
 ma-debug-output = []
 
 [dependencies]
-ep-miniaudio-sys = { version = "0.1.0", path = "../miniaudio-sys" }
+ep-miniaudio-sys = { version = "1.0.0", path = "../miniaudio-sys" }
