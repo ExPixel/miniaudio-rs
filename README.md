@@ -2,6 +2,8 @@ Mini Audio Rust Bindings
 ===
 
 [![Build Status](https://github.com/ExPixel/miniaudio-rs/workflows/Tests/badge.svg)](https://github.com/ExPixel/miniaudio-rs/actions?query=workflow%3ATests)
+[![crates.io](https://img.shields.io/crates/v/miniaudio.svg?color=orange)](https://crates.io/crates/miniaudio)
+[![docs.rs](https://img.shields.io/badge/docs-stable-blue.svg)](https://docs.rs/miniaudio)
 
 Bindings to https://github.com/dr-soft/miniaudio
 
