@@ -107,17 +107,43 @@ impl_from_c!(
     sys::ma_ios_session_category_option
 );
 
-// FIXME probably going to want a way to compare these???
+/// Like device info but only contains the ID and name of a device info.
+/// use Context::device_info(ID) in order to get more information about
+/// the device that this refers to.
 #[repr(transparent)]
+#[derive(Clone)]
+pub struct DeviceIdAndName(DeviceInfo);
+
+impl DeviceIdAndName {
+    #[inline]
+    pub fn id<'r>(&'r self) -> &'r DeviceId {
+        self.0.id()
+    }
+
+    #[inline]
+    pub fn name<'r>(&'r self) -> &'r str {
+        self.0.name()
+    }
+
+    /// Allows you to use this as the device info.
+    /// NOTE: Only ID and name are guaranteed to be initialzied. All other values may just be zero.
+    pub unsafe fn as_device_info<'r>(&'r self) -> &'r DeviceInfo {
+        std::mem::transmute(self)
+    }
+}
+
+#[repr(transparent)]
+#[derive(Clone)]
 pub struct DeviceId(sys::ma_device_id);
 
 #[repr(transparent)]
+#[derive(Clone)]
 pub struct DeviceInfo(sys::ma_device_info);
 
 impl DeviceInfo {
     #[inline]
-    pub fn id(&self) -> DeviceId {
-        unsafe { std::mem::transmute(self.0.id) }
+    pub fn id(&self) -> &DeviceId {
+        unsafe { std::mem::transmute(&self.0.id) }
     }
 
     #[inline]
@@ -564,6 +590,47 @@ impl Context {
         map_result!(result, unsafe { std::mem::transmute(context) })
     }
 
+    /// Returns information like name, format, and sample rate, ect. about a device with the given
+    /// ID.
+    pub fn get_device_info(
+        &self,
+        device_type: DeviceType,
+        device_id: &DeviceId,
+        share_mode: ShareMode,
+    ) -> Result<DeviceInfo, Error> {
+        let mut device_info = MaybeUninit::<DeviceInfo>::uninit();
+        let result = unsafe {
+            sys::ma_context_get_device_info(
+                self as *const _ as *mut _,
+                device_type as _,
+                device_id as *const DeviceId as *mut _,
+                share_mode as _,
+                device_info.as_mut_ptr().cast(),
+            )
+        };
+        map_result!(result, unsafe { device_info.assume_init() })
+    }
+
+    /// Returns information like name, format, and sample rate, ect. about a device with the given
+    /// ID. This will place the gathered information into the passed in device_info reference.
+    pub fn set_device_info(
+        &self,
+        device_type: DeviceType,
+        device_id: &DeviceId,
+        share_mode: ShareMode,
+        device_info: &mut DeviceInfo,
+    ) -> Result<(), Error> {
+        Error::from_c_result(unsafe {
+            sys::ma_context_get_device_info(
+                self as *const _ as *mut _,
+                device_type as _,
+                device_id as *const DeviceId as *mut _,
+                share_mode as _,
+                device_info as *mut DeviceInfo as *mut _,
+            )
+        })
+    }
+
     pub fn backend(&self) -> Backend {
         Backend::from_c(self.0.backend)
     }
@@ -576,15 +643,18 @@ impl Context {
         self.0.deviceInfoCapacity
     }
 
-    pub fn playback_device_info_count(&self) -> u32 {
+    /// Returns the number of found playback devices.
+    pub fn playback_device_count(&self) -> u32 {
         self.0.playbackDeviceInfoCount
     }
 
-    pub fn capture_device_info_count(&self) -> u32 {
+    /// Returns the number of found capture devices.
+    pub fn capture_device_count(&self) -> u32 {
         self.0.captureDeviceInfoCount
     }
 
-    pub fn playback_device_infos(&self) -> &[DeviceInfo] {
+    /// Returns a slice containing the name and IDs of all found playback devices.
+    pub fn playback_devices(&self) -> &[DeviceIdAndName] {
         unsafe {
             std::slice::from_raw_parts(
                 self.0.pDeviceInfos as _,
@@ -593,7 +663,8 @@ impl Context {
         }
     }
 
-    pub fn capture_device_info(&self) -> &[DeviceInfo] {
+    /// Returns a slice containing the name and IDs of all found capture devices.
+    pub fn capture_devices(&self) -> &[DeviceIdAndName] {
         unsafe {
             std::slice::from_raw_parts(
                 self.0
@@ -613,7 +684,7 @@ impl Context {
     /// This function will not call the closure if an error occurred.
     pub fn with_devices<F>(&self, f: F) -> Result<(), Error>
     where
-        F: FnOnce(&[DeviceInfo], &[DeviceInfo]),
+        F: FnOnce(&[DeviceIdAndName], &[DeviceIdAndName]),
     {
         let mut playback_ptr: *mut sys::ma_device_info = ptr::null_mut();
         let mut playback_count: u32 = 0;
@@ -636,11 +707,11 @@ impl Context {
 
             f(
                 std::slice::from_raw_parts(
-                    std::mem::transmute::<_, *mut DeviceInfo>(playback_ptr),
+                    std::mem::transmute::<_, *mut DeviceIdAndName>(playback_ptr),
                     playback_count as usize,
                 ),
                 std::slice::from_raw_parts(
-                    std::mem::transmute::<_, *mut DeviceInfo>(capture_ptr),
+                    std::mem::transmute::<_, *mut DeviceIdAndName>(capture_ptr),
                     capture_count as usize,
                 ),
             );
@@ -654,7 +725,7 @@ impl Context {
     /// This function will not call the closure if an error occurred.
     pub fn with_playback_devices<F>(&self, f: F) -> Result<(), Error>
     where
-        F: FnOnce(&[DeviceInfo]),
+        F: FnOnce(&[DeviceIdAndName]),
     {
         let mut playback_ptr: *mut sys::ma_device_info = ptr::null_mut();
         let mut playback_count: u32 = 0;
@@ -673,7 +744,7 @@ impl Context {
             }
 
             f(std::slice::from_raw_parts(
-                std::mem::transmute::<_, *mut DeviceInfo>(playback_ptr),
+                std::mem::transmute::<_, *mut DeviceIdAndName>(playback_ptr),
                 playback_count as usize,
             ));
         }
@@ -686,7 +757,7 @@ impl Context {
     /// This function will not call the closure if an error occurred.
     pub fn with_capture_devices<F>(&self, f: F) -> Result<(), Error>
     where
-        F: FnOnce(&[DeviceInfo]),
+        F: FnOnce(&[DeviceIdAndName]),
     {
         let mut capture_ptr: *mut sys::ma_device_info = ptr::null_mut();
         let mut capture_count = 0;
@@ -705,7 +776,7 @@ impl Context {
             }
 
             f(std::slice::from_raw_parts(
-                std::mem::transmute::<_, *mut DeviceInfo>(capture_ptr),
+                std::mem::transmute::<_, *mut DeviceIdAndName>(capture_ptr),
                 capture_count as usize,
             ));
         }
@@ -713,21 +784,20 @@ impl Context {
         return Ok(());
     }
 
-    pub fn enumerate_devices<F>(&self, mut callback: F) -> Result<(), Error>
+    /// **DO NOT** call `get_device_info` or `set_device_info` while inside of the callback.
+    pub unsafe fn enumerate_devices<F>(&self, mut callback: F) -> Result<(), Error>
     where
-        F: for<'r, 's> FnMut(&'r Context, DeviceType, &'s DeviceInfo) -> bool,
+        F: for<'r, 's> FnMut(&'r Context, DeviceType, &'s DeviceIdAndName) -> bool,
     {
-        let mut callback_ptr: &mut dyn FnMut(&Context, DeviceType, &DeviceInfo) -> bool =
+        let mut callback_ptr: &mut dyn FnMut(&Context, DeviceType, &DeviceIdAndName) -> bool =
             &mut callback;
         let callback_ptr_ptr = &mut callback_ptr;
 
-        let result = unsafe {
-            sys::ma_context_enumerate_devices(
-                &self.0 as *const _ as *mut _,
-                Some(enumerate_devices_inner_trampoline),
-                callback_ptr_ptr as *mut _ as *mut c_void,
-            )
-        };
+        let result = sys::ma_context_enumerate_devices(
+            &self.0 as *const _ as *mut _,
+            Some(enumerate_devices_inner_trampoline),
+            callback_ptr_ptr as *mut _ as *mut c_void,
+        );
 
         return Error::from_c_result(result);
 
@@ -738,21 +808,18 @@ impl Context {
             udata: *mut c_void,
         ) -> u32 {
             let real_callback =
-                udata as *mut &mut dyn FnMut(&Context, DeviceType, &DeviceInfo) -> bool;
+                udata as *mut &mut dyn FnMut(&Context, DeviceType, &DeviceIdAndName) -> bool;
             let b = (*real_callback)(
                 (context as *mut Context).as_mut().unwrap(),
                 DeviceType::from_c(device_type),
-                (info as *const DeviceInfo).as_ref().unwrap(),
+                (info as *const DeviceInfo as *const DeviceIdAndName)
+                    .as_ref()
+                    .unwrap(),
             );
 
             to_bool32(b)
         }
     }
-
-    // FIXME implement ma_context_enumerate_devices
-
-    // FIXME implement user data / callbacks
-    // See `DeviceConfig` for how to do that.
 }
 
 impl Drop for Context {
