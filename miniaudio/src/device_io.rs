@@ -452,9 +452,24 @@ unsafe extern "C" fn device_stop_callback_trampoline(device_ptr: *mut sys::ma_de
 
 impl Drop for DeviceConfig {
     fn drop(&mut self) {
+        // It's fine to get rid of this because a device will only use this once
+        // to call the factory functions to get the callbacks at construction, so
+        // it won't keep a reference.
         let user_data = self.0.pUserData;
         if !user_data.is_null() {
             unsafe { Box::from_raw(user_data.cast::<DeviceConfigUserData>()) }; // drop it
+        }
+
+        // Clean these up if they were set because they won't drop themselves.
+
+        if !self.0.playback.pDeviceID.is_null() {
+            let _ = unsafe { Box::from_raw(self.0.playback.pDeviceID as *mut DeviceId) };
+            self.0.playback.pDeviceID = std::ptr::null_mut();
+        }
+
+        if !self.0.capture.pDeviceID.is_null() {
+            let _ = unsafe { Box::from_raw(self.0.capture.pDeviceID as *mut DeviceId) };
+            self.0.capture.pDeviceID = std::ptr::null_mut();
         }
     }
 }
@@ -467,14 +482,21 @@ impl DeviceConfigPlayback {
         unsafe { std::mem::transmute(self.0.pDeviceID) }
     }
 
-    // FIXME this sucks, but I don't really have a better way.
-    /// Unfortunately the device id passed in here has to be a pointer, and this is unsafe because
-    /// you have to ensure that the device ID will live longer than the `DeviceConfig` that owns this
-    /// `DeviceConfigPlayback`.
-    pub unsafe fn set_device_id(&mut self, device_id: Option<NonNull<DeviceId>>) {
-        self.0.pDeviceID = device_id
-            .map(|id| id.cast().as_ptr())
-            .unwrap_or(ptr::null_mut());
+    /// Sets the ID of the device that should be used. Be aware that this function will allocate
+    /// once in order to reserve space for the device id.
+    pub fn set_device_id(&mut self, maybe_device_id: Option<DeviceId>) {
+        if let Some(device_id) = maybe_device_id {
+            if !self.0.pDeviceID.is_null() {
+                unsafe { std::ptr::write(self.0.pDeviceID as *mut DeviceId, device_id) };
+            } else {
+                self.0.pDeviceID = Box::into_raw(Box::new(device_id)) as *mut sys::ma_device_id;
+            }
+        } else {
+            if !self.0.pDeviceID.is_null() {
+                let _ = unsafe { Box::from_raw(self.0.pDeviceID as *mut DeviceId) };
+                self.0.pDeviceID = std::ptr::null_mut();
+            }
+        }
     }
 
     pub fn format(&self) -> Format {
@@ -510,6 +532,15 @@ impl DeviceConfigPlayback {
     }
 }
 
+impl Drop for DeviceConfigPlayback {
+    fn drop(&mut self) {
+        if !self.0.pDeviceID.is_null() {
+            let _ = unsafe { Box::from_raw(self.0.pDeviceID as *mut DeviceId) };
+            self.0.pDeviceID = std::ptr::null_mut();
+        }
+    }
+}
+
 #[repr(transparent)]
 pub struct DeviceConfigCapture(MADeviceConfigCapture);
 
@@ -518,10 +549,21 @@ impl DeviceConfigCapture {
         unsafe { std::mem::transmute(self.0.pDeviceID) }
     }
 
-    pub fn set_device_id(&mut self, device_id: Option<NonNull<DeviceId>>) {
-        self.0.pDeviceID = device_id
-            .map(|id| id.cast().as_ptr())
-            .unwrap_or(ptr::null_mut());
+    /// Sets the ID of the device that should be used. Be aware that this function will allocate
+    /// once in order to reserve space for the device id.
+    pub fn set_device_id(&mut self, maybe_device_id: Option<DeviceId>) {
+        if let Some(device_id) = maybe_device_id {
+            if !self.0.pDeviceID.is_null() {
+                unsafe { std::ptr::write(self.0.pDeviceID as *mut DeviceId, device_id) };
+            } else {
+                self.0.pDeviceID = Box::into_raw(Box::new(device_id)) as *mut sys::ma_device_id;
+            }
+        } else {
+            if !self.0.pDeviceID.is_null() {
+                let _ = unsafe { Box::from_raw(self.0.pDeviceID as *mut DeviceId) };
+                self.0.pDeviceID = std::ptr::null_mut();
+            }
+        }
     }
 
     pub fn format(&self) -> Format {
@@ -554,6 +596,15 @@ impl DeviceConfigCapture {
 
     pub fn set_share_mode(&mut self, share_mode: ShareMode) {
         self.0.shareMode = share_mode as _
+    }
+}
+
+impl Drop for DeviceConfigCapture {
+    fn drop(&mut self) {
+        if !self.0.pDeviceID.is_null() {
+            let _ = unsafe { Box::from_raw(self.0.pDeviceID as *mut DeviceId) };
+            self.0.pDeviceID = std::ptr::null_mut();
+        }
     }
 }
 
@@ -866,6 +917,7 @@ impl Device {
         if !self.0.pUserData.is_null() {
             let config_user_data = self.0.pUserData.cast::<DeviceConfigUserData>();
 
+            // Use the callback factories to create clones of the callback functions:
             let data_callback = unsafe {
                 ((*config_user_data).data_callback_factory)
                     .as_ref()
@@ -885,24 +937,36 @@ impl Device {
     }
 
     /// This will return the context **owned** by this device. A context that was passed into this
-    /// device via `new` is **not** owned by this device and if you need a reference to that just
-    /// keep a reference to it instead. The purpose of this function is to provide a reference to a
-    /// context when one was not initially provided. If you want a function that will return
-    /// whatever context this is using whether it owns it or now, use `context_ptr` instead which
-    /// will just return the same raw pointer to a context that this device uses internally.
+    /// device via `new` is **not** owned by this device and if you need a reference to that use
+    /// `context` instead.
     pub fn owned_context(&self) -> Option<&'static Context> {
         if self.is_owner_of_context() {
-            assert!(!self.0.pContext.is_null());
-            unsafe { Some(self.0.pContext.cast::<Context>().as_mut().unwrap()) }
+            unsafe {
+                Some(
+                    self.0
+                        .pContext
+                        .cast::<Context>()
+                        .as_mut()
+                        .expect("no context for device (???)"),
+                )
+            }
         } else {
             None
         }
     }
 
     /// This will return a pointer to the context being used by this device.
-    pub fn context_ptr(&self) -> NonNull<Context> {
-        assert!(!self.0.pContext.is_null());
-        NonNull::new(self.0.pContext).unwrap().cast::<Context>()
+    pub fn context<'r>(&'r self) -> &'r Context {
+        // This should be safe because Context's can only be constructed via Context::alloc which
+        // will wrap it in an Arc and then Device::alloc will clone the Arc. This means that there
+        // is no way to mutably access the Context while a Device object is also in scope.
+        unsafe {
+            self.0
+                .pContext
+                .cast::<Context>()
+                .as_ref()
+                .expect("no context for device (???)")
+        }
     }
 
     /// Starts the device. For playback devices this begins playback. For capture devices this

@@ -33,13 +33,7 @@ pub fn main() {
     let device = Device::alloc(None, &device_config).expect("failed to open playback device");
     device.start().expect("failed to start device");
 
-    println!(
-        "Device Backend: {:?}",
-        device
-            .owned_context()
-            .expect("the context is not owned by the device")
-            .backend()
-    );
+    println!("Device Backend: {:?}", device.context().backend());
     wait_for_enter();
     println!("Shutting Down...");
 }
