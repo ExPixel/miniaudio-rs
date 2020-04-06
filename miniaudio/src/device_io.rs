@@ -885,8 +885,6 @@ impl Drop for RawContext {
     fn drop(&mut self) {
         Error::from_c_result(unsafe { sys::ma_context_uninit(&mut self.0) })
             .expect("failed to uninit context");
-
-        println!("dropped raw context");
     }
 }
 
@@ -1129,8 +1127,6 @@ impl Drop for RawDevice {
             self.0.pContext = ptr::null_mut();
             drop(context_arc);
         }
-
-        println!("dropped raw device");
     }
 }
 
