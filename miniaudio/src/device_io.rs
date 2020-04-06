@@ -325,7 +325,7 @@ impl DeviceConfig {
     /// of cloneable thread-safe struct like an Arc.
     pub fn set_data_callback<F>(&mut self, callback: F)
     where
-        F: FnMut(NonNull<Device>, &mut FramesMut, &Frames) + Send + Sync + Clone + 'static,
+        F: FnMut(NonNull<RawDevice>, &mut FramesMut, &Frames) + Send + Sync + Clone + 'static,
     {
         let user_data = self.ensure_user_data();
         unsafe {
@@ -346,7 +346,7 @@ impl DeviceConfig {
     /// of cloneable thread-safe struct like an Arc.
     pub fn set_stop_callback<F>(&mut self, callback: F)
     where
-        F: FnMut(NonNull<Device>) + Clone + Send + Sync + 'static,
+        F: FnMut(NonNull<RawDevice>) + Clone + Send + Sync + 'static,
     {
         let user_data = self.ensure_user_data();
         unsafe {
@@ -373,15 +373,15 @@ impl DeviceConfig {
 
 pub struct DeviceConfigUserData {
     data_callback_factory:
-        Option<Box<dyn Fn() -> Box<dyn FnMut(NonNull<Device>, &mut FramesMut, &Frames)>>>,
-    stop_callback_factory: Option<Box<dyn Fn() -> Box<dyn FnMut(NonNull<Device>)>>>,
+        Option<Box<dyn Fn() -> Box<dyn FnMut(NonNull<RawDevice>, &mut FramesMut, &Frames)>>>,
+    stop_callback_factory: Option<Box<dyn Fn() -> Box<dyn FnMut(NonNull<RawDevice>)>>>,
 }
 
 // FIXME it might be better to just set the callbacks to some noop functions by default
 // to save ourselves the extra in the audio callback code.
 pub struct DeviceUserData {
-    data_callback: Option<Box<dyn FnMut(NonNull<Device>, &mut FramesMut, &Frames)>>,
-    stop_callback: Option<Box<dyn FnMut(NonNull<Device>)>>,
+    data_callback: Option<Box<dyn FnMut(NonNull<RawDevice>, &mut FramesMut, &Frames)>>,
+    stop_callback: Option<Box<dyn FnMut(NonNull<RawDevice>)>>,
 }
 
 unsafe extern "C" fn device_data_callback_trampoline(
@@ -390,7 +390,7 @@ unsafe extern "C" fn device_data_callback_trampoline(
     input_ptr: *const c_void,
     frame_count: u32,
 ) {
-    if let Some(device) = NonNull::new(device_ptr.cast::<Device>()) {
+    if let Some(device) = NonNull::new(device_ptr.cast::<RawDevice>()) {
         let mut empty_output = [0u8; 0];
         let empty_input = [0u8; 0];
 
@@ -439,7 +439,7 @@ unsafe extern "C" fn device_data_callback_trampoline(
 }
 
 unsafe extern "C" fn device_stop_callback_trampoline(device_ptr: *mut sys::ma_device) {
-    if let Some(device) = NonNull::new(device_ptr.cast::<Device>()) {
+    if let Some(device) = NonNull::new(device_ptr.cast::<RawDevice>()) {
         let user_data = (*device.as_ptr()).0.pUserData.cast::<DeviceUserData>();
         if user_data.is_null() {
             return;
@@ -622,9 +622,9 @@ impl ContextConfig {
 }
 
 #[repr(transparent)]
-pub struct Context(sys::ma_context);
+pub struct RawContext(sys::ma_context);
 
-impl Context {
+impl RawContext {
     /// - `backends` - A list of backends to try initializing, in priority order. Can be None, in which case it
     /// uses default priority order.
     ///
@@ -632,7 +632,7 @@ impl Context {
     pub fn alloc(
         backends: Option<&[Backend]>,
         config: Option<&ContextConfig>,
-    ) -> Result<Arc<Context>, Error> {
+    ) -> Result<Arc<RawContext>, Error> {
         let context = Arc::new(MaybeUninit::<sys::ma_context>::uninit());
 
         let result = unsafe {
@@ -846,9 +846,9 @@ impl Context {
     /// **DO NOT** call `get_device_info` or `set_device_info` while inside of the callback.
     pub unsafe fn enumerate_devices<F>(&self, mut callback: F) -> Result<(), Error>
     where
-        F: for<'r, 's> FnMut(&'r Context, DeviceType, &'s DeviceIdAndName) -> bool,
+        F: for<'r, 's> FnMut(&'r RawContext, DeviceType, &'s DeviceIdAndName) -> bool,
     {
-        let mut callback_ptr: &mut dyn FnMut(&Context, DeviceType, &DeviceIdAndName) -> bool =
+        let mut callback_ptr: &mut dyn FnMut(&RawContext, DeviceType, &DeviceIdAndName) -> bool =
             &mut callback;
         let callback_ptr_ptr = &mut callback_ptr;
 
@@ -867,9 +867,9 @@ impl Context {
             udata: *mut c_void,
         ) -> u32 {
             let real_callback =
-                udata as *mut &mut dyn FnMut(&Context, DeviceType, &DeviceIdAndName) -> bool;
+                udata as *mut &mut dyn FnMut(&RawContext, DeviceType, &DeviceIdAndName) -> bool;
             let b = (*real_callback)(
-                (context as *mut Context).as_mut().unwrap(),
+                (context as *mut RawContext).as_mut().unwrap(),
                 DeviceType::from_c(device_type),
                 (info as *const DeviceInfo as *const DeviceIdAndName)
                     .as_ref()
@@ -881,34 +881,54 @@ impl Context {
     }
 }
 
-impl Drop for Context {
+impl Drop for RawContext {
     fn drop(&mut self) {
         Error::from_c_result(unsafe { sys::ma_context_uninit(&mut self.0) })
             .expect("failed to uninit context");
+
+        println!("dropped raw context");
+    }
+}
+
+/// An atomically reference counted context.
+#[derive(Clone)]
+pub struct Context(Arc<RawContext>);
+
+impl Context {
+    pub fn new(
+        backends: Option<&[Backend]>,
+        config: Option<&ContextConfig>,
+    ) -> Result<Context, Error> {
+        RawContext::alloc(backends, config).map(|raw| Context(raw))
+    }
+}
+
+impl std::ops::Deref for Context {
+    type Target = RawContext;
+
+    fn deref(&self) -> &RawContext {
+        &self.0
     }
 }
 
 #[repr(transparent)]
-pub struct Device(sys::ma_device);
+pub struct RawDevice(sys::ma_device);
 
-impl Device {
-    pub fn alloc(
-        context: Option<Arc<Context>>,
-        config: &DeviceConfig,
-    ) -> Result<Arc<Device>, Error> {
+impl RawDevice {
+    fn alloc(context: Option<Context>, config: &DeviceConfig) -> Result<Arc<RawDevice>, Error> {
         let device = Arc::new(MaybeUninit::<sys::ma_device>::uninit());
 
         let result = unsafe {
             sys::ma_device_init(
                 context
-                    .map(|c| Arc::into_raw(c) as *mut _)
+                    .map(|c| Arc::into_raw(c.0) as *mut _)
                     .unwrap_or(ptr::null_mut()),
                 config as *const DeviceConfig as *const _,
                 Arc::deref(&device).as_ptr() as *mut _,
             )
         };
 
-        unsafe { (*(Arc::deref(&device).as_ptr() as *mut Device)).create_device_user_data() };
+        unsafe { (*(Arc::deref(&device).as_ptr() as *mut RawDevice)).create_device_user_data() };
 
         map_result!(result, unsafe { std::mem::transmute(device) })
     }
@@ -939,13 +959,13 @@ impl Device {
     /// This will return the context **owned** by this device. A context that was passed into this
     /// device via `new` is **not** owned by this device and if you need a reference to that use
     /// `context` instead.
-    pub fn owned_context(&self) -> Option<&'static Context> {
+    pub fn owned_context(&self) -> Option<&'static RawContext> {
         if self.is_owner_of_context() {
             unsafe {
                 Some(
                     self.0
                         .pContext
-                        .cast::<Context>()
+                        .cast::<RawContext>()
                         .as_mut()
                         .expect("no context for device (???)"),
                 )
@@ -956,14 +976,14 @@ impl Device {
     }
 
     /// This will return a pointer to the context being used by this device.
-    pub fn context<'r>(&'r self) -> &'r Context {
+    pub fn context<'r>(&'r self) -> &'r RawContext {
         // This should be safe because Context's can only be constructed via Context::alloc which
-        // will wrap it in an Arc and then Device::alloc will clone the Arc. This means that there
+        // will wrap it in an Arc and then RawDevice::alloc will clone the Arc. This means that there
         // is no way to mutably access the Context while a Device object is also in scope.
         unsafe {
             self.0
                 .pContext
-                .cast::<Context>()
+                .cast::<RawContext>()
                 .as_ref()
                 .expect("no context for device (???)")
         }
@@ -1073,7 +1093,7 @@ impl Device {
     }
 }
 
-impl Drop for Device {
+impl Drop for RawDevice {
     fn drop(&mut self) {
         // We have to copy these before the struct is zeroed.
         let is_owner_of_context = self.is_owner_of_context();
@@ -1089,10 +1109,30 @@ impl Drop for Device {
 
         // We only decrement the context ref count if we own it and now the device.
         if !is_owner_of_context && !context_ptr.is_null() {
-            let context_arc = unsafe { Arc::from_raw(context_ptr as *const _) };
+            let context_arc =
+                unsafe { Arc::from_raw(context_ptr as *const _ as *const RawContext) };
             self.0.pContext = ptr::null_mut();
             drop(context_arc);
         }
+
+        println!("dropped raw device");
+    }
+}
+
+#[derive(Clone)]
+pub struct Device(Arc<RawDevice>);
+
+impl Device {
+    pub fn new(context: Option<Context>, config: &DeviceConfig) -> Result<Device, Error> {
+        RawDevice::alloc(context, config).map(|raw| Device(raw))
+    }
+}
+
+impl std::ops::Deref for Device {
+    type Target = RawDevice;
+
+    fn deref(&self) -> &RawDevice {
+        &self.0
     }
 }
 

@@ -30,7 +30,7 @@ pub fn main() {
         println!("Device Stopped.");
     });
 
-    let device = Device::alloc(None, &device_config).expect("failed to open playback device");
+    let device = Device::new(None, &device_config).expect("failed to open playback device");
     device.start().expect("failed to start device");
 
     println!("Device Backend: {:?}", device.context().backend());
