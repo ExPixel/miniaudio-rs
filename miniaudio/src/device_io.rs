@@ -325,7 +325,7 @@ impl DeviceConfig {
     /// of cloneable thread-safe struct like an Arc.
     pub fn set_data_callback<F>(&mut self, callback: F)
     where
-        F: FnMut(NonNull<RawDevice>, &mut FramesMut, &Frames) + Send + Sync + Clone + 'static,
+        F: FnMut(&RawDevice, &mut FramesMut, &Frames) + Send + Sync + Clone + 'static,
     {
         let user_data = self.ensure_user_data();
         unsafe {
@@ -346,7 +346,7 @@ impl DeviceConfig {
     /// of cloneable thread-safe struct like an Arc.
     pub fn set_stop_callback<F>(&mut self, callback: F)
     where
-        F: FnMut(NonNull<RawDevice>) + Clone + Send + Sync + 'static,
+        F: FnMut(&RawDevice) + Clone + Send + Sync + 'static,
     {
         let user_data = self.ensure_user_data();
         unsafe {
@@ -373,15 +373,15 @@ impl DeviceConfig {
 
 pub struct DeviceConfigUserData {
     data_callback_factory:
-        Option<Box<dyn Fn() -> Box<dyn FnMut(NonNull<RawDevice>, &mut FramesMut, &Frames)>>>,
-    stop_callback_factory: Option<Box<dyn Fn() -> Box<dyn FnMut(NonNull<RawDevice>)>>>,
+        Option<Box<dyn Fn() -> Box<dyn FnMut(&RawDevice, &mut FramesMut, &Frames)>>>,
+    stop_callback_factory: Option<Box<dyn Fn() -> Box<dyn FnMut(&RawDevice)>>>,
 }
 
 // FIXME it might be better to just set the callbacks to some noop functions by default
 // to save ourselves the extra in the audio callback code.
 pub struct DeviceUserData {
-    data_callback: Option<Box<dyn FnMut(NonNull<RawDevice>, &mut FramesMut, &Frames)>>,
-    stop_callback: Option<Box<dyn FnMut(NonNull<RawDevice>)>>,
+    data_callback: Option<Box<dyn FnMut(&RawDevice, &mut FramesMut, &Frames)>>,
+    stop_callback: Option<Box<dyn FnMut(&RawDevice)>>,
 }
 
 unsafe extern "C" fn device_data_callback_trampoline(
@@ -433,7 +433,7 @@ unsafe extern "C" fn device_data_callback_trampoline(
         }
 
         if let Some(ref mut data_callback) = (*user_data).data_callback {
-            (data_callback)(device, &mut output, &input);
+            (data_callback)(device.as_ref(), &mut output, &input);
         }
     }
 }
@@ -445,7 +445,7 @@ unsafe extern "C" fn device_stop_callback_trampoline(device_ptr: *mut sys::ma_de
             return;
         }
         if let Some(ref mut stop_callback) = (*user_data).stop_callback {
-            (stop_callback)(device);
+            (stop_callback)(device.as_ref());
         }
     }
 }
@@ -959,6 +959,7 @@ impl RawDevice {
     /// This will return the context **owned** by this device. A context that was passed into this
     /// device via `new` is **not** owned by this device and if you need a reference to that use
     /// `context` instead.
+    #[inline]
     pub fn owned_context(&self) -> Option<&'static RawContext> {
         if self.is_owner_of_context() {
             unsafe {
@@ -976,6 +977,7 @@ impl RawDevice {
     }
 
     /// This will return a pointer to the context being used by this device.
+    #[inline]
     pub fn context<'r>(&'r self) -> &'r RawContext {
         // This should be safe because Context's can only be constructed via Context::alloc which
         // will wrap it in an Arc and then RawDevice::alloc will clone the Arc. This means that there
@@ -994,6 +996,7 @@ impl RawDevice {
     /// Use `stop` to stop this device.
     ///
     /// **WARNING** This should not be called from a callback.
+    #[inline]
     pub fn start(&self) -> Result<(), Error> {
         Error::from_c_result(unsafe { sys::ma_device_start(&self.0 as *const _ as *mut _) })
     }
@@ -1002,11 +1005,13 @@ impl RawDevice {
     /// recording. Use `start` to start this device again.
     ///
     /// **WARNING** This should not be called from a callback.
+    #[inline]
     pub fn stop(&self) -> Result<(), Error> {
         Error::from_c_result(unsafe { sys::ma_device_stop(&self.0 as *const _ as *mut _) })
     }
 
     /// Returns true if this device has started.
+    #[inline]
     pub fn is_started(&self) -> bool {
         from_bool32(unsafe { sys::ma_device_is_started(&self.0 as *const _ as *mut _) })
     }
@@ -1019,6 +1024,7 @@ impl RawDevice {
     /// Callback Safety
     /// ---------------
     /// Safe. If you set the volume in the data callback, that data written to the output buffer will have the new volume applied.
+    #[inline]
     pub fn set_master_volume(&self, volume: f32) -> Result<(), Error> {
         Error::from_c_result(unsafe {
             sys::ma_device_set_master_volume(&self.0 as *const _ as *mut _, volume)
@@ -1026,6 +1032,7 @@ impl RawDevice {
     }
 
     /// Retrieves the master volume factor for the device.
+    #[inline]
     pub fn get_master_volume(&self) -> Result<f32, Error> {
         let mut out = 0.0;
         map_result!(
@@ -1044,6 +1051,7 @@ impl RawDevice {
     /// Callback Safety
     /// ---------------
     /// Safe. If you set the volume in the data callback, that data written to the output buffer will have the new volume applied.
+    #[inline]
     pub fn set_master_gain_db(&self, gain_db: f32) -> Result<(), Error> {
         Error::from_c_result(unsafe {
             sys::ma_device_set_master_gain_db(&self.0 as *const _ as *mut _, gain_db)
@@ -1051,6 +1059,7 @@ impl RawDevice {
     }
 
     /// Retrieves the master gain in decibels.
+    #[inline]
     pub fn get_master_gain_db(&self) -> Result<f32, Error> {
         let mut out = 0.0;
         map_result!(
@@ -1062,8 +1071,14 @@ impl RawDevice {
     /// This is set to true if the context was created by and is managed by the device.
     /// If this is false, then the context is created by the user and should be cleaned by on the
     /// Rust side.
+    #[inline]
     fn is_owner_of_context(&self) -> bool {
         from_bool32(self.0.isOwnerOfContext())
+    }
+
+    #[inline]
+    pub fn sample_rate(&self) -> u32 {
+        self.0.sampleRate
     }
 
     #[inline]
