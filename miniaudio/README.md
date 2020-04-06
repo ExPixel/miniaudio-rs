@@ -26,7 +26,7 @@ Example Usage
 use miniaudio::Context;
 
 pub fn main() {
-    let context = Context::alloc(None, None).expect("failed to create context");
+    let context = Context::new(None, None).expect("failed to create context");
 
     context
         .with_devices(|playback_devices, capture_devices| {
