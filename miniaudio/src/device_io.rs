@@ -478,8 +478,8 @@ impl Drop for DeviceConfig {
 pub struct DeviceConfigPlayback(MADeviceConfigPlayback);
 
 impl DeviceConfigPlayback {
-    pub fn device_id(&self) -> Option<NonNull<DeviceId>> {
-        unsafe { std::mem::transmute(self.0.pDeviceID) }
+    pub fn device_id<'r>(&'r self) -> Option<&'r DeviceId> {
+        unsafe { (self.0.pDeviceID as *const DeviceId).as_ref() }
     }
 
     /// Sets the ID of the device that should be used. Be aware that this function will allocate
@@ -545,8 +545,8 @@ impl Drop for DeviceConfigPlayback {
 pub struct DeviceConfigCapture(MADeviceConfigCapture);
 
 impl DeviceConfigCapture {
-    pub fn device_id(&self) -> Option<NonNull<DeviceId>> {
-        unsafe { std::mem::transmute(self.0.pDeviceID) }
+    pub fn device_id<'r>(&'r self) -> Option<&'r DeviceId> {
+        unsafe { (self.0.pDeviceID as *const DeviceId).as_ref() }
     }
 
     /// Sets the ID of the device that should be used. Be aware that this function will allocate
