@@ -14,7 +14,7 @@ That can be found in the C library's main header file.
 
 Building
 ---
-Building that LLVM is installed in order to generate the bindings, but aside from that everything should __just work__.
+LLVM must be installed in order to generate the bindings, but aside from that everything should __just work__.
 Feel free to open an issue here if that is not the case.
 
 
