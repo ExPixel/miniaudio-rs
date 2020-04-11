@@ -72,4 +72,4 @@ jobs:
         - name: Check Formatting
           run: cargo fmt --all -- --check
         - name: Clippy Lints
-          run: cargo clippy -- -A warnings
+          run: cargo clippy

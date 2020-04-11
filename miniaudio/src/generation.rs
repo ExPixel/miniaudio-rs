@@ -158,6 +158,24 @@ impl Waveform {
     pub fn set_time(&mut self, time: f64) {
         self.0.time = time;
     }
+
+    /// Set the amplitude of the waveform after it has been configured.
+    pub fn set_amplitude(&mut self, amplitude: f64) {
+        // NOTE error only occurs if pWaveform is NULL
+        let _ = unsafe { sys::ma_waveform_set_amplitude(&mut self.0, amplitude) };
+    }
+
+    /// Set the frequency of the waveform after it has been configured.
+    pub fn set_frequency(&mut self, frequency: f64) {
+        // NOTE error only occurs if pWaveform is NULL
+        let _ = unsafe { sys::ma_waveform_set_frequency(&mut self.0, frequency) };
+    }
+
+    /// Set the sample rate of teh waveform after is as been configured.
+    pub fn set_sample_rate(&mut self, sample_rate: u32) {
+        // NOTE error only occurs if pWaveform is NULL
+        let _ = unsafe { sys::ma_waveform_set_sample_rate(&mut self.0, sample_rate) };
+    }
 }
 
 #[derive(Copy, Clone)]

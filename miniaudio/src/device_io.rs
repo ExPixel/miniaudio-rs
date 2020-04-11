@@ -995,8 +995,8 @@ impl RawDevice {
     ///
     /// **WARNING** This should not be called from a callback.
     #[inline]
-    pub fn start(&self) -> Result<(), Error> {
-        Error::from_c_result(unsafe { sys::ma_device_start(&self.0 as *const _ as *mut _) })
+    pub unsafe fn raw_start(&self) -> Result<(), Error> {
+        Error::from_c_result(sys::ma_device_start(&self.0 as *const _ as *mut _))
     }
 
     /// Stops this device. For playback devices this stops playback. For capture devices this stops
@@ -1004,8 +1004,8 @@ impl RawDevice {
     ///
     /// **WARNING** This should not be called from a callback.
     #[inline]
-    pub fn stop(&self) -> Result<(), Error> {
-        Error::from_c_result(unsafe { sys::ma_device_stop(&self.0 as *const _ as *mut _) })
+    pub unsafe fn raw_stop(&self) -> Result<(), Error> {
+        Error::from_c_result(sys::ma_device_stop(&self.0 as *const _ as *mut _))
     }
 
     /// Returns true if this device has started.
@@ -1136,6 +1136,23 @@ pub struct Device(Arc<RawDevice>);
 impl Device {
     pub fn new(context: Option<Context>, config: &DeviceConfig) -> Result<Device, Error> {
         RawDevice::alloc(context, config).map(|raw| Device(raw))
+    }
+
+    /// Starts the device. For playback devices this begins playback. For capture devices this
+    /// begins recording.
+    /// Use `stop` to stop this device.
+    ///
+    /// **WARNING** This should not be called from a callback.
+    pub fn start(&self) -> Result<(), Error> {
+        unsafe { self.0.raw_start() }
+    }
+
+    /// Stops this device. For playback devices this stops playback. For capture devices this stops
+    /// recording. Use `start` to start this device again.
+    ///
+    /// **WARNING** This should not be called from a callback.
+    pub fn stop(&self) -> Result<(), Error> {
+        unsafe { self.0.raw_stop() }
     }
 }
 
