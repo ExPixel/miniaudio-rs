@@ -819,13 +819,13 @@ impl ContextConfigCoreAudio {
 
     #[inline]
     pub fn session_category_options(&mut self) -> IOSSessionCategoryOption {
-        IOSSessionCategoryOption::from_bits(self.0.sessionCategoryOptions)
+        IOSSessionCategoryOption::from_bits(self.0.sessionCategoryOptions as _)
             .expect("invalid session category options")
     }
 
     #[inline]
     pub fn set_session_category_options(&mut self, options: IOSSessionCategoryOption) {
-        self.0.sessionCategoryOptions = options.bits;
+        self.0.sessionCategoryOptions = options.bits as _;
     }
 }
 
