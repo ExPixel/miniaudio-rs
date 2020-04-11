@@ -1,7 +1,7 @@
 use miniaudio::{Context, DeviceType};
 
 pub fn main() {
-    let context = Context::new(None, None).expect("failed to create context");
+    let context = Context::new(&[], None).expect("failed to create context");
 
     println!("Devices:");
     unsafe {

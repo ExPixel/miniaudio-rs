@@ -1,7 +1,7 @@
 use miniaudio::{Context, DeviceId, DeviceType, ShareMode};
 
 pub fn main() {
-    let context = Context::new(None, None).expect("failed to create context");
+    let context = Context::new(&[], None).expect("failed to create context");
 
     context
         .with_devices(|playback_devices, capture_devices| {

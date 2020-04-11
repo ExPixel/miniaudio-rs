@@ -2,6 +2,7 @@ use crate::base::*;
 use crate::frames::{Frames, FramesMut};
 use crate::resampling::ResampleAlgorithm;
 use miniaudio_sys as sys;
+use std::ffi::{CStr, CString, NulError};
 use std::mem::MaybeUninit;
 use std::ops::Deref;
 use std::os::raw::c_void;
@@ -15,10 +16,15 @@ type MADeviceConfigCapture = sys::ma_device_config__bindgen_ty_3;
 type MADevicePlayback = sys::ma_device__bindgen_ty_2;
 type MADeviceCapture = sys::ma_device__bindgen_ty_3;
 
+type MAContextConfigAlsa = sys::ma_context_config__bindgen_ty_1;
+type MAContextConfigPulse = sys::ma_context_config__bindgen_ty_2;
+type MAContextConfigCoreAudio = sys::ma_context_config__bindgen_ty_3;
+type MAContextConfigJack = sys::ma_context_config__bindgen_ty_4;
+
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Backend {
-    WASAPI = sys::ma_backend_wasapi as _,
+    Wasapi = sys::ma_backend_wasapi as _,
     DSound = sys::ma_backend_dsound as _,
     WinMM = sys::ma_backend_winmm as _,
     CoreAudio = sys::ma_backend_coreaudio as _,
@@ -26,7 +32,7 @@ pub enum Backend {
     Audio4 = sys::ma_backend_audio4 as _,
     OSS = sys::ma_backend_oss as _,
     PulseAudio = sys::ma_backend_pulseaudio as _,
-    ALSA = sys::ma_backend_alsa as _,
+    Alsa = sys::ma_backend_alsa as _,
     Jack = sys::ma_backend_jack as _,
     AAudio = sys::ma_backend_aaudio as _,
     OpenSL = sys::ma_backend_opensl as _,
@@ -90,22 +96,19 @@ pub enum IOSSessionCategory {
 }
 impl_from_c!(IOSSessionCategory, sys::ma_ios_session_category);
 
-#[repr(C)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum IOSSessionCategoryOption {
-    MixWithOthers = sys::ma_ios_session_category_option_mix_with_others as _,
-    DuckOthers = sys::ma_ios_session_category_option_duck_others as _,
-    AllowBluetooth = sys::ma_ios_session_category_option_allow_bluetooth as _,
-    DefaultToSpeaker = sys::ma_ios_session_category_option_default_to_speaker as _,
-    InterruptSpokenAudioAndMixWithOthers =
-        sys::ma_ios_session_category_option_interrupt_spoken_audio_and_mix_with_others as _,
-    AllowBluetoothA2DP = sys::ma_ios_session_category_option_allow_bluetooth_a2dp as _,
-    AllowAirPlay = sys::ma_ios_session_category_option_allow_air_play as _,
+bitflags::bitflags! {
+    #[repr(transparent)]
+    pub struct IOSSessionCategoryOption: sys::ma_ios_session_category_option {
+        const MIX_WITH_OTHERS = sys::ma_ios_session_category_option_mix_with_others as _;
+        const DUCK_OTHERS = sys::ma_ios_session_category_option_duck_others as _;
+        const ALLOW_BLUETOOTH = sys::ma_ios_session_category_option_allow_bluetooth as _;
+        const DEFAULT_TO_SPEAKER = sys::ma_ios_session_category_option_default_to_speaker as _;
+        const INTERRUPT_SPOKEN_AUDIO_AND_MIX_WITH_OTHERS =
+            sys::ma_ios_session_category_option_interrupt_spoken_audio_and_mix_with_others as _;
+        const ALLOW_BLUETOOTH_A2_DP = sys::ma_ios_session_category_option_allow_bluetooth_a2dp as _;
+        const ALLOW_AIR_PLAY = sys::ma_ios_session_category_option_allow_air_play as _;
+    }
 }
-impl_from_c!(
-    IOSSessionCategoryOption,
-    sys::ma_ios_session_category_option
-);
 
 /// Like device info but only contains the ID and name of a device info.
 /// use Context::device_info(ID) in order to get more information about
@@ -149,7 +152,7 @@ impl DeviceInfo {
 
     #[inline]
     pub fn name(&self) -> &str {
-        let cstr = unsafe { std::ffi::CStr::from_ptr(self.0.name.as_ptr()) };
+        let cstr = unsafe { CStr::from_ptr(self.0.name.as_ptr()) };
 
         // FIXME at the moment we just return a blank string instead of invalid UTF-8
         cstr.to_str().unwrap_or("")
@@ -471,17 +474,9 @@ impl Drop for DeviceConfig {
             unsafe { Box::from_raw(user_data.cast::<DeviceConfigUserData>()) }; // drop it
         }
 
-        // Clean these up if they were set because they won't drop themselves.
-
-        if !self.0.playback.pDeviceID.is_null() {
-            let _ = unsafe { Box::from_raw(self.0.playback.pDeviceID as *mut DeviceId) };
-            self.0.playback.pDeviceID = std::ptr::null_mut();
-        }
-
-        if !self.0.capture.pDeviceID.is_null() {
-            let _ = unsafe { Box::from_raw(self.0.capture.pDeviceID as *mut DeviceId) };
-            self.0.capture.pDeviceID = std::ptr::null_mut();
-        }
+        // Free these in case they allocated:
+        self.playback_mut().internal_free();
+        self.capture_mut().internal_free();
     }
 }
 
@@ -545,14 +540,19 @@ impl DeviceConfigPlayback {
     pub fn set_share_mode(&mut self, share_mode: ShareMode) {
         self.0.shareMode = share_mode as _
     }
-}
 
-impl Drop for DeviceConfigPlayback {
-    fn drop(&mut self) {
+    fn internal_free(&mut self) {
+        // Allowed to free this because miniaudio will copy it when we construct a device.
         if !self.0.pDeviceID.is_null() {
             let _ = unsafe { Box::from_raw(self.0.pDeviceID as *mut DeviceId) };
             self.0.pDeviceID = std::ptr::null_mut();
         }
+    }
+}
+
+impl Drop for DeviceConfigPlayback {
+    fn drop(&mut self) {
+        self.internal_free();
     }
 }
 
@@ -616,14 +616,19 @@ impl DeviceConfigCapture {
     pub fn set_share_mode(&mut self, share_mode: ShareMode) {
         self.0.shareMode = share_mode as _
     }
-}
 
-impl Drop for DeviceConfigCapture {
-    fn drop(&mut self) {
+    fn internal_free(&mut self) {
+        // Allowed to free this because miniaudio will copy it when we construct a device.
         if !self.0.pDeviceID.is_null() {
             let _ = unsafe { Box::from_raw(self.0.pDeviceID as *mut DeviceId) };
             self.0.pDeviceID = std::ptr::null_mut();
         }
+    }
+}
+
+impl Drop for DeviceConfigCapture {
+    fn drop(&mut self) {
+        self.internal_free();
     }
 }
 
@@ -632,12 +637,56 @@ pub struct ContextConfig(sys::ma_context_config);
 
 impl ContextConfig {
     /// Initializes a ContextConfig object.
+    #[inline]
     pub fn new() -> ContextConfig {
         ContextConfig(unsafe { sys::ma_context_config_init() })
     }
 
-    // FIXME implement some stuff for context config.
-    //       I just don't need it at the moement, so...
+    #[inline]
+    pub fn alsa(&self) -> &ContextConfigAlsa {
+        unsafe { &*(&self.0.alsa as *const MAContextConfigAlsa as *const ContextConfigAlsa) }
+    }
+
+    #[inline]
+    pub fn alsa_mut(&mut self) -> &mut ContextConfigAlsa {
+        unsafe { &mut *(&mut self.0.alsa as *mut MAContextConfigAlsa as *mut ContextConfigAlsa) }
+    }
+
+    #[inline]
+    pub fn pulse(&self) -> &ContextConfigPulse {
+        unsafe { &*(&self.0.pulse as *const MAContextConfigPulse as *const ContextConfigPulse) }
+    }
+
+    #[inline]
+    pub fn pulse_mut(&mut self) -> &mut ContextConfigPulse {
+        unsafe { &mut *(&mut self.0.pulse as *mut MAContextConfigPulse as *mut ContextConfigPulse) }
+    }
+
+    #[inline]
+    pub fn coreaudio(&self) -> &ContextConfigCoreAudio {
+        unsafe {
+            &*(&self.0.coreaudio as *const MAContextConfigCoreAudio
+                as *const ContextConfigCoreAudio)
+        }
+    }
+
+    #[inline]
+    pub fn coreaudio_mut(&mut self) -> &mut ContextConfigCoreAudio {
+        unsafe {
+            &mut *(&mut self.0.coreaudio as *mut MAContextConfigCoreAudio
+                as *mut ContextConfigCoreAudio)
+        }
+    }
+
+    #[inline]
+    pub fn jack(&self) -> &ContextConfigJack {
+        unsafe { &*(&self.0.jack as *const MAContextConfigJack as *const ContextConfigJack) }
+    }
+
+    #[inline]
+    pub fn jack_mut(&mut self) -> &mut ContextConfigJack {
+        unsafe { &mut *(&mut self.0.jack as *mut MAContextConfigJack as *mut ContextConfigJack) }
+    }
 }
 
 impl Default for ContextConfig {
@@ -646,7 +695,174 @@ impl Default for ContextConfig {
     }
 }
 
+impl Drop for ContextConfig {
+    fn drop(&mut self) {
+        // It's okay to free these because miniaudio copies the strings.
+        self.pulse_mut().internal_free();
+        self.jack_mut().internal_free();
+    }
+}
+
 #[repr(transparent)]
+#[derive(Clone)]
+pub struct ContextConfigAlsa(MAContextConfigAlsa);
+
+impl ContextConfigAlsa {
+    #[inline]
+    pub fn use_verbose_device_enumeration(&self) -> bool {
+        from_bool32(self.0.useVerboseDeviceEnumeration)
+    }
+
+    #[inline]
+    pub fn set_use_verbose_device_enumeration(&mut self, verbose: bool) {
+        self.0.useVerboseDeviceEnumeration = to_bool32(verbose);
+    }
+}
+
+macro_rules! raw_str_get {
+    ($String:expr) => {
+        if $String.is_null() {
+            None
+        } else {
+            let cstr = unsafe { CStr::from_ptr($String) };
+
+            // FIXME at the moment we just return a blank string instead of invalid UTF-8
+            Some(cstr.to_str().unwrap_or(""))
+        }
+    };
+}
+
+macro_rules! raw_str_free {
+    ($String:expr) => {
+        if !$String.is_null() {
+            let _ = unsafe {
+                CString::from_raw(std::mem::replace(&mut $String, std::ptr::null()) as *mut _)
+            };
+        }
+    };
+}
+
+macro_rules! raw_str_set {
+    ($String:expr, $Value:expr) => {{
+        // Free the old string if there is one.
+        raw_str_free!($String);
+
+        // Allocate a new string and leak it (temporarily)
+        CString::new($Value).map(|s| $String = s.into_raw())
+    }};
+}
+
+#[repr(transparent)]
+#[derive(Clone)]
+pub struct ContextConfigPulse(MAContextConfigPulse);
+
+impl ContextConfigPulse {
+    #[inline]
+    pub fn application_name(&self) -> Option<&str> {
+        raw_str_get!(self.0.pApplicationName)
+    }
+
+    #[inline]
+    pub fn set_application_name<N: Into<Vec<u8>>>(&mut self, name: N) -> Result<(), NulError> {
+        raw_str_set!(self.0.pApplicationName, name)
+    }
+
+    #[inline]
+    pub fn server_name(&self) -> Option<&str> {
+        raw_str_get!(self.0.pServerName)
+    }
+
+    #[inline]
+    pub fn set_server_name<N: Into<Vec<u8>>>(&mut self, name: N) -> Result<(), NulError> {
+        raw_str_set!(self.0.pServerName, name)
+    }
+
+    /// Enables auto spawning of PulseAudio Daemon if necessary.
+    #[inline]
+    pub fn try_auto_spawn(&self) -> bool {
+        from_bool32(self.0.tryAutoSpawn)
+    }
+
+    /// Enables auto spawning of PulseAudio Daemon if necessary.
+    #[inline]
+    pub fn set_try_auto_spawn(&mut self, auto_spawn: bool) {
+        self.0.tryAutoSpawn = to_bool32(auto_spawn);
+    }
+
+    #[inline]
+    fn internal_free(&mut self) {
+        raw_str_free!(self.0.pApplicationName);
+        raw_str_free!(self.0.pServerName);
+    }
+}
+
+impl Drop for ContextConfigPulse {
+    fn drop(&mut self) {
+        self.internal_free();
+    }
+}
+
+#[repr(transparent)]
+#[derive(Clone)]
+pub struct ContextConfigCoreAudio(MAContextConfigCoreAudio);
+
+impl ContextConfigCoreAudio {
+    #[inline]
+    pub fn session_category(&self) -> IOSSessionCategory {
+        IOSSessionCategory::from_c(self.0.sessionCategory)
+    }
+
+    #[inline]
+    pub fn set_session_category(&mut self, category: IOSSessionCategory) {
+        self.0.sessionCategory = category as _;
+    }
+
+    #[inline]
+    pub fn session_category_options(&mut self) -> IOSSessionCategoryOption {
+        IOSSessionCategoryOption::from_bits(self.0.sessionCategoryOptions)
+            .expect("invalid session category options")
+    }
+
+    #[inline]
+    pub fn set_session_category_options(&mut self, options: IOSSessionCategoryOption) {
+        self.0.sessionCategoryOptions = options.bits;
+    }
+}
+
+#[repr(transparent)]
+#[derive(Clone)]
+pub struct ContextConfigJack(MAContextConfigJack);
+
+impl ContextConfigJack {
+    pub fn client_name(&self) -> Option<&str> {
+        raw_str_get!(self.0.pClientName)
+    }
+
+    pub fn set_client_name<N: Into<Vec<u8>>>(&mut self, name: N) -> Result<(), NulError> {
+        raw_str_set!(self.0.pClientName, name)
+    }
+
+    pub fn try_start_server(&self) -> bool {
+        from_bool32(self.0.tryStartServer)
+    }
+
+    pub fn set_try_start_server(&mut self, try_start: bool) {
+        self.0.tryStartServer = to_bool32(try_start);
+    }
+
+    fn internal_free(&mut self) {
+        raw_str_free!(self.0.pClientName);
+    }
+}
+
+impl Drop for ContextConfigJack {
+    fn drop(&mut self) {
+        self.internal_free();
+    }
+}
+
+#[repr(transparent)]
+#[derive(Clone)]
 pub struct RawContext(sys::ma_context);
 
 impl RawContext {
@@ -655,17 +871,21 @@ impl RawContext {
     ///
     /// - `config` - Optional context configuration.
     pub fn alloc(
-        backends: Option<&[Backend]>,
+        backends: &[Backend],
         config: Option<&ContextConfig>,
     ) -> Result<Arc<RawContext>, Error> {
         let context = Arc::new(MaybeUninit::<sys::ma_context>::uninit());
 
+        let backends_ptr = if backends.len() > 0 {
+            backends.as_ptr() as *const Backend as *const sys::ma_backend
+        } else {
+            ptr::null()
+        };
+
         let result = unsafe {
             sys::ma_context_init(
-                backends
-                    .map(|b| b.as_ptr() as *const _)
-                    .unwrap_or(ptr::null()),
-                backends.map(|b| b.len() as u32).unwrap_or(0),
+                backends_ptr,
+                backends.len() as u32,
                 config.map(|c| &c.0 as *const _).unwrap_or(ptr::null()),
                 Arc::deref(&context).as_ptr() as *mut _,
             )
@@ -919,10 +1139,7 @@ impl Drop for RawContext {
 pub struct Context(Arc<RawContext>);
 
 impl Context {
-    pub fn new(
-        backends: Option<&[Backend]>,
-        config: Option<&ContextConfig>,
-    ) -> Result<Context, Error> {
+    pub fn new(backends: &[Backend], config: Option<&ContextConfig>) -> Result<Context, Error> {
         RawContext::alloc(backends, config).map(Context)
     }
 }
