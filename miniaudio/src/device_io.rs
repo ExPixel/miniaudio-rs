@@ -876,7 +876,7 @@ impl RawContext {
     ) -> Result<Arc<RawContext>, Error> {
         let context = Arc::new(MaybeUninit::<sys::ma_context>::uninit());
 
-        let backends_ptr = if backends.len() > 0 {
+        let backends_ptr = if !backends.is_empty() {
             backends.as_ptr() as *const Backend as *const sys::ma_backend
         } else {
             ptr::null()
