@@ -29,9 +29,9 @@ pub enum ResampleAlgorithm {
 
 impl ResampleAlgorithm {
     pub fn algorithm_type(&self) -> ResampleAlgorithmType {
-        match self {
-            &ResampleAlgorithm::Linear { .. } => ResampleAlgorithmType::Linear,
-            &ResampleAlgorithm::Speex { .. } => ResampleAlgorithmType::Speex,
+        match *self {
+            ResampleAlgorithm::Linear { .. } => ResampleAlgorithmType::Linear,
+            ResampleAlgorithm::Speex { .. } => ResampleAlgorithmType::Speex,
         }
     }
 }
@@ -126,7 +126,10 @@ impl LinearResampler {
 
     #[inline]
     pub fn config(&self) -> &LinearResamplerConfig {
-        unsafe { std::mem::transmute(&self.0.config) }
+        unsafe {
+            &*(&self.0.config as *const sys::ma_linear_resampler_config
+                as *const LinearResamplerConfig)
+        }
     }
 
     // FIXME this API actually allows passing null for input or output and does this:
@@ -356,7 +359,7 @@ impl Resampler {
 
     #[inline]
     pub fn config(&self) -> &ResamplerConfig {
-        unsafe { std::mem::transmute(&self.0.config) }
+        unsafe { &*(&self.0.config as *const sys::ma_resampler_config as *const ResamplerConfig) }
     }
 
     // FIXME this API actually allows passing null for input or output and does this:

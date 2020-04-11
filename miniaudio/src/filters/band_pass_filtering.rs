@@ -135,7 +135,7 @@ impl BPF2 {
 
     #[inline]
     pub fn bq(&self) -> &Biquad {
-        unsafe { std::mem::transmute(&self.0.bq) }
+        unsafe { &*(&self.0.bq as *const sys::ma_biquad as *const Biquad) }
     }
 
     #[inline]
@@ -290,7 +290,10 @@ impl BPF {
 
     #[inline]
     pub fn bpf2(&self) -> &[BPF2; MAX_FILTER_ORDER / 2] {
-        unsafe { std::mem::transmute(&self.0.bpf2) }
+        unsafe {
+            &*(&self.0.bpf2 as *const [sys::ma_bpf2; MAX_FILTER_ORDER / 2]
+                as *const [BPF2; MAX_FILTER_ORDER / 2])
+        }
     }
 
     #[inline]

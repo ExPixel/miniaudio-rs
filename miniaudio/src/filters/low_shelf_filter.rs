@@ -147,7 +147,7 @@ impl LowShelf2 {
 
     #[inline]
     pub fn bq(&self) -> &Biquad {
-        unsafe { std::mem::transmute(&self.0.bq) }
+        unsafe { &*(&self.0.bq as *const sys::ma_biquad as *const Biquad) }
     }
 
     #[inline]

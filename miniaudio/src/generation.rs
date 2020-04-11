@@ -184,7 +184,7 @@ pub struct LCG(sys::ma_lcg);
 
 impl LCG {
     #[inline]
-    pub fn state(&self) -> i32 {
+    pub fn state(self) -> i32 {
         self.0.state
     }
 

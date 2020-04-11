@@ -49,7 +49,7 @@ impl<'s> Frames<'s> {
     }
 
     #[inline]
-    pub fn as_samples<'t, S: Sample>(&'t self) -> &'t [S] {
+    pub fn as_samples<S: Sample>(&self) -> &[S] {
         assert!(
             self.format() == S::format(),
             "format mismatch (frames: {:?}, requested: {:?})",
@@ -145,7 +145,7 @@ impl<'s> FramesMut<'s> {
     }
 
     #[inline]
-    pub fn as_samples<'t, S: Sample>(&'t self) -> &'t [S] {
+    pub fn as_samples<S: Sample>(&self) -> &[S] {
         assert!(
             self.format() == S::format(),
             "format mismatch (frames: {:?}, requested: {:?})",
@@ -158,7 +158,7 @@ impl<'s> FramesMut<'s> {
     }
 
     #[inline]
-    pub fn as_samples_mut<'t, S: Sample>(&'t mut self) -> &'t mut [S] {
+    pub fn as_samples_mut<S: Sample>(&mut self) -> &mut [S] {
         assert!(
             self.format() == S::format(),
             "format mismatch (frames: {:?}, requested: {:?})",

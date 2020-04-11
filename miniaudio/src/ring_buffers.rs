@@ -39,7 +39,7 @@ impl<T: Sized> RingBuffer<T> {
             );
 
             // If an error occurred, we need to drop the box.
-            if let &Err(_) = &result {
+            if result.is_err() {
                 drop(Box::from_raw(preallocated_ptr_slice));
             }
 

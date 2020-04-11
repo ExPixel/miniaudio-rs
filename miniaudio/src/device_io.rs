@@ -371,17 +371,21 @@ impl DeviceConfig {
     }
 }
 
+pub type DataCallback = dyn FnMut(&RawDevice, &mut FramesMut, &Frames);
+pub type StopCallback = dyn FnMut(&RawDevice);
+pub type BoxedDataCallback = Box<DataCallback>;
+pub type BoxedStopCallback = Box<StopCallback>;
+
 pub struct DeviceConfigUserData {
-    data_callback_factory:
-        Option<Box<dyn Fn() -> Box<dyn FnMut(&RawDevice, &mut FramesMut, &Frames)>>>,
-    stop_callback_factory: Option<Box<dyn Fn() -> Box<dyn FnMut(&RawDevice)>>>,
+    data_callback_factory: Option<Box<dyn Fn() -> BoxedDataCallback>>,
+    stop_callback_factory: Option<Box<dyn Fn() -> BoxedStopCallback>>,
 }
 
 // FIXME it might be better to just set the callbacks to some noop functions by default
 // to save ourselves the extra in the audio callback code.
 pub struct DeviceUserData {
-    data_callback: Option<Box<dyn FnMut(&RawDevice, &mut FramesMut, &Frames)>>,
-    stop_callback: Option<Box<dyn FnMut(&RawDevice)>>,
+    data_callback: Option<BoxedDataCallback>,
+    stop_callback: Option<BoxedStopCallback>,
 }
 
 unsafe extern "C" fn device_data_callback_trampoline(
@@ -478,7 +482,7 @@ impl Drop for DeviceConfig {
 pub struct DeviceConfigPlayback(MADeviceConfigPlayback);
 
 impl DeviceConfigPlayback {
-    pub fn device_id<'r>(&'r self) -> Option<&'r DeviceId> {
+    pub fn device_id(&self) -> Option<&DeviceId> {
         unsafe { (self.0.pDeviceID as *const DeviceId).as_ref() }
     }
 
@@ -515,12 +519,18 @@ impl DeviceConfigPlayback {
         self.0.channels = channels;
     }
 
-    pub fn channel_map(&self) -> &[Channel; sys::MA_MAX_CHANNELS as usize] {
-        unsafe { std::mem::transmute(&self.0.channelMap) }
+    pub fn channel_map(&self) -> &[Channel; MAX_CHANNELS] {
+        unsafe {
+            &*(&self.0.channelMap as *const [sys::ma_channel; MAX_CHANNELS]
+                as *const [Channel; MAX_CHANNELS])
+        }
     }
 
-    pub fn channel_map_mut(&mut self) -> &mut [Channel; sys::MA_MAX_CHANNELS as usize] {
-        unsafe { std::mem::transmute(&mut self.0.channelMap) }
+    pub fn channel_map_mut(&mut self) -> &mut [Channel; MAX_CHANNELS] {
+        unsafe {
+            &mut *(&mut self.0.channelMap as *mut [sys::ma_channel; MAX_CHANNELS]
+                as *mut [Channel; MAX_CHANNELS])
+        }
     }
 
     pub fn share_mode(&self) -> ShareMode {
@@ -545,7 +555,7 @@ impl Drop for DeviceConfigPlayback {
 pub struct DeviceConfigCapture(MADeviceConfigCapture);
 
 impl DeviceConfigCapture {
-    pub fn device_id<'r>(&'r self) -> Option<&'r DeviceId> {
+    pub fn device_id(&self) -> Option<&DeviceId> {
         unsafe { (self.0.pDeviceID as *const DeviceId).as_ref() }
     }
 
@@ -582,12 +592,18 @@ impl DeviceConfigCapture {
         self.0.channels = channels;
     }
 
-    pub fn channel_map(&self) -> &[Channel; sys::MA_MAX_CHANNELS as usize] {
-        unsafe { std::mem::transmute(&self.0.channelMap) }
+    pub fn channel_map(&self) -> &[Channel; MAX_CHANNELS] {
+        unsafe {
+            &*(&self.0.channelMap as *const [sys::ma_channel; MAX_CHANNELS]
+                as *const [Channel; MAX_CHANNELS])
+        }
     }
 
-    pub fn channel_map_mut(&mut self) -> &mut [Channel; sys::MA_MAX_CHANNELS as usize] {
-        unsafe { std::mem::transmute(&mut self.0.channelMap) }
+    pub fn channel_map_mut(&mut self) -> &mut [Channel; MAX_CHANNELS] {
+        unsafe {
+            &mut *(&mut self.0.channelMap as *mut [sys::ma_channel; MAX_CHANNELS]
+                as *mut [Channel; MAX_CHANNELS])
+        }
     }
 
     pub fn share_mode(&self) -> ShareMode {
@@ -619,6 +635,12 @@ impl ContextConfig {
 
     // FIXME implement some stuff for context config.
     //       I just don't need it at the moement, so...
+}
+
+impl Default for ContextConfig {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[repr(transparent)]
@@ -766,11 +788,11 @@ impl RawContext {
 
             f(
                 std::slice::from_raw_parts(
-                    std::mem::transmute::<_, *mut DeviceIdAndName>(playback_ptr),
+                    playback_ptr as *mut DeviceIdAndName,
                     playback_count as usize,
                 ),
                 std::slice::from_raw_parts(
-                    std::mem::transmute::<_, *mut DeviceIdAndName>(capture_ptr),
+                    capture_ptr as *mut DeviceIdAndName,
                     capture_count as usize,
                 ),
             );
@@ -803,7 +825,7 @@ impl RawContext {
             }
 
             f(std::slice::from_raw_parts(
-                std::mem::transmute::<_, *mut DeviceIdAndName>(playback_ptr),
+                playback_ptr as *mut DeviceIdAndName,
                 playback_count as usize,
             ));
         }
@@ -835,7 +857,7 @@ impl RawContext {
             }
 
             f(std::slice::from_raw_parts(
-                std::mem::transmute::<_, *mut DeviceIdAndName>(capture_ptr),
+                capture_ptr as *mut DeviceIdAndName,
                 capture_count as usize,
             ));
         }
@@ -843,6 +865,7 @@ impl RawContext {
         return Ok(());
     }
 
+    /// # Safety
     /// **DO NOT** call `get_device_info` or `set_device_info` while inside of the callback.
     pub unsafe fn enumerate_devices<F>(&self, mut callback: F) -> Result<(), Error>
     where
@@ -897,7 +920,7 @@ impl Context {
         backends: Option<&[Backend]>,
         config: Option<&ContextConfig>,
     ) -> Result<Context, Error> {
-        RawContext::alloc(backends, config).map(|raw| Context(raw))
+        RawContext::alloc(backends, config).map(Context)
     }
 }
 
@@ -976,7 +999,7 @@ impl RawDevice {
 
     /// This will return a pointer to the context being used by this device.
     #[inline]
-    pub fn context<'r>(&'r self) -> &'r RawContext {
+    pub fn context(&self) -> &RawContext {
         // This should be safe because Context's can only be constructed via Context::alloc which
         // will wrap it in an Arc and then RawDevice::alloc will clone the Arc. This means that there
         // is no way to mutably access the Context while a Device object is also in scope.
@@ -993,7 +1016,8 @@ impl RawDevice {
     /// begins recording.
     /// Use `stop` to stop this device.
     ///
-    /// **WARNING** This should not be called from a callback.
+    /// # Safety
+    /// This should not be called from a callback.
     #[inline]
     pub unsafe fn raw_start(&self) -> Result<(), Error> {
         Error::from_c_result(sys::ma_device_start(&self.0 as *const _ as *mut _))
@@ -1002,7 +1026,8 @@ impl RawDevice {
     /// Stops this device. For playback devices this stops playback. For capture devices this stops
     /// recording. Use `start` to start this device again.
     ///
-    /// **WARNING** This should not be called from a callback.
+    /// # Safety
+    /// This should not be called from a callback.
     #[inline]
     pub unsafe fn raw_stop(&self) -> Result<(), Error> {
         Error::from_c_result(sys::ma_device_stop(&self.0 as *const _ as *mut _))
@@ -1097,12 +1122,12 @@ impl RawDevice {
 
     #[inline]
     pub fn capture(&self) -> &DeviceCapture {
-        unsafe { std::mem::transmute(&self.0.capture) }
+        unsafe { &*(&self.0.capture as *const MADeviceCapture as *const DeviceCapture) }
     }
 
     #[inline]
     pub fn playback(&self) -> &DevicePlayback {
-        unsafe { std::mem::transmute(&self.0.playback) }
+        unsafe { &*(&self.0.playback as *const MADevicePlayback as *const DevicePlayback) }
     }
 }
 
@@ -1135,7 +1160,7 @@ pub struct Device(Arc<RawDevice>);
 
 impl Device {
     pub fn new(context: Option<Context>, config: &DeviceConfig) -> Result<Device, Error> {
-        RawDevice::alloc(context, config).map(|raw| Device(raw))
+        RawDevice::alloc(context, config).map(Device)
     }
 
     /// Starts the device. For playback devices this begins playback. For capture devices this
@@ -1199,8 +1224,11 @@ impl DeviceCapture {
         self.0.channels
     }
 
-    pub fn channel_map(&self) -> &[Channel; sys::MA_MAX_CHANNELS as usize] {
-        unsafe { std::mem::transmute(&self.0.channelMap) }
+    pub fn channel_map(&self) -> &[Channel; MAX_CHANNELS] {
+        unsafe {
+            &*(&self.0.channelMap as *const [sys::ma_channel; MAX_CHANNELS]
+                as *const [Channel; MAX_CHANNELS])
+        }
     }
 }
 
@@ -1239,8 +1267,11 @@ impl DevicePlayback {
         self.0.channels
     }
 
-    pub fn channel_map(&self) -> &[Channel; sys::MA_MAX_CHANNELS as usize] {
-        unsafe { std::mem::transmute(&self.0.channelMap) }
+    pub fn channel_map(&self) -> &[Channel; MAX_CHANNELS] {
+        unsafe {
+            &*(&self.0.channelMap as *const [sys::ma_channel; MAX_CHANNELS]
+                as *const [Channel; MAX_CHANNELS])
+        }
     }
 
     // FIXME I'm not sure if these are supposed to be public.
@@ -1258,7 +1289,7 @@ impl DevicePlayback {
     //     self.0.internalSampleRate
     // }
 
-    // pub fn internal_channel_map(&self) -> &[Channel; sys::MA_MAX_CHANNELS as usize] {
+    // pub fn internal_channel_map(&self) -> &[Channel; MAX_CHANNELS] {
     //     unsafe { std::mem::transmute(&self.0.internalChannelMap) }
     // }
 
