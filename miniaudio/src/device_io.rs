@@ -888,7 +888,7 @@ impl RawContext {
             device_type: sys::ma_device_type,
             info: *const sys::ma_device_info,
             udata: *mut c_void,
-        ) -> u32 {
+        ) -> sys::ma_bool32 {
             let real_callback =
                 udata as *mut &mut dyn FnMut(&RawContext, DeviceType, &DeviceIdAndName) -> bool;
             let b = (*real_callback)(
