@@ -116,19 +116,20 @@ pub struct DeviceIdAndName(DeviceInfo);
 
 impl DeviceIdAndName {
     #[inline]
-    pub fn id<'r>(&'r self) -> &'r DeviceId {
+    pub fn id(&self) -> &DeviceId {
         self.0.id()
     }
 
     #[inline]
-    pub fn name<'r>(&'r self) -> &'r str {
+    pub fn name(&self) -> &str {
         self.0.name()
     }
 
     /// Allows you to use this as the device info.
-    /// NOTE: Only ID and name are guaranteed to be initialzied. All other values may just be zero.
-    pub unsafe fn as_device_info<'r>(&'r self) -> &'r DeviceInfo {
-        std::mem::transmute(self)
+    /// # Safety
+    /// Only ID and name are guaranteed to be initialzied. All other values may just be zero.
+    pub unsafe fn as_device_info(&self) -> &DeviceInfo {
+        &*(self as *const DeviceIdAndName as *const DeviceInfo)
     }
 }
 
@@ -143,7 +144,7 @@ pub struct DeviceInfo(sys::ma_device_info);
 impl DeviceInfo {
     #[inline]
     pub fn id(&self) -> &DeviceId {
-        unsafe { std::mem::transmute(&self.0.id) }
+        unsafe { &*(&self.0.id as *const sys::ma_device_id as *const DeviceId) }
     }
 
     #[inline]
@@ -160,7 +161,7 @@ impl DeviceInfo {
     }
 
     #[inline]
-    pub fn formats<'r>(&'r self) -> &'r [Format] {
+    pub fn formats(&self) -> &[Format] {
         unsafe {
             std::slice::from_raw_parts(
                 &self.0.formats as *const sys::ma_format as *const Format,
@@ -264,22 +265,28 @@ impl DeviceConfig {
 
     #[inline]
     pub fn playback(&self) -> &DeviceConfigPlayback {
-        unsafe { std::mem::transmute(&self.0.playback) }
+        unsafe {
+            &*(&self.0.playback as *const MADeviceConfigPlayback as *const DeviceConfigPlayback)
+        }
     }
 
     #[inline]
     pub fn playback_mut(&mut self) -> &mut DeviceConfigPlayback {
-        unsafe { std::mem::transmute(&mut self.0.playback) }
+        unsafe {
+            &mut *(&mut self.0.playback as *mut MADeviceConfigPlayback as *mut DeviceConfigPlayback)
+        }
     }
 
     #[inline]
     pub fn capture(&self) -> &DeviceConfigCapture {
-        unsafe { std::mem::transmute(&self.0.capture) }
+        unsafe { &*(&self.0.capture as *const MADeviceConfigCapture as *const DeviceConfigCapture) }
     }
 
     #[inline]
     pub fn capture_mut(&mut self) -> &mut DeviceConfigCapture {
-        unsafe { std::mem::transmute(&mut self.0.capture) }
+        unsafe {
+            &mut *(&mut self.0.capture as *mut MADeviceConfigCapture as *mut DeviceConfigCapture)
+        }
     }
 
     #[inline]
@@ -495,11 +502,9 @@ impl DeviceConfigPlayback {
             } else {
                 self.0.pDeviceID = Box::into_raw(Box::new(device_id)) as *mut sys::ma_device_id;
             }
-        } else {
-            if !self.0.pDeviceID.is_null() {
-                let _ = unsafe { Box::from_raw(self.0.pDeviceID as *mut DeviceId) };
-                self.0.pDeviceID = std::ptr::null_mut();
-            }
+        } else if !self.0.pDeviceID.is_null() {
+            let _ = unsafe { Box::from_raw(self.0.pDeviceID as *mut DeviceId) };
+            self.0.pDeviceID = std::ptr::null_mut();
         }
     }
 
@@ -568,11 +573,9 @@ impl DeviceConfigCapture {
             } else {
                 self.0.pDeviceID = Box::into_raw(Box::new(device_id)) as *mut sys::ma_device_id;
             }
-        } else {
-            if !self.0.pDeviceID.is_null() {
-                let _ = unsafe { Box::from_raw(self.0.pDeviceID as *mut DeviceId) };
-                self.0.pDeviceID = std::ptr::null_mut();
-            }
+        } else if !self.0.pDeviceID.is_null() {
+            let _ = unsafe { Box::from_raw(self.0.pDeviceID as *mut DeviceId) };
+            self.0.pDeviceID = std::ptr::null_mut();
         }
     }
 
@@ -798,7 +801,7 @@ impl RawContext {
             );
         }
 
-        return Ok(());
+        Ok(())
     }
 
     /// Retrieves basic information about every active playback device. This function
@@ -830,7 +833,7 @@ impl RawContext {
             ));
         }
 
-        return Ok(());
+        Ok(())
     }
 
     /// Retrieves basic information about every active capture device. This function
@@ -862,7 +865,7 @@ impl RawContext {
             ));
         }
 
-        return Ok(());
+        Ok(())
     }
 
     /// # Safety

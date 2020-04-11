@@ -190,7 +190,7 @@ impl<'s> FramesMut<'s> {
         FramesIterMut {
             samples_ptr: samples.as_mut_ptr(),
             len: samples_len,
-            channels: channels,
+            channels,
             offset: 0,
             phantom: std::marker::PhantomData,
         }

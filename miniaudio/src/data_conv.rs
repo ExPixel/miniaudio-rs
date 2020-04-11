@@ -166,19 +166,19 @@ impl DataConverter {
             )
         })?;
 
-        return Ok((output_frame_count, input_frame_count));
+        Ok((output_frame_count, input_frame_count))
     }
 
     pub fn set_rate(&mut self, sample_rate_in: u32, sample_rate_out: u32) -> Result<(), Error> {
-        return Error::from_c_result(unsafe {
+        Error::from_c_result(unsafe {
             sys::ma_data_converter_set_rate(&mut self.0, sample_rate_in, sample_rate_out)
-        });
+        })
     }
 
     pub fn set_rate_ratio(&mut self, ratio_in_out: f32) -> Result<(), Error> {
-        return Error::from_c_result(unsafe {
+        Error::from_c_result(unsafe {
             sys::ma_data_converter_set_rate_ratio(&mut self.0, ratio_in_out)
-        });
+        })
     }
 
     pub fn required_input_frame_count(&self, output_frame_count: u64) -> u64 {

@@ -163,7 +163,7 @@ impl LinearResampler {
             )
         })?;
 
-        return Ok((output_frames, input_frames));
+        Ok((output_frames, input_frames))
     }
 
     /// Sets the input and output sample rate.
@@ -402,7 +402,7 @@ impl Resampler {
             )
         })?;
 
-        return Ok((input_frames, output_frames));
+        Ok((input_frames, output_frames))
     }
 
     /// Sets the input and output sample rate.

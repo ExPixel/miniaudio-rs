@@ -225,14 +225,14 @@ impl ChannelConverter {
             return Err(Error::InvalidArgs);
         }
 
-        return Error::from_c_result(unsafe {
+        Error::from_c_result(unsafe {
             sys::ma_channel_converter_process_pcm_frames(
                 &mut self.0,
                 output.as_mut_ptr() as *mut _,
                 input.as_ptr() as *const _,
                 output.frame_count() as u64,
             )
-        });
+        })
     }
 }
 
