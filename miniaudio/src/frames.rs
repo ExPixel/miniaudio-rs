@@ -189,7 +189,7 @@ impl<'s> FramesMut<'s> {
 
         FramesIterMut {
             samples_ptr: samples.as_mut_ptr(),
-            len: samples_len,
+            samples_len: samples_len,
             channels,
             offset: 0,
             phantom: std::marker::PhantomData,
@@ -244,19 +244,19 @@ impl<'s, S: Sample> Iterator for FramesIter<'s, S> {
     type Item = &'s [S];
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.offset >= (self.samples.len() - self.channels as usize) {
-            None
-        } else {
+        if self.offset < self.samples.len() {
             let ret = Some(&self.samples[self.offset..(self.offset + self.channels as usize)]);
             self.offset += self.channels as usize;
             ret
+        } else {
+            None
         }
     }
 }
 
 pub struct FramesIterMut<'s, S: Sample> {
     samples_ptr: *mut S,
-    len: usize,
+    samples_len: usize,
     channels: u32,
     offset: usize,
     phantom: std::marker::PhantomData<&'s S>,
@@ -266,9 +266,7 @@ impl<'s, S: Sample> Iterator for FramesIterMut<'s, S> {
     type Item = &'s mut [S];
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.offset >= (self.len - self.channels as usize) {
-            None
-        } else {
+        if self.offset < self.samples_len {
             // FIXME The compiler doesn't like me doing the same thing that I do in FramesIter in here
             // using mut and gives me some cryptic error, so I'm just using pointers for now.
             let ret = Some(unsafe {
@@ -279,6 +277,8 @@ impl<'s, S: Sample> Iterator for FramesIterMut<'s, S> {
             });
             self.offset += self.channels as usize;
             ret
+        } else {
+            None
         }
     }
 }
