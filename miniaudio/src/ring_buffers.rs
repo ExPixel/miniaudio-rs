@@ -7,23 +7,45 @@ use crate::base::{from_bool32, Error};
 use miniaudio_sys as sys;
 use std::os::raw::c_void;
 use std::ptr::NonNull;
+use std::sync::Arc;
 
 #[repr(transparent)]
 #[derive(Debug)]
-pub struct RingBuffer<T: Sized> {
+pub(crate) struct RingBuffer<T: Clone> {
     inner: sys::ma_rb,
     _buffer_type: std::marker::PhantomData<T>,
 }
 
-impl<T: Sized> RingBuffer<T> {
-    pub fn new(count: usize) -> Result<RingBuffer<T>, Error> {
+impl<T: Clone> RingBuffer<T> {
+    pub(crate) fn split(self) -> (RingBufferSend<T>, RingBufferRecv<T>) {
+        let wrapped = Arc::new(self);
+        let recv = RingBufferRecv {
+            inner: Arc::clone(&wrapped),
+        };
+        let send = RingBufferSend { inner: wrapped };
+        (send, recv)
+    }
+
+    pub(crate) fn create_pair(
+        count: usize,
+    ) -> Result<(RingBufferSend<T>, RingBufferRecv<T>), Error> {
+        RingBuffer::new(count).map(Self::split)
+    }
+
+    pub(crate) fn create_pair_preallocated(
+        preallocated: Box<[T]>,
+    ) -> Result<(RingBufferSend<T>, RingBufferRecv<T>), Error> {
+        RingBuffer::new_preallocated(preallocated).map(Self::split)
+    }
+
+    pub(crate) fn new(count: usize) -> Result<RingBuffer<T>, Error> {
         let stride_in_bytes = std::mem::size_of::<T>();
         let size_in_bytes = count * stride_in_bytes;
 
         unsafe { Self::new_raw(size_in_bytes, count, stride_in_bytes, None) }
     }
 
-    pub fn new_preallocated(preallocated: Box<[T]>) -> Result<RingBuffer<T>, Error> {
+    pub(crate) fn new_preallocated(preallocated: Box<[T]>) -> Result<RingBuffer<T>, Error> {
         let count = preallocated.len();
         let stride_in_bytes = std::mem::size_of::<T>();
         let size_in_bytes = count * stride_in_bytes;
@@ -75,7 +97,10 @@ impl<T: Sized> RingBuffer<T> {
         )
     }
 
-    pub fn read<F>(&self, count_requested: usize, f: F) -> Result<usize, Error>
+    /// Used to retrieve a section of the ring buffer for reading. You specify the number of items
+    /// you would like to read and a slice with the number of requested items (or less if the
+    /// buffer needs to wrap), will be passed to the given closure.
+    pub(crate) fn read<F>(&self, count_requested: usize, f: F) -> usize
     where
         F: FnOnce(&[T]),
     {
@@ -84,27 +109,35 @@ impl<T: Sized> RingBuffer<T> {
         let acquire_result = unsafe {
             sys::ma_rb_acquire_read(&self.inner as *const _ as *mut _, &mut bytes, &mut buf_ptr)
         };
+
+        // This shouldn't fail because our arguments are valid, but we debug assert just to be sure.
+        debug_assert!(acquire_result == 0);
         debug_assert!(bytes % std::mem::size_of::<T>() == 0);
+
         let count = bytes / std::mem::size_of::<T>();
 
         if count == 0 || buf_ptr.is_null() {
             f(&[]);
-            return Ok(0);
+            return 0;
         }
 
-        let items = map_result!(acquire_result, unsafe {
-            std::slice::from_raw_parts(buf_ptr.cast::<T>(), count)
-        })?;
+        let items = unsafe { std::slice::from_raw_parts(buf_ptr.cast::<T>(), count) };
 
         f(items);
 
-        map_result!(
-            unsafe { sys::ma_rb_commit_read(&self.inner as *const _ as *mut _, bytes, buf_ptr) },
-            count
-        )
+        let commit_result =
+            unsafe { sys::ma_rb_commit_read(&self.inner as *const _ as *mut _, bytes, buf_ptr) };
+
+        // This shouldn't fail because our arguments are valid, but we debug assert just to be sure.
+        debug_assert!(commit_result == 0);
+
+        count
     }
 
-    pub fn write<F>(&self, count_requested: usize, f: F) -> Result<usize, Error>
+    /// Used to retrieve a section of the ring buffer for writing. You specify the number of items
+    /// you would like to write to and a slice with the number of requested items (or less if the
+    /// buffer needs to wrap), will be passed to the given closure.
+    pub(crate) fn write<F>(&self, count_requested: usize, f: F) -> usize
     where
         F: FnOnce(&mut [T]),
     {
@@ -113,31 +146,38 @@ impl<T: Sized> RingBuffer<T> {
         let acquire_result = unsafe {
             sys::ma_rb_acquire_write(&self.inner as *const _ as *mut _, &mut bytes, &mut buf_ptr)
         };
+
+        // This shouldn't fail because our arguments are valid, but we debug assert just to be sure.
+        debug_assert!(acquire_result == 0);
         debug_assert!(bytes % std::mem::size_of::<T>() == 0);
+
         let count = bytes / std::mem::size_of::<T>();
 
         if count == 0 || buf_ptr.is_null() {
             f(&mut []);
-            return Ok(0);
+            return 0;
         }
 
-        let items = map_result!(acquire_result, unsafe {
-            std::slice::from_raw_parts_mut(buf_ptr.cast::<T>(), count)
-        })?;
+        let items = unsafe { std::slice::from_raw_parts_mut(buf_ptr.cast::<T>(), count) };
 
         f(items);
 
-        map_result!(
-            unsafe { sys::ma_rb_commit_write(&self.inner as *const _ as *mut _, bytes, buf_ptr) },
-            count
-        )
+        let commit_result =
+            unsafe { sys::ma_rb_commit_write(&self.inner as *const _ as *mut _, bytes, buf_ptr) };
+
+        // This shouldn't fail because our arguments are valid, but we debug assert just to be sure.
+        debug_assert!(commit_result == 0);
+
+        count
     }
 
+    // FIXME find out what to do with this and remove allow(dead_code).
     /// Returns the distance between the write pointer and the read pointer. Should never be
     /// negative for a correct program. Will return the number of items that can be read before the
     /// read pointer hits the write pointer.
     #[inline]
-    pub fn pointer_distance(&self) -> usize {
+    #[allow(dead_code)]
+    pub(crate) fn pointer_distance(&self) -> usize {
         let byte_distance =
             unsafe { sys::ma_rb_pointer_distance(&self.inner as *const _ as *mut _) as usize };
         debug_assert!(byte_distance % std::mem::size_of::<T>() == 0);
@@ -145,7 +185,7 @@ impl<T: Sized> RingBuffer<T> {
     }
 
     #[inline]
-    pub fn available_read(&self) -> usize {
+    pub(crate) fn available_read(&self) -> usize {
         let bytes_available =
             unsafe { sys::ma_rb_available_read(&self.inner as *const _ as *mut _) as usize };
         debug_assert!(bytes_available % std::mem::size_of::<T>() == 0);
@@ -153,26 +193,32 @@ impl<T: Sized> RingBuffer<T> {
     }
 
     #[inline]
-    pub fn available_write(&self) -> usize {
+    pub(crate) fn available_write(&self) -> usize {
         let bytes_available =
             unsafe { sys::ma_rb_available_write(&self.inner as *const _ as *mut _) as usize };
         debug_assert!(bytes_available % std::mem::size_of::<T>() == 0);
         bytes_available / std::mem::size_of::<T>()
     }
 
+    // FIXME find out what to do with this and remove allow(dead_code).
     #[inline]
-    pub fn subbuffer_size(&self) -> usize {
+    #[allow(dead_code)]
+    pub(crate) fn subbuffer_size(&self) -> usize {
         unsafe { sys::ma_rb_get_subbuffer_size(&self.inner as *const _ as *mut _) }
     }
 
+    // FIXME find out what to do with this and remove allow(dead_code).
     #[inline]
-    pub fn subbuffer_stride(&self) -> usize {
+    #[allow(dead_code)]
+    pub(crate) fn subbuffer_stride(&self) -> usize {
         unsafe { sys::ma_rb_get_subbuffer_stride(&self.inner as *const _ as *mut _) }
     }
 
     // FIXME document this (???)
+    // FIXME find out what to do with this and remove allow(dead_code).
     #[inline]
-    pub fn subbuffer_offset(&self, index: usize) -> usize {
+    #[allow(dead_code)]
+    pub(crate) fn subbuffer_offset(&self, index: usize) -> usize {
         unsafe { sys::ma_rb_get_subbuffer_offset(&self.inner as *const _ as *mut _, index) }
     }
 
@@ -180,10 +226,46 @@ impl<T: Sized> RingBuffer<T> {
     // really.
 }
 
-unsafe impl<T: Send + Sized> Send for RingBuffer<T> {}
-unsafe impl<T: Sync + Sized> Sync for RingBuffer<T> {}
+unsafe impl<T: Send + Sized + Clone> Send for RingBuffer<T> {}
+unsafe impl<T: Send + Sized + Clone> Sync for RingBuffer<T> {}
 
-impl<T> Drop for RingBuffer<T> {
+pub struct RingBufferSend<T: Clone> {
+    inner: Arc<RingBuffer<T>>,
+}
+
+impl<T: Clone> RingBufferSend<T> {
+    /// Write a buffer of items into the ring buffer, returning the number of items that were
+    /// successfully written.
+    pub fn write(&mut self, src: &[T]) -> usize {
+        self.inner.write(src.len(), |dest| {
+            dest.clone_from_slice(&src[0..dest.len()]);
+        })
+    }
+
+    /// Returns the number of items that are available for writing.
+    pub fn available(&mut self) -> usize {
+        self.inner.available_write()
+    }
+}
+
+pub struct RingBufferRecv<T: Clone> {
+    inner: Arc<RingBuffer<T>>,
+}
+
+impl<T: Clone> RingBufferRecv<T> {
+    pub fn read(&mut self, dest: &mut [T]) -> usize {
+        self.inner.read(dest.len(), |src| {
+            (&mut dest[0..src.len()]).clone_from_slice(src);
+        })
+    }
+
+    /// Returns the number of items that are available for reading.
+    pub fn available(&mut self) -> usize {
+        self.inner.available_read()
+    }
+}
+
+impl<T: Clone> Drop for RingBuffer<T> {
     fn drop(&mut self) {
         unsafe {
             let buffer_ptr = self.inner.pBuffer;
@@ -199,6 +281,18 @@ impl<T> Drop for RingBuffer<T> {
             }
         };
     }
+}
+
+pub fn ring_buffer<T: Clone + Send>(
+    max_item_count: usize,
+) -> Result<(RingBufferSend<T>, RingBufferRecv<T>), Error> {
+    RingBuffer::create_pair(max_item_count)
+}
+
+pub fn ring_buffer_preallocated<T: Clone + Send>(
+    preallocated: Box<[T]>,
+) -> Result<(RingBufferSend<T>, RingBufferRecv<T>), Error> {
+    RingBuffer::create_pair_preallocated(preallocated)
 }
 
 // FIXME remove this since it's probably useless (in Rust anyway).
