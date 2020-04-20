@@ -9,9 +9,13 @@ pub struct Frames<'s> {
 
 impl<'s> Frames<'s> {
     #[inline]
-    pub fn wrap(data: &'s [u8], format: Format, channels: u32) -> Frames<'s> {
+    pub fn wrap<S: Sample>(data: &'s [S], format: Format, channels: u32) -> Frames<'s> {
+        let byte_data_len = data.len() * std::mem::size_of::<S>();
+        let byte_data =
+            unsafe { std::slice::from_raw_parts(data.as_ptr() as *const u8, byte_data_len) };
+
         Frames {
-            data,
+            data: byte_data,
             format,
             channels,
         }
@@ -106,9 +110,13 @@ pub struct FramesMut<'s> {
 
 impl<'s> FramesMut<'s> {
     #[inline]
-    pub fn wrap(data: &'s mut [u8], format: Format, channels: u32) -> FramesMut<'s> {
+    pub fn wrap<S: Sample>(data: &'s mut [S], format: Format, channels: u32) -> FramesMut<'s> {
+        let byte_data_len = data.len() * std::mem::size_of::<S>();
+        let byte_data =
+            unsafe { std::slice::from_raw_parts_mut(data.as_ptr() as *mut u8, byte_data_len) };
+
         FramesMut {
-            data,
+            data: byte_data,
             format,
             channels,
         }

@@ -412,10 +412,10 @@ unsafe extern "C" fn device_data_callback_trampoline(
         let output_channels = (*device.as_ptr()).playback().channels();
 
         let mut output = if output_ptr.is_null() {
-            FramesMut::wrap(&mut empty_output, output_format, output_channels)
+            FramesMut::wrap::<u8>(&mut empty_output, output_format, output_channels)
         } else {
             let bytes_per_frame = output_format.size_in_bytes() * output_channels as usize;
-            FramesMut::wrap(
+            FramesMut::wrap::<u8>(
                 std::slice::from_raw_parts_mut(
                     output_ptr.cast(),
                     frame_count as usize * bytes_per_frame,
@@ -428,10 +428,10 @@ unsafe extern "C" fn device_data_callback_trampoline(
         let input_format = (*device.as_ptr()).capture().format();
         let input_channels = (*device.as_ptr()).capture().channels();
         let input = if input_ptr.is_null() {
-            Frames::wrap(&empty_input, output_format, output_channels)
+            Frames::wrap::<u8>(&empty_input, output_format, output_channels)
         } else {
             let bytes_per_frame = input_format.size_in_bytes() * input_channels as usize;
-            Frames::wrap(
+            Frames::wrap::<u8>(
                 std::slice::from_raw_parts(
                     input_ptr.cast(),
                     frame_count as usize * bytes_per_frame,

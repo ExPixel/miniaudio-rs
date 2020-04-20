@@ -27,36 +27,63 @@ impl<T: Clone> RingBuffer<T> {
     }
 
     pub(crate) fn create_pair(
-        count: usize,
+        subbuffer_len: usize,
+        subbuffer_count: usize,
     ) -> Result<(RingBufferSend<T>, RingBufferRecv<T>), Error> {
-        RingBuffer::new(count).map(Self::split)
+        RingBuffer::new(subbuffer_len, subbuffer_count).map(Self::split)
     }
 
     pub(crate) fn create_pair_preallocated(
+        subbuffer_len: usize,
+        subbufer_count: usize,
+        subbffer_stride_in_bytes: usize,
         preallocated: Box<[T]>,
     ) -> Result<(RingBufferSend<T>, RingBufferRecv<T>), Error> {
-        RingBuffer::new_preallocated(preallocated).map(Self::split)
+        RingBuffer::new_preallocated(
+            subbuffer_len,
+            subbufer_count,
+            subbffer_stride_in_bytes,
+            preallocated,
+        )
+        .map(Self::split)
     }
 
-    pub(crate) fn new(count: usize) -> Result<RingBuffer<T>, Error> {
-        let stride_in_bytes = std::mem::size_of::<T>();
-        let size_in_bytes = count * stride_in_bytes;
+    pub(crate) fn new(
+        subbuffer_len: usize,
+        subbuffer_count: usize,
+    ) -> Result<RingBuffer<T>, Error> {
+        let size_in_bytes = std::mem::size_of::<T>() * subbuffer_len;
+        let stride_in_bytes = std::mem::size_of::<T>() * subbuffer_len;
 
-        unsafe { Self::new_raw(size_in_bytes, count, stride_in_bytes, None) }
+        unsafe { Self::new_raw(size_in_bytes, subbuffer_count, stride_in_bytes, None) }
     }
 
-    pub(crate) fn new_preallocated(preallocated: Box<[T]>) -> Result<RingBuffer<T>, Error> {
-        let count = preallocated.len();
-        let stride_in_bytes = std::mem::size_of::<T>();
-        let size_in_bytes = count * stride_in_bytes;
-        let preallocated_ptr_slice = Box::into_raw(preallocated);
+    pub(crate) fn new_preallocated(
+        subbuffer_len: usize,
+        subbuffer_count: usize,
+        mut subbuffer_stride_in_bytes: usize,
+        preallocated: Box<[T]>,
+    ) -> Result<RingBuffer<T>, Error> {
+        let subbuffer_size_in_bytes = std::mem::size_of::<T>() * subbuffer_len;
+
+        if subbuffer_stride_in_bytes < subbuffer_size_in_bytes {
+            subbuffer_stride_in_bytes = subbuffer_size_in_bytes;
+        }
+
+        if subbuffer_count * subbuffer_stride_in_bytes
+            != preallocated.len() * std::mem::size_of::<T>()
+        {
+            ma_debug_panic!("preallocated buffer size too small for arguments");
+            return Err(Error::InvalidArgs);
+        }
 
         unsafe {
+            let preallocated_ptr_slice = Box::into_raw(preallocated);
             let preallocated_ptr = (*preallocated_ptr_slice).as_mut_ptr();
             let result = Self::new_raw(
-                size_in_bytes,
-                count,
-                stride_in_bytes,
+                subbuffer_size_in_bytes,
+                subbuffer_count,
+                subbuffer_stride_in_bytes,
                 NonNull::new(preallocated_ptr).map(NonNull::cast),
             );
 
@@ -229,6 +256,8 @@ impl<T: Clone> RingBuffer<T> {
 unsafe impl<T: Send + Sized + Clone> Send for RingBuffer<T> {}
 unsafe impl<T: Send + Sized + Clone> Sync for RingBuffer<T> {}
 
+/// Be aware that it is not safe to have this being written to from multiple threads.
+/// This is part of a **single producer** single consumer ring buffer.
 pub struct RingBufferSend<T: Clone> {
     inner: Arc<RingBuffer<T>>,
 }
@@ -236,10 +265,22 @@ pub struct RingBufferSend<T: Clone> {
 impl<T: Clone> RingBufferSend<T> {
     /// Write a buffer of items into the ring buffer, returning the number of items that were
     /// successfully written.
-    pub fn write(&mut self, src: &[T]) -> usize {
+    /// Be aware that it is not safe to have this being written to from multiple threads.
+    /// This is part of a **single producer** single consumer ring buffer.
+    pub fn write(&self, src: &[T]) -> usize {
         self.inner.write(src.len(), |dest| {
             dest.clone_from_slice(&src[0..dest.len()]);
         })
+    }
+
+    /// Used to retrieve a section of the ring buffer for writing. You specify the number of items
+    /// you would like to write to and a slice with the number of requested items (or less if the
+    /// buffer needs to wrap), will be passed to the given closure.
+    pub fn write_with<F>(&self, count_requested: usize, f: F) -> usize
+    where
+        F: FnOnce(&mut [T]),
+    {
+        self.inner.write(count_requested, f)
     }
 
     /// Returns the number of items that are available for writing.
@@ -248,20 +289,52 @@ impl<T: Clone> RingBufferSend<T> {
     }
 }
 
+impl<T: Clone> Clone for RingBufferSend<T> {
+    fn clone(&self) -> Self {
+        RingBufferSend {
+            inner: Arc::clone(&self.inner),
+        }
+    }
+}
+
+/// Be aware that it is not safe to have this being written to from multiple threads.
+/// This is part of a single producer **single consumer** ring buffer.
 pub struct RingBufferRecv<T: Clone> {
     inner: Arc<RingBuffer<T>>,
 }
 
 impl<T: Clone> RingBufferRecv<T> {
-    pub fn read(&mut self, dest: &mut [T]) -> usize {
+    /// Read a buffer of items from a ring buffer, returning the number of items that were
+    /// successfully read.
+    /// Be aware that it is not safe to have this being written to from multiple threads.
+    /// This is part of a single producer **single consumer** ring buffer.
+    pub fn read(&self, dest: &mut [T]) -> usize {
         self.inner.read(dest.len(), |src| {
             (&mut dest[0..src.len()]).clone_from_slice(src);
         })
     }
 
+    /// Used to retrieve a section of the ring buffer for reading. You specify the number of items
+    /// you would like to read and a slice with the number of requested items (or less if the
+    /// buffer needs to wrap), will be passed to the given closure.
+    pub fn read_with<F>(&self, count_requested: usize, f: F) -> usize
+    where
+        F: FnOnce(&[T]),
+    {
+        self.inner.read(count_requested, f)
+    }
+
     /// Returns the number of items that are available for reading.
     pub fn available(&mut self) -> usize {
         self.inner.available_read()
+    }
+}
+
+impl<T: Clone> Clone for RingBufferRecv<T> {
+    fn clone(&self) -> Self {
+        RingBufferRecv {
+            inner: Arc::clone(&self.inner),
+        }
     }
 }
 
@@ -284,18 +357,32 @@ impl<T: Clone> Drop for RingBuffer<T> {
 }
 
 /// Create a sender/receiver pair for a single producer single consumer ring buffer.
+/// `subbfer_len` is the number of items that should be contained in each subbffer, and
+/// `subbuffer_count` is the number of subbffers that are used to swap data between the
+/// sender and receiver.
 pub fn ring_buffer<T: Clone + Send>(
-    max_item_count: usize,
+    subbuffer_len: usize,
+    subbuffer_count: usize,
 ) -> Result<(RingBufferSend<T>, RingBufferRecv<T>), Error> {
-    RingBuffer::create_pair(max_item_count)
+    RingBuffer::create_pair(subbuffer_len, subbuffer_count)
 }
 
 /// Create a sender/receiver pair for a single producer single consumer ring buffer using
-/// a preallocated buffer for items.
+/// a preallocated buffer for items. `subbfer_len` is the number of items that should be contained in each subbffer, and
+/// `subbuffer_count` is the number of subbffers that are used to swap data between the
+/// sender and receiver.
 pub fn ring_buffer_preallocated<T: Clone + Send>(
+    subbuffer_len: usize,
+    subbuffer_count: usize,
+    subbuffer_stride_in_bytes: usize,
     preallocated: Box<[T]>,
 ) -> Result<(RingBufferSend<T>, RingBufferRecv<T>), Error> {
-    RingBuffer::create_pair_preallocated(preallocated)
+    RingBuffer::create_pair_preallocated(
+        subbuffer_len,
+        subbuffer_count,
+        subbuffer_stride_in_bytes,
+        preallocated,
+    )
 }
 
 // FIXME remove this since it's probably useless (in Rust anyway).
