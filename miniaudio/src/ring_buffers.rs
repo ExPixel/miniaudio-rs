@@ -283,12 +283,15 @@ impl<T: Clone> Drop for RingBuffer<T> {
     }
 }
 
+/// Create a sender/receiver pair for a single producer single consumer ring buffer.
 pub fn ring_buffer<T: Clone + Send>(
     max_item_count: usize,
 ) -> Result<(RingBufferSend<T>, RingBufferRecv<T>), Error> {
     RingBuffer::create_pair(max_item_count)
 }
 
+/// Create a sender/receiver pair for a single producer single consumer ring buffer using
+/// a preallocated buffer for items.
 pub fn ring_buffer_preallocated<T: Clone + Send>(
     preallocated: Box<[T]>,
 ) -> Result<(RingBufferSend<T>, RingBufferRecv<T>), Error> {
