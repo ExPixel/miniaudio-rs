@@ -1,4 +1,4 @@
-name: Test
+name: CI
 
 on:
     pull_request:
@@ -7,6 +7,10 @@ on:
     push:
         branches:
             - master
+    create:
+        tags:
+            - miniaudio-sys-v*
+            - miniaudio-v*
 
 jobs:
     cargo_tests:
@@ -73,3 +77,41 @@ jobs:
           run: cargo fmt --all -- --check
         - name: Clippy Lints
           run: cargo clippy --examples
+
+    publish:
+        name: Publish Crates
+        runs-on: ubuntu-latest
+        needs: cargo_tests
+        if: ${{ github.event_name == 'create' && contains(github.ref, 'refs/tags/') }}
+
+        env:
+            CARGO_INCREMENTAL: 0
+
+        steps:
+        - uses: actions/checkout@v2
+        - name: Checkout Submodules
+          shell: bash
+          run: |
+            auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+            git submodule sync --recursive
+            git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+        - uses: actions-rs/toolchain@v1
+          with:
+              toolchain: ${{ matrix.rust_channel }}
+              profile: default
+              override: true
+              components: rustfmt, clippy
+
+        # Publish
+        - name: Publish Sys Crate
+          if: ${{ github.event_name == 'create' && contains(github.ref, 'tags/miniaudio-sys-v') }}
+          working-directory: miniaudio-sys
+          run: |
+              cargo login ${{ secrets.CARGO_LOGIN_TOKEN  }}
+              cargo publish
+        - name: Publish Main Crate
+          if: ${{ github.event_name == 'create' && contains(github.ref, 'tags/miniaudio-v') }}
+          working-directory: miniaudio
+          run: |
+              cargo login ${{ secrets.CARGO_LOGIN_TOKEN  }}
+              cargo publish
