@@ -7,6 +7,10 @@ use std::path::PathBuf;
 pub fn main() {
     let mut cc_builder = cc::Build::new();
     cc_builder.cpp(false).define("MINIAUDIO_IMPLEMENTATION", "");
+
+    // This removes an annoying unused function warning from miniaudio.
+    cc_builder.flag_if_supported("-Wno-unused-function");
+
     apply_flags(&mut cc_builder);
     apply_definitions(|name, value| {
         cc_builder.define(name, value);
