@@ -8,8 +8,8 @@ on:
             - '.github/**'
             - '.gitignore'
             - 'LICENSE'
-            - 'README'
-            - 'miniaudio/README'
+            - 'README.md'
+            - 'miniaudio/README.md'
     push:
         branches:
             - master
@@ -17,8 +17,8 @@ on:
             - '.github/**'
             - '.gitignore'
             - 'LICENSE'
-            - 'README'
-            - 'miniaudio/README'
+            - 'README.md'
+            - 'miniaudio/README.md'
 
 jobs:
     cargo-tests:
