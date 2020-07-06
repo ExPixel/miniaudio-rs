@@ -28,6 +28,11 @@ jobs:
               profile: default
               override: true
               components: rustfmt, clippy
+        
+        - name: Get Tag
+          run: |
+              echo "::set-env name=PUBLISH_TAG::${GITHUB_REF#refs/tags/}"
+              echo "Publishing tag ${{ env.PUBLISH_TAG }}"
 
         # Display Tool Versions:
         - name: Check Tools
@@ -37,13 +42,13 @@ jobs:
 
         # Publish
         - name: Publish Sys Crate
-          if: ${{ github.event_name == 'create' && contains(github.ref, 'tags/miniaudio-sys-v') }}
+          if: ${{ startsWith(env.PUBLISH_TAG, 'miniaudio-sys-v') }}
           working-directory: miniaudio-sys
           run: |
               cargo login ${{ secrets.CARGO_LOGIN_TOKEN  }}
               cargo publish
         - name: Publish Main Crate
-          if: ${{ github.event_name == 'create' && contains(github.ref, 'tags/miniaudio-v') }}
+          if: ${{ startsWith(env.PUBLISH_TAG, 'miniaudio-v') }}
           working-directory: miniaudio
           run: |
               cargo login ${{ secrets.CARGO_LOGIN_TOKEN  }}
