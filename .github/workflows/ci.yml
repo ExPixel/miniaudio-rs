@@ -19,7 +19,7 @@ jobs:
 
         strategy:
             matrix:
-                rust_channel: [stable, beta, nightly]
+                rust_channel: [stable]
                 os: [ubuntu-latest, windows-latest, macOS-latest]
 
         env:
