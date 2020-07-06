@@ -1,8 +1,9 @@
 name: Publish
 
 on:
-    tags:
-        - miniaudio-sys-v*
+    push:
+        tags:
+            - miniaudio-sys-v*
 jobs:
     publish:
         name: publish miniaudio-sys
