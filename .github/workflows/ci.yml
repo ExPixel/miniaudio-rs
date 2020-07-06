@@ -27,7 +27,6 @@ jobs:
 
         strategy:
             matrix:
-                rust_channel: [stable]
                 os: [ubuntu-latest, windows-latest, macOS-latest]
 
         env:
@@ -43,7 +42,7 @@ jobs:
             git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
         - uses: actions-rs/toolchain@v1
           with:
-              toolchain: ${{ matrix.rust_channel }}
+              toolchain: stable
               profile: default
               override: true
               components: rustfmt, clippy
