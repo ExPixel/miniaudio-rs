@@ -23,7 +23,7 @@ pub fn main() {
     emit_supported_features();
 
     let maybe_vorbis_header = if cfg!(feature = "ma-enable-vorbis") {
-        Some("./miniaudio/extras/stb_vorbis")
+        Some("./miniaudio/extras/stb_vorbis.c")
     } else {
         None
     };
