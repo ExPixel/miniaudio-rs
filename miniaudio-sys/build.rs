@@ -18,22 +18,12 @@ pub fn main() {
 
     emit_supported_features();
 
-    let mut included_headers = Vec::new();
-    included_headers.push("./miniaudio/miniaudio.h");
-
-    if cfg!(feature = "ma-enable-dr-flac") {
-        included_headers.push("./miniaudio/extras/dr_flac.h");
-    }
-
-    if cfg!(feature = "ma-enable-dr-mp3") {
-        included_headers.push("./miniaudio/extras/dr_mp3.h");
-    }
-
-    if cfg!(feature = "ma-enable-dr-wav") {
-        included_headers.push("./miniaudio/extras/dr_wav.h");
-    }
-
-    let header_contents = generate_miniaudio_header(&included_headers);
+    let maybe_vorbis_header = if cfg!(feature = "ma-enable-vorbis") {
+        Some("./miniaudio/extras/stb_vorbis")
+    } else {
+        None
+    };
+    let header_contents = generate_miniaudio_header("./miniaudio/miniaudio.h", maybe_vorbis_header);
 
     let bindings = bindgen::Builder::default()
         // Make sure to only whitelist miniaudio's API.
@@ -64,39 +54,63 @@ pub fn main() {
     println!("cargo:rerun-if-env-changed=CC");
 }
 
-fn generate_miniaudio_header(headers: &[&str]) -> String {
-    use std::io::prelude::*;
+/// Generates the contents of the header that will be used by bindgen to create bindings to the C
+/// API.
+fn generate_miniaudio_header(main_header: &str, maybe_vorbis_header: Option<&str>) -> String {
+    use std::fmt::Write;
 
     let mut contents = String::new();
     apply_definitions(|name, value| {
         contents.push_str(&format!("#define {} {}\n", name, value));
     });
 
-    for header in headers.iter() {
-        // Insert a line break before each new header file.
-        if contents.len() > 0 {
-            contents.push_str("\n");
-        }
+    // The vorbis decoder is enabled by including the header twice like so:
+    // ```c
+    // #define STB_VORBIS_HEADER_ONLY
+    // #include "extras/stb_vorbis.c"    // Enables Vorbis decoding.
+    //
+    // #define MINIAUDIO_IMPLEMENTATION
+    // #include "miniaudio.h"
+    //
+    // // The stb_vorbis implementation must come after the implementation of miniaudio.
+    // #undef STB_VORBIS_HEADER_ONLY
+    // #include "extras/stb_vorbis.c"
+    // ```
+    let (vorbis_prefix, vorbis_suffix) = if let Some(vorbis_header) = maybe_vorbis_header {
+        (
+            format!(
+                "#define STB_VORBIS_HEADER_ONLY\n#include \"{}\"",
+                vorbis_header
+            ),
+            format!(
+                "#undef STB_VORBIS_HEADER_ONLY\n#include \"{}\"",
+                vorbis_header
+            ),
+        )
+    } else {
+        (String::new(), String::new())
+    };
 
-        let mut file = std::fs::File::open(*header).expect("failed to open header file");
-        file.read_to_string(&mut contents)
-            .expect("failed to read header contents");
-    }
+    writeln!(contents, "{}", vorbis_prefix).unwrap();
+    writeln!(contents, "#include \"{}\"", main_header).unwrap();
+    writeln!(contents, "{}", vorbis_suffix).unwrap();
 
     return contents;
 }
 
+/// Calls the given closure with the macro definitions that map to features in miniaudio that are enabled
+/// through Rust.
 fn apply_definitions<F: FnMut(&str, &str)>(mut define: F) {
-    if cfg!(feature = "ma-enable-dr-flac") {
-        define("DR_FLAC_IMPLEMENTATION", "1");
+    if cfg!(feature = "ma-no-flac") {
+        define("MA_NO_FLAC", "1");
     }
 
-    if cfg!(feature = "ma-enable-dr-mp3") {
-        define("DR_MP3_IMPLEMENTATION", "1");
+    if cfg!(feature = "ma-no-mp3") {
+        define("MA_NO_MP3", "1");
     }
 
-    if cfg!(feature = "ma-enable-dr-wav") {
-        define("DR_WAV_IMPLEMENTATION", "1");
+    if cfg!(feature = "ma-no-wav") {
+        define("MA_NO_WAV", "1");
     }
 
     if cfg!(feature = "ma-no-wasapi") {
@@ -193,6 +207,7 @@ fn apply_definitions<F: FnMut(&str, &str)>(mut define: F) {
     }
 }
 
+/// Enables SIMD flags for CC based on enabled Rust features.
 #[allow(clippy::logic_bug)]
 fn apply_flags(b: &mut cc::Build) {
     if cfg!(target_feature = "sse2") && !(cfg!(feature = "ma-no-sse2")) {
@@ -212,6 +227,7 @@ fn apply_flags(b: &mut cc::Build) {
     }
 }
 
+/// Emits features that map to miniaudio platform feature macros.
 #[allow(clippy::logic_bug)]
 fn emit_supported_features() {
     let emit_feat = |feature: &'static str| {

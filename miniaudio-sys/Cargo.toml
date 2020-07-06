@@ -30,9 +30,11 @@ crate_type = ["lib"]
 [features]
 default = ["ma-log-level-error"]
 
-ma-enable-dr-flac = []
-ma-enable-dr-mp3 = []
-ma-enable-dr-wav = []
+ma-enable-vorbis = []
+
+ma-no-wav = []
+ma-no-mp3 = []
+ma-no-flac = []
 
 ma-no-wasapi = []
 ma-no-dsound = []
