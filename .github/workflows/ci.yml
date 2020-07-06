@@ -4,16 +4,24 @@ on:
     pull_request:
         branches:
             - master
+        paths-ignore:
+            - '.github/**'
+            - '.gitignore'
+            - 'LICENSE'
+            - 'README'
+            - 'miniaudio/README'
     push:
         branches:
             - master
-    create:
-        tags:
-            - miniaudio-sys-v*
-            - miniaudio-v*
+        paths-ignore:
+            - '.github/**'
+            - '.gitignore'
+            - 'LICENSE'
+            - 'README'
+            - 'miniaudio/README'
 
 jobs:
-    cargo_tests:
+    cargo-tests:
         name: ${{ matrix.rust_channel }} ${{ matrix.os }}
         runs-on: ${{ matrix.os }}
 
@@ -101,17 +109,3 @@ jobs:
               profile: default
               override: true
               components: rustfmt, clippy
-
-        # Publish
-        - name: Publish Sys Crate
-          if: ${{ github.event_name == 'create' && contains(github.ref, 'tags/miniaudio-sys-v') }}
-          working-directory: miniaudio-sys
-          run: |
-              cargo login ${{ secrets.CARGO_LOGIN_TOKEN  }}
-              cargo publish
-        - name: Publish Main Crate
-          if: ${{ github.event_name == 'create' && contains(github.ref, 'tags/miniaudio-v') }}
-          working-directory: miniaudio
-          run: |
-              cargo login ${{ secrets.CARGO_LOGIN_TOKEN  }}
-              cargo publish

@@ -1,0 +1,50 @@
+name: Publish
+
+on:
+    push:
+        tags:
+            - miniaudio-sys-v*
+            - miniaudio-v*
+
+jobs:
+    publish-crates:
+        name: publish crates
+        runs-on: ubuntu-latest
+
+        env:
+            CARGO_INCREMENTAL: 0
+
+        steps:
+        - uses: actions/checkout@v2
+        - name: Checkout Submodules
+          shell: bash
+          run: |
+            auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+            git submodule sync --recursive
+            git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+        - uses: actions-rs/toolchain@v1
+          with:
+              toolchain: stable
+              profile: default
+              override: true
+              components: rustfmt, clippy
+
+        # Display Tool Versions:
+        - name: Check Tools
+          run: |
+            rustc --version
+            cargo --version
+
+        # Publish
+        - name: Publish Sys Crate
+          if: ${{ github.event_name == 'create' && contains(github.ref, 'tags/miniaudio-sys-v') }}
+          working-directory: miniaudio-sys
+          run: |
+              cargo login ${{ secrets.CARGO_LOGIN_TOKEN  }}
+              cargo publish
+        - name: Publish Main Crate
+          if: ${{ github.event_name == 'create' && contains(github.ref, 'tags/miniaudio-v') }}
+          working-directory: miniaudio
+          run: |
+              cargo login ${{ secrets.CARGO_LOGIN_TOKEN  }}
+              cargo publish
