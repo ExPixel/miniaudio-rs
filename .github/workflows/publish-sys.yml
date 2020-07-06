@@ -1,0 +1,51 @@
+name: Publish
+
+on:
+    tags:
+        - miniaudio-sys-v*
+jobs:
+    publish:
+        name: publish miniaudio-sys
+        runs-on: ubuntu-latest
+
+        env:
+            CARGO_INCREMENTAL: 0
+
+        steps:
+        - uses: actions/checkout@v2
+        - name: Checkout Submodules
+          shell: bash
+          run: |
+            auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+            git submodule sync --recursive
+            git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+        - uses: actions-rs/toolchain@v1
+          with:
+              toolchain: ${{ matrix.rust_channel }}
+              profile: default
+              override: true
+              components: rustfmt, clippy
+        - name: Install LLVM (Windows)
+          run: choco install llvm
+          if: matrix.os == 'windows-latest'
+
+        # Display Tool Versions:
+        - name: Check Tools
+          run: |
+            rustc --version
+            cargo --version
+            cargo fmt --version
+            cargo clippy --version
+
+        # Run Tests:
+        - name: Test
+          run: cargo test -vv
+        - name: Check Formatting
+          run: cargo fmt --all -- --check
+        - name: Clippy Lints
+          run: cargo clippy --examples
+        - name: Login To Cargo
+          run: cargo login ${{ secrets.CARGO_LOGIN_TOKEN }}
+        - name: Publish Crate
+          run: cargo publish
+
