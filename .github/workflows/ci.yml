@@ -7,6 +7,10 @@ on:
     push:
         branches:
             - master
+    create:
+        tags:
+            - miniaudio-sys-v*
+            - miniaudio-v*
 
 jobs:
     cargo_tests:
@@ -73,3 +77,17 @@ jobs:
           run: cargo fmt --all -- --check
         - name: Clippy Lints
           run: cargo clippy --examples
+
+        # Publish
+        - name: Publish Sys Crate
+          if: ${{ github.event_name == 'create' && contains(github.ref, 'tags/miniaudio-sys-v') }}
+          working-directory: miniaudio-sys
+          run: |
+              cargo login ${{ secrets.CARGO_LOGIN_TOKEN  }}
+              cargo publish
+        - name: Publish Main Crate
+          if: ${{ github.event_name == 'create' && contains(github.ref, 'tags/miniaudio-v') }}
+          working-directory: miniaudio
+          run: |
+              cargo login ${{ secrets.CARGO_LOGIN_TOKEN  }}
+              cargo publish
