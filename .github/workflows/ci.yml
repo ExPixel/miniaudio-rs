@@ -78,6 +78,8 @@ jobs:
             cargo clippy --version
 
         # Run Tests:
+        - name: Build
+          run: cargo build --examples --tests
         - name: Test
           run: cargo test -vv
         - name: Check Formatting
