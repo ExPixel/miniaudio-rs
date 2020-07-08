@@ -335,7 +335,7 @@ impl DeviceConfig {
     /// of cloneable thread-safe struct like an Arc.
     pub fn set_data_callback<F>(&mut self, callback: F)
     where
-        F: FnMut(&RawDevice, &mut FramesMut, &Frames) + Send + Sync + Clone + 'static,
+        F: FnMut(&RawDevice, &mut FramesMut, &Frames) + Send + Clone + 'static,
     {
         let user_data = self.ensure_user_data();
         unsafe {
@@ -356,7 +356,7 @@ impl DeviceConfig {
     /// of cloneable thread-safe struct like an Arc.
     pub fn set_stop_callback<F>(&mut self, callback: F)
     where
-        F: FnMut(&RawDevice) + Clone + Send + Sync + 'static,
+        F: FnMut(&RawDevice) + Clone + Send + 'static,
     {
         let user_data = self.ensure_user_data();
         unsafe {
