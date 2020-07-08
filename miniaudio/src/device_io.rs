@@ -1134,6 +1134,9 @@ impl Drop for RawContext {
     }
 }
 
+unsafe impl Send for RawContext {}
+unsafe impl Sync for RawContext {}
+
 /// An atomically reference counted context.
 #[derive(Clone)]
 pub struct Context(Arc<RawContext>);
@@ -1374,6 +1377,9 @@ impl Drop for RawDevice {
         }
     }
 }
+
+unsafe impl Send for RawDevice {}
+unsafe impl Sync for RawDevice {}
 
 #[derive(Clone)]
 pub struct Device(Arc<RawDevice>);
