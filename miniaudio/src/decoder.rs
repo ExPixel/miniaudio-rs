@@ -54,10 +54,29 @@ impl Decoder {
                 Arc::deref(&self.0) as *const _ as *mut _,
                 output.as_mut_ptr() as *mut _,
                 output.frame_count() as u64,
-            );
+            )
         }
+    }
 
-        1
+    #[inline]
+    pub fn length_in_pcm_frames(&self) -> u64 {
+        unsafe {
+            sys::ma_decoder_get_length_in_pcm_frames(
+                Arc::deref(&self.0) as *const _ as *mut _,
+            )
+        }
+    }
+
+    #[inline]
+    pub fn seek_to_pcm_frame(&self, frame_index: u64) -> Result<(), Error> {
+        let result = unsafe {
+            sys::ma_decoder_seek_to_pcm_frame(
+                Arc::deref(&self.0) as *const _ as *mut _,
+                frame_index,
+            )
+        };
+
+        map_result!(result, ())
     }
 
     #[inline]
