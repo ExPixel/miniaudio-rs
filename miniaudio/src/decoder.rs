@@ -61,9 +61,7 @@ impl Decoder {
     #[inline]
     pub fn length_in_pcm_frames(&self) -> u64 {
         unsafe {
-            sys::ma_decoder_get_length_in_pcm_frames(
-                Arc::deref(&self.0) as *const _ as *mut _,
-            )
+            sys::ma_decoder_get_length_in_pcm_frames(Arc::deref(&self.0) as *const _ as *mut _)
         }
     }
 
