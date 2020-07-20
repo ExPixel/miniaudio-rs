@@ -10,7 +10,7 @@ bg_whitelisted_types="ma_.*"
 bg_whitelisted_functions="ma_.*"
 bg_whitelisted_variables="(ma|MA)_.*"
 
-bg_flags="--ctypes-prefix libc --use-core --size_t-is-usize --impl-debug --no-prepend-enum-name"
+bg_flags="--no-layout-tests --ctypes-prefix libc --use-core --size_t-is-usize --impl-debug --no-prepend-enum-name"
 
 bg_options="--rust-target ${bg_rust_target}"
 
