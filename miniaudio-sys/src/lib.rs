@@ -5,4 +5,11 @@
 
 pub mod util;
 
+#[cfg(feature = "bindgen")]
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+
+#[cfg(all(not(feature = "bindgen"), feature = "ma-enable-vorbis"))]
+include!("../generated-bindings/bindings-with-vorbis.rs");
+
+#[cfg(all(not(feature = "bindgen"), not(feature = "ma-enable-vorbis")))]
+include!("../generated-bindings/bindings.rs");

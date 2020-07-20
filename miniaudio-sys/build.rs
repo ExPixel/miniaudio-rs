@@ -1,9 +1,3 @@
-extern crate bindgen;
-extern crate cc;
-
-use std::env;
-use std::path::PathBuf;
-
 pub fn main() {
     let mut cc_builder = cc::Build::new();
     cc_builder.cpp(false).define("MINIAUDIO_IMPLEMENTATION", "");
@@ -15,28 +9,45 @@ pub fn main() {
     apply_definitions(|name, value| {
         cc_builder.define(name, value);
     });
+
     cc_builder
         .include("./miniaudio")
-        .file("./miniaudio-wrapper.c")
-        .compile("libminiaudio");
+        .file("./miniaudio-wrapper.c");
+
+    if cfg!(feature = "ma-enable-vorbis") {
+        cc_builder.file("./miniaudio/extras/stb_vorbis.c");
+    }
+
+    cc_builder.compile("libminiaudio");
 
     emit_supported_features();
 
-    let maybe_vorbis_header = if cfg!(feature = "ma-enable-vorbis") {
-        Some("./miniaudio/extras/stb_vorbis.c")
+    #[cfg(feature = "bindgen")]
+    {
+        generate_bindings();
+    }
+
+    // only rebuild if these files are changed.
+    println!("cargo:rerun-if-changed=./miniaudio/miniaudio.h");
+    println!("cargo:rerun-if-changed=./miniaudio-wrapper.c");
+    println!("cargo:rerun-if-env-changed=CC");
+}
+
+#[cfg(feature = "bindgen")]
+fn generate_bindings() {
+    let header = if cfg!(feature = "ma-enable-vorbis") {
+        "./bindings-with-vorbis.h"
     } else {
-        None
+        "./bindings.h"
     };
-    let header_contents = generate_miniaudio_header("./miniaudio/miniaudio.h", maybe_vorbis_header);
 
     let bindings = bindgen::Builder::default()
         // Make sure to only whitelist miniaudio's API.
         .whitelist_type("ma_.*")
         .whitelist_function("ma_.*")
-        .whitelist_var("ma_.*")
-        .whitelist_var("MA_.*")
+        .whitelist_var("(ma|MA)_.*")
         // We just use one big generated header created by concatenating what we need.
-        .header_contents("miniaudio.h", &header_contents)
+        .header(header)
         .size_t_is_usize(true)
         .rustfmt_bindings(true)
         .layout_tests(true)
@@ -51,55 +62,6 @@ pub fn main() {
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("failed to write bindings");
-
-    // only rebuild if these files are changed.
-    println!("cargo:rerun-if-changed=./miniaudio/miniaudio.h");
-    println!("cargo:rerun-if-changed=./miniaudio-wrapper.c");
-    println!("cargo:rerun-if-env-changed=CC");
-}
-
-/// Generates the contents of the header that will be used by bindgen to create bindings to the C
-/// API.
-fn generate_miniaudio_header(main_header: &str, maybe_vorbis_header: Option<&str>) -> String {
-    use std::fmt::Write;
-
-    let mut contents = String::new();
-    apply_definitions(|name, value| {
-        contents.push_str(&format!("#define {} {}\n", name, value));
-    });
-
-    // The vorbis decoder is enabled by including the header twice like so:
-    // ```c
-    // #define STB_VORBIS_HEADER_ONLY
-    // #include "extras/stb_vorbis.c"    // Enables Vorbis decoding.
-    //
-    // #define MINIAUDIO_IMPLEMENTATION
-    // #include "miniaudio.h"
-    //
-    // // The stb_vorbis implementation must come after the implementation of miniaudio.
-    // #undef STB_VORBIS_HEADER_ONLY
-    // #include "extras/stb_vorbis.c"
-    // ```
-    let (vorbis_prefix, vorbis_suffix) = if let Some(vorbis_header) = maybe_vorbis_header {
-        (
-            format!(
-                "#define STB_VORBIS_HEADER_ONLY\n#include \"{}\"",
-                vorbis_header
-            ),
-            format!(
-                "#undef STB_VORBIS_HEADER_ONLY\n#include \"{}\"",
-                vorbis_header
-            ),
-        )
-    } else {
-        (String::new(), String::new())
-    };
-
-    writeln!(contents, "{}", vorbis_prefix).unwrap();
-    writeln!(contents, "#include \"{}\"", main_header).unwrap();
-    writeln!(contents, "{}", vorbis_suffix).unwrap();
-
-    return contents;
 }
 
 /// Calls the given closure with the macro definitions that map to features in miniaudio that are enabled
