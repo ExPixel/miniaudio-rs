@@ -1,6 +1,6 @@
 [package]
 name = "ep-miniaudio-sys"
-version = "2.2.0"
+version = "2.3.0"
 authors = ["ExPixel <adolphc@outlook.com>"]
 edition = "2018"
 description = "Raw bindings to the miniaudio C library."
