@@ -6,6 +6,7 @@ use std::ffi::{CStr, CString, NulError};
 use std::mem::MaybeUninit;
 use std::ops::Deref;
 use std::os::raw::c_void;
+use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::ptr;
 use std::ptr::NonNull;
 use std::sync::Arc;
@@ -381,6 +382,12 @@ impl DeviceConfig {
     }
 }
 
+/// Represents a value that was possibly poisoned by a panic.
+enum MaybePoisoned<T> {
+    CanUse(T),
+    Poison(Box<dyn std::any::Any + Send>),
+}
+
 pub type DataCallback = dyn FnMut(&RawDevice, &mut FramesMut, &Frames);
 pub type StopCallback = dyn FnMut(&RawDevice);
 pub type BoxedDataCallback = Box<DataCallback>;
@@ -394,8 +401,8 @@ pub struct DeviceConfigUserData {
 // FIXME it might be better to just set the callbacks to some noop functions by default
 // to save ourselves the extra in the audio callback code.
 pub struct DeviceUserData {
-    data_callback: Option<BoxedDataCallback>,
-    stop_callback: Option<BoxedStopCallback>,
+    data_callback: MaybePoisoned<Option<BoxedDataCallback>>,
+    stop_callback: MaybePoisoned<Option<BoxedStopCallback>>,
 }
 
 unsafe extern "C" fn device_data_callback_trampoline(
@@ -446,8 +453,23 @@ unsafe extern "C" fn device_data_callback_trampoline(
             return;
         }
 
-        if let Some(ref mut data_callback) = (*user_data).data_callback {
-            (data_callback)(device.as_ref(), &mut output, &input);
+        // FIXME I am asserting that everything is unwind safe in here because I just plan on
+        // propagating the panic as soon as I get the change on the main thread by poisoning the
+        // device. Not sure if this is a good strategy though.
+        let mut maybe_poison = Ok(());
+        if let MaybePoisoned::CanUse(Some(ref mut data_callback)) = (*user_data).data_callback {
+            maybe_poison = catch_unwind(AssertUnwindSafe(|| {
+                (data_callback)(device.as_ref(), &mut output, &input);
+            }));
+        }
+
+        if let Err(data_callback_poison) = maybe_poison {
+            (*user_data).data_callback = MaybePoisoned::Poison(data_callback_poison);
+            if let Err(stop_callback_poison) =
+                catch_unwind(|| panic!("a panic occurred in the data callback"))
+            {
+                (*user_data).stop_callback = MaybePoisoned::Poison(stop_callback_poison);
+            };
         }
     }
 }
@@ -458,8 +480,24 @@ unsafe extern "C" fn device_stop_callback_trampoline(device_ptr: *mut sys::ma_de
         if user_data.is_null() {
             return;
         }
-        if let Some(ref mut stop_callback) = (*user_data).stop_callback {
-            (stop_callback)(device.as_ref());
+
+        // FIXME I am asserting that everything is unwind safe in here because I just plan on
+        // propagating the panic as soon as I get the change on the main thread by poisoning the
+        // device. Not sure if this is a good strategy though.
+        let mut maybe_poison = Ok(());
+        if let MaybePoisoned::CanUse(Some(ref mut stop_callback)) = (*user_data).stop_callback {
+            maybe_poison = catch_unwind(AssertUnwindSafe(|| {
+                (stop_callback)(device.as_ref());
+            }));
+        }
+
+        if let Err(stop_callback_poison) = maybe_poison {
+            (*user_data).stop_callback = MaybePoisoned::Poison(stop_callback_poison);
+            if let Err(data_callback_poison) =
+                catch_unwind(|| panic!("a panic occurred in the stop callback"))
+            {
+                (*user_data).data_callback = MaybePoisoned::Poison(data_callback_poison);
+            };
         }
     }
 }
@@ -1182,16 +1220,17 @@ impl RawDevice {
             let config_user_data = self.0.pUserData.cast::<DeviceConfigUserData>();
 
             // Use the callback factories to create clones of the callback functions:
-            let data_callback = unsafe {
+            let data_callback = MaybePoisoned::CanUse(unsafe {
                 ((*config_user_data).data_callback_factory)
                     .as_ref()
                     .map(|f| (f)())
-            };
-            let stop_callback = unsafe {
+            });
+
+            let stop_callback = MaybePoisoned::CanUse(unsafe {
                 ((*config_user_data).stop_callback_factory)
                     .as_ref()
                     .map(|f| (f)())
-            };
+            });
 
             self.0.pUserData = Box::into_raw(Box::new(DeviceUserData {
                 data_callback,
