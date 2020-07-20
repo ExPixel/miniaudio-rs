@@ -4,6 +4,7 @@ use miniaudio_sys as sys;
 use std::ffi::CString;
 use std::mem::MaybeUninit;
 use std::sync::Arc;
+use std::time::Duration;
 
 #[repr(transparent)]
 #[derive(Clone)]
@@ -58,6 +59,35 @@ impl Decoder {
         }
 
         1
+    }
+
+    #[inline]
+    pub fn length_in_frames(&self) -> u64 {
+        unsafe {
+            sys::ma_decoder_get_length_in_pcm_frames(Arc::deref(&self.0) as *const _ as *mut _)
+        }
+    }
+
+    #[inline]
+    pub fn length(&self) -> Duration {
+        let length_in_frames = self.length_in_frames() as f64;
+        let sample_rate = self.output_sample_rate() as f64;
+        let secs = length_in_frames / sample_rate;
+        Duration::from_secs_f64(secs)
+    }
+
+    #[inline]
+    pub fn seek_to_frame(&mut self, frame: u64) -> bool {
+        let result = unsafe {
+            sys::ma_decoder_seek_to_pcm_frame(Arc::deref(&self.0) as *const _ as *mut _, frame)
+        };
+        result == 0
+    }
+
+    #[inline]
+    pub fn seek_to_secs(&mut self, secs: f64) -> bool {
+        let frame = (secs * self.output_sample_rate() as f64) as u64;
+        self.seek_to_frame(frame)
     }
 
     #[inline]
