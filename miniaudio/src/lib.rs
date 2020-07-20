@@ -50,6 +50,7 @@ mod device_io;
 mod filters;
 mod frames;
 mod generation;
+mod lock;
 mod resampling;
 mod ring_buffers;
 

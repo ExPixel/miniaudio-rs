@@ -1,7 +1,10 @@
 use miniaudio::{Decoder, Device, DeviceConfig, DeviceType};
 
 pub fn main() {
-    let mut decoder = Decoder::from_file("miniaudio/examples/assets/exit.wav", None).unwrap();
+    let decoder = Decoder::from_file("miniaudio/examples/assets/exit.wav", None)
+        .expect("failed to initialize decoder from file")
+        .sync();
+
     let mut config = DeviceConfig::new(DeviceType::Playback);
     config.playback_mut().set_format(decoder.output_format());
     config
