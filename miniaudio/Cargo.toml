@@ -21,6 +21,8 @@ crate_type = ["lib"]
 [features]
 default = ["ma-log-level-error"]
 
+bindgen = ["ep-miniaudio-sys/bindgen"]
+
 ma-enable-vorbis = ["ep-miniaudio-sys/ma-enable-vorbis"]
 
 ma-no-flac = ["ep-miniaudio-sys/ma-no-flac"]
