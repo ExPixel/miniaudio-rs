@@ -1,6 +1,6 @@
 [package]
 name = "miniaudio"
-version = "0.8.0"
+version = "0.8.1"
 authors = ["Adolph C. <adolphc@outlook.com>"]
 edition = "2018"
 description = "Bindings to the miniaudio C library."
@@ -12,6 +12,10 @@ keywords = ["audio", "miniaudio", "sound", "pcm"]
 readme = "README.md"
 publish = true
 categories = ["multimedia::audio", "multimedia"]
+
+include = [
+    "src/**/*.rs"
+]
 
 [lib]
 name = "miniaudio"

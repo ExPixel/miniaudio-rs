@@ -1,6 +1,6 @@
 [package]
 name = "ep-miniaudio-sys"
-version = "2.3.0"
+version = "2.3.1"
 authors = ["ExPixel <adolphc@outlook.com>"]
 edition = "2018"
 description = "Raw bindings to the miniaudio C library."
@@ -11,15 +11,17 @@ license = "MIT"
 keywords = ["audio", "miniaudio", "sound", "pcm"]
 publish = true
 categories = ["multimedia::audio", "multimedia"]
-exclude = [
-    "miniaudio/examples/*",
-    "miniaudio/extras/*",
-    "miniaudio/research/*",
-    "miniaudio/resources/*",
-    "miniaudio/tests/*",
-    "miniaudio/tools/*",
-    "miniaudio/CONTRIBUTING.md",
-    "miniaudio/README.md",
+
+include = [
+    "src/**/*.rs",
+    "generated-bindings/**/*.rs",
+    "build.rs",
+    "bindings.h",
+    "bindings-with-vorbis.h",
+    "miniaudio-wrapper.c",
+    "miniaudio/miniaudio.h",
+    "miniaudio/extras/**/*.c",
+    "miniaudio/extras/**/*.h"
 ]
 
 [lib]
