@@ -1,8 +1,6 @@
 use std::cell::UnsafeCell;
 use std::sync::atomic::{spin_loop_hint, AtomicUsize, Ordering};
 
-// This is made repr(C) to enable some transmutation hacks for Decoders.
-#[repr(C)]
 pub struct SpinRwLock<T> {
     /// This either contains the number of readers using all of the bits above the first (0th bit),
     /// or the 0th bit will be set meaning that there is one writer with control of the lock.
@@ -73,6 +71,11 @@ impl<T> SpinRwLock<T> {
 
     fn release_read(&self) {
         self.lock.fetch_sub(2, Ordering::Release);
+    }
+
+    /// Returns the data in this lock as a pointer.
+    pub(crate) fn as_ptr(&self) -> *mut T {
+        self.data.get()
     }
 }
 

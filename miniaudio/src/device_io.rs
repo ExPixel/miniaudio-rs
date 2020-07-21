@@ -200,7 +200,16 @@ pub struct DeviceConfig(sys::ma_device_config);
 
 impl DeviceConfig {
     pub fn new(device_type: DeviceType) -> DeviceConfig {
-        DeviceConfig(unsafe { sys::ma_device_config_init(device_type as _) })
+        let mut config = DeviceConfig(unsafe { sys::ma_device_config_init(device_type as _) });
+
+        // It's important for these callbacks to always be set or else `Device::set_data_callback`
+        // and `Device::set_stop_callback` won't work correctly because the `onData` and `onStop`
+        // callbacks of teh device won't be set properly. I would set them in the `RawDevice` if
+        // possible but this is not allowed by the miniaudio API.
+        config.0.dataCallback = Some(device_data_callback_trampoline);
+        config.0.stopCallback = Some(device_stop_callback_trampoline);
+
+        return config;
     }
 
     pub fn device_type(&self) -> DeviceType {
@@ -342,11 +351,6 @@ impl DeviceConfig {
         unsafe {
             (*user_data).data_callback_factory = Some(Box::new(move || Box::new(callback.clone())));
         }
-
-        // This is set in here instead of the Device's initialization code because overwritting
-        // the value of the data callback after device initialization is not allowed by miniaudio's
-        // API.
-        self.0.dataCallback = Some(device_data_callback_trampoline);
     }
 
     /// Sets the stop callback for this device config.
@@ -363,11 +367,6 @@ impl DeviceConfig {
         unsafe {
             (*user_data).stop_callback_factory = Some(Box::new(move || Box::new(callback.clone())));
         }
-
-        // This is set in here instead of the Device's initialization code because overwritting
-        // the value of the stop callback after device initialization is not allowed by miniaudio's
-        // API.
-        self.0.stopCallback = Some(device_stop_callback_trampoline);
     }
 
     /// This will ensure that user data is initialized and return an unsafe mutable pointer to it.
@@ -384,7 +383,10 @@ impl DeviceConfig {
 
 /// Represents a value that was possibly poisoned by a panic.
 enum MaybePoisoned<T> {
+    /// A pristine value that can be used.
     CanUse(T),
+
+    /// Panic result after the value has been poisoned.
     Poison(Box<dyn std::any::Any + Send>),
 }
 
@@ -1236,7 +1238,28 @@ impl RawDevice {
                 data_callback,
                 stop_callback,
             })) as *mut _;
+        } else {
+            self.0.pUserData = Box::into_raw(Box::new(DeviceUserData {
+                data_callback: MaybePoisoned::CanUse(None),
+                stop_callback: MaybePoisoned::CanUse(None),
+            })) as *mut _;
         }
+    }
+
+    fn set_raw_data_callback(&mut self, callback: Option<Box<DataCallback>>) {
+        assert!(!self.0.pUserData.is_null());
+        let mut user_data =
+            unsafe { Box::<DeviceUserData>::from_raw(self.0.pUserData as *mut DeviceUserData) };
+        user_data.data_callback = MaybePoisoned::CanUse(callback);
+        std::mem::forget(user_data);
+    }
+
+    fn set_raw_stop_callback(&mut self, callback: Option<Box<StopCallback>>) {
+        assert!(!self.0.pUserData.is_null());
+        let mut user_data =
+            unsafe { Box::<DeviceUserData>::from_raw(self.0.pUserData as *mut DeviceUserData) };
+        user_data.stop_callback = MaybePoisoned::CanUse(callback);
+        std::mem::forget(user_data);
     }
 
     /// This will return the context **owned** by this device. A context that was passed into this
@@ -1426,6 +1449,49 @@ pub struct Device(Arc<RawDevice>);
 impl Device {
     pub fn new(context: Option<Context>, config: &DeviceConfig) -> Result<Device, Error> {
         RawDevice::alloc(context, config).map(Device)
+    }
+
+    /// Override the data callback of the device with a different one.
+    /// This callback has less restrictions than the callback of the config
+    /// because it does not have to be cloneable.
+    ///
+    /// ### Panics
+    ///
+    /// * This will panic if it is called after the device has been started.
+    /// * This will also panic if there is more than one reference to the same device (if this has
+    /// been cloned).
+    pub fn set_data_callback<F>(&mut self, callback: F)
+    where
+        F: FnMut(&RawDevice, &mut FramesMut, &Frames) + Send + 'static,
+    {
+        if self.is_started() {
+            panic!("cannot set the data callback after the device has been started");
+        }
+
+        Arc::get_mut(&mut self.0)
+            .expect("cannot set data callback while there is more than one reference to a device")
+            .set_raw_data_callback(Some(Box::new(callback)));
+    }
+
+    /// Override the stop callback of the device with a different one.
+    /// This callback has less restrictions than the callback of the config
+    /// because it does not have to be cloneable.
+    ///
+    /// ### Panics
+    ///
+    /// * This will panic if it is called after the device has been started.
+    /// * This will also panic if there is more than one reference to the same device (if this has
+    pub fn set_stop_callback<F>(&mut self, callback: F)
+    where
+        F: FnMut(&RawDevice) + Send + 'static,
+    {
+        if self.is_started() {
+            panic!("cannot set the stop callback after the device has been started");
+        }
+
+        Arc::get_mut(&mut self.0)
+            .expect("cannot set stop callback while there is more than one reference to a device")
+            .set_raw_stop_callback(Some(Box::new(callback)));
     }
 
     /// Starts the device. For playback devices this begins playback. For capture devices this

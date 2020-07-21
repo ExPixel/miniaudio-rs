@@ -4,7 +4,7 @@ use miniaudio_sys as sys;
 use std::ffi::CString;
 use std::mem::MaybeUninit;
 use std::ops::{Deref, DerefMut};
-use std::sync::{atomic::AtomicUsize, Arc};
+use std::sync::Arc;
 
 #[repr(transparent)]
 #[derive(Clone)]
@@ -21,12 +21,41 @@ impl DecoderConfig {
 
 /// A decoder with synchronization. This will use a spinlock to synchronize access to the decoder
 /// on each function call. The decoder may have multiple readers or one writer.
-#[repr(transparent)]
 pub struct SyncDecoder {
     inner: SpinRwLock<RawDecoder>,
 }
 
 impl SyncDecoder {
+    pub fn from_file(file: &str, config: Option<&DecoderConfig>) -> Result<Arc<Self>, Error> {
+        let decoder = Arc::new(MaybeUninit::<SyncDecoder>::uninit());
+        let filename = CString::new(file.to_string()).map_err(|_err| Error::InvalidFile)?;
+
+        let result = unsafe {
+            sys::ma_decoder_init_file(
+                filename.as_ptr() as *const _,
+                config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
+                (*Arc::deref(&decoder).as_ptr()).inner.as_ptr() as *const _ as *mut _,
+            )
+        };
+
+        map_result!(result, unsafe { std::mem::transmute(decoder) })
+    }
+
+    pub fn from_memory(data: &[u8], config: Option<&DecoderConfig>) -> Result<Arc<Self>, Error> {
+        let decoder = Arc::new(MaybeUninit::<SyncDecoder>::uninit());
+
+        let result = unsafe {
+            sys::ma_decoder_init_memory(
+                data.as_ptr() as *const _,
+                data.len() as _,
+                config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
+                (*Arc::deref(&decoder).as_ptr()).inner.as_ptr() as *const _ as *mut _,
+            )
+        };
+
+        map_result!(result, unsafe { std::mem::transmute(decoder) })
+    }
+
     /// This will block until the lock for the inner decoder is acquired before calling
     /// `read_pcm_frames`.
     #[inline]
@@ -143,52 +172,35 @@ impl Drop for RawDecoder {
     }
 }
 
-// This is made repr(C) to enable a very hacky way to turn this into a SyncDecoder
-#[repr(C)]
 pub struct Decoder {
-    /// This lock field needs to be here in the same position as it is in SpinRwLock
-    /// so that this can be transmuted into a SyncDecoder.
-    _lock: AtomicUsize,
     inner: RawDecoder,
 }
 
 impl Decoder {
-    /// Turn this decoder into a synchronized decoder.
-    pub fn sync(self: Arc<Decoder>) -> Arc<SyncDecoder> {
-        // Make sure there are no other references to this arc.
-        // If this is the only one is should be safe to transmute.
-        assert!(
-            Arc::strong_count(&self) == 1,
-            "cannot create a sync decoder from a decoder with more than one strong reference",
-        );
-
-        unsafe { std::mem::transmute::<Arc<Decoder>, Arc<SyncDecoder>>(self) }
-    }
-
-    pub fn from_file(file: &str, config: Option<&DecoderConfig>) -> Result<Arc<Self>, Error> {
-        let decoder = Arc::new(MaybeUninit::<Decoder>::uninit());
+    pub fn from_file(file: &str, config: Option<&DecoderConfig>) -> Result<Box<Self>, Error> {
+        let decoder = Box::new(MaybeUninit::<Decoder>::uninit());
         let filename = CString::new(file.to_string()).map_err(|_err| Error::InvalidFile)?;
 
         let result = unsafe {
             sys::ma_decoder_init_file(
                 filename.as_ptr() as *const _,
                 config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
-                &(*Arc::deref(&decoder).as_ptr()).inner as *const _ as *mut _,
+                &(*decoder.as_ptr()).inner as *const _ as *mut _,
             )
         };
 
         map_result!(result, unsafe { std::mem::transmute(decoder) })
     }
 
-    pub fn from_memory(data: &[u8], config: Option<&DecoderConfig>) -> Result<Arc<Self>, Error> {
-        let decoder = Arc::new(MaybeUninit::<Decoder>::uninit());
+    pub fn from_memory(data: &[u8], config: Option<&DecoderConfig>) -> Result<Box<Self>, Error> {
+        let decoder = Box::new(MaybeUninit::<Decoder>::uninit());
 
         let result = unsafe {
             sys::ma_decoder_init_memory(
                 data.as_ptr() as *const _,
                 data.len() as _,
                 config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
-                &(*Arc::deref(&decoder).as_ptr()).inner as *const _ as *mut _,
+                &(*decoder.as_ptr()).inner as *const _ as *mut _,
             )
         };
 

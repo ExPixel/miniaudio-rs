@@ -1,11 +1,10 @@
-use miniaudio::{Decoder, Device, DeviceConfig, DeviceType};
+use miniaudio::{Device, DeviceConfig, DeviceType, SyncDecoder};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 pub fn main() {
-    let decoder = Decoder::from_file("miniaudio/examples/assets/exit.wav", None)
-        .expect("failed to initialize decoder from file")
-        .sync();
+    let decoder = SyncDecoder::from_file("miniaudio/examples/assets/exit.wav", None)
+        .expect("failed to initialize decoder from file");
 
     let mut config = DeviceConfig::new(DeviceType::Playback);
     config.playback_mut().set_format(decoder.output_format());
