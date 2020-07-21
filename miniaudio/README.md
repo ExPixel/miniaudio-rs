@@ -26,7 +26,7 @@ If the `bindgen` feature is turned on:
 Example Usage
 ---
 
-For more examples, check out the [examples](/ExPixel/miniaudio-rs/tree/master/miniaudio/examples) directory.
+For more examples, check out the [examples](/miniaudio/examples) directory.
 
 ```rust
 //! Enumerating Devices
