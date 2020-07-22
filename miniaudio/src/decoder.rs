@@ -20,41 +20,102 @@ impl DecoderConfig {
     }
 }
 
+#[repr(transparent)]
+pub struct RawDecoder {
+    inner: sys::ma_decoder,
+}
+
+impl RawDecoder {
+    #[inline]
+    pub fn read_pcm_frames(&mut self, output: &mut FramesMut) -> u64 {
+        unsafe {
+            sys::ma_decoder_read_pcm_frames(
+                &self.inner as *const _ as *mut _,
+                output.as_mut_ptr() as *mut _,
+                output.frame_count() as u64,
+            )
+        }
+    }
+
+    #[inline]
+    pub fn length_in_pcm_frames(&mut self) -> u64 {
+        unsafe { sys::ma_decoder_get_length_in_pcm_frames(&self.inner as *const _ as *mut _) }
+    }
+
+    #[inline]
+    pub fn seek_to_pcm_frame(&mut self, frame_index: u64) -> Result<(), Error> {
+        Error::from_c_result(unsafe {
+            sys::ma_decoder_seek_to_pcm_frame(&self.inner as *const _ as *mut _, frame_index)
+        })
+    }
+
+    pub fn output_format(&self) -> Format {
+        Format::from_c(self.inner.outputFormat)
+    }
+
+    pub fn output_channels(&self) -> u32 {
+        self.inner.outputChannels as _
+    }
+
+    pub fn output_sample_rate(&self) -> u32 {
+        self.inner.outputSampleRate as _
+    }
+}
+
+impl Drop for RawDecoder {
+    fn drop(&mut self) {
+        Error::from_c_result(unsafe { sys::ma_decoder_uninit(&mut self.inner) })
+            .expect("failed to uninit decoder");
+    }
+}
+
 /// A decoder with synchronization. This will use a spinlock to synchronize access to the decoder
-/// on each function call. The decoder may have multiple readers or one writer.
+/// on each function call. The decoder may have multiple readers or one writer. Cloning this
+/// decoder will simply return another reference to the same decoder.
 pub struct SyncDecoder {
-    inner: SpinRwLock<RawDecoder>,
+    inner: Arc<SpinRwLock<RawDecoder>>,
 }
 
 impl SyncDecoder {
-    pub fn from_file(file: &str, config: Option<&DecoderConfig>) -> Result<Arc<Self>, Error> {
-        let decoder = Arc::new(MaybeUninit::<SyncDecoder>::uninit());
+    pub fn from_file(file: &str, config: Option<&DecoderConfig>) -> Result<Self, Error> {
+        let decoder = Arc::new(SpinRwLock::new(MaybeUninit::<RawDecoder>::uninit()));
+
         let filename = CString::new(file.to_string()).map_err(|_err| Error::InvalidFile)?;
 
         let result = unsafe {
             sys::ma_decoder_init_file(
                 filename.as_ptr() as *const _,
                 config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
-                (*Arc::deref(&decoder).as_ptr()).inner.as_ptr() as *const _ as *mut _,
+                Arc::deref(&decoder).as_ptr() as *const _ as *mut _,
             )
         };
 
-        map_result!(result, unsafe { std::mem::transmute(decoder) })
+        map_result!(
+            result,
+            SyncDecoder {
+                inner: unsafe { std::mem::transmute(decoder) }
+            }
+        )
     }
 
-    pub fn from_memory(data: &[u8], config: Option<&DecoderConfig>) -> Result<Arc<Self>, Error> {
-        let decoder = Arc::new(MaybeUninit::<SyncDecoder>::uninit());
+    pub fn from_memory(data: &[u8], config: Option<&DecoderConfig>) -> Result<Self, Error> {
+        let decoder = Arc::new(SpinRwLock::new(MaybeUninit::<RawDecoder>::uninit()));
 
         let result = unsafe {
             sys::ma_decoder_init_memory(
                 data.as_ptr() as *const _,
                 data.len() as _,
                 config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
-                (*Arc::deref(&decoder).as_ptr()).inner.as_ptr() as *const _ as *mut _,
+                Arc::deref(&decoder).as_ptr() as *const _ as *mut _,
             )
         };
 
-        map_result!(result, unsafe { std::mem::transmute(decoder) })
+        map_result!(
+            result,
+            SyncDecoder {
+                inner: unsafe { std::mem::transmute(decoder) }
+            }
+        )
     }
 
     pub fn from_reader(
@@ -141,94 +202,60 @@ impl SyncDecoder {
     }
 }
 
+impl Clone for SyncDecoder {
+    fn clone(&self) -> SyncDecoder {
+        SyncDecoder {
+            inner: Arc::clone(&self.inner),
+        }
+    }
+}
+
 unsafe impl Send for SyncDecoder {}
 unsafe impl Sync for SyncDecoder {}
 
-#[repr(transparent)]
-pub struct RawDecoder {
-    inner: sys::ma_decoder,
-}
-
-impl RawDecoder {
-    #[inline]
-    pub fn read_pcm_frames(&mut self, output: &mut FramesMut) -> u64 {
-        unsafe {
-            sys::ma_decoder_read_pcm_frames(
-                &self.inner as *const _ as *mut _,
-                output.as_mut_ptr() as *mut _,
-                output.frame_count() as u64,
-            )
-        }
-    }
-
-    #[inline]
-    pub fn length_in_pcm_frames(&mut self) -> u64 {
-        unsafe { sys::ma_decoder_get_length_in_pcm_frames(&self.inner as *const _ as *mut _) }
-    }
-
-    #[inline]
-    pub fn seek_to_pcm_frame(&mut self, frame_index: u64) -> Result<(), Error> {
-        Error::from_c_result(unsafe {
-            sys::ma_decoder_seek_to_pcm_frame(&self.inner as *const _ as *mut _, frame_index)
-        })
-    }
-
-    pub fn output_format(&self) -> Format {
-        Format::from_c(self.inner.outputFormat)
-    }
-
-    pub fn output_channels(&self) -> u32 {
-        self.inner.outputChannels as _
-    }
-
-    pub fn output_sample_rate(&self) -> u32 {
-        self.inner.outputSampleRate as _
-    }
-}
-
-impl Drop for RawDecoder {
-    fn drop(&mut self) {
-        // Drop the user data allocated in `from_reader` functions.
-        let _: Option<Box<Box<dyn Reader>>> = unsafe { std::mem::transmute(self.inner.pUserData) };
-
-        Error::from_c_result(unsafe { sys::ma_decoder_uninit(&mut self.inner) })
-            .expect("failed to uninit decoder");
-    }
-}
-
 pub struct Decoder {
-    inner: RawDecoder,
+    inner: Box<RawDecoder>,
 }
 
 impl Decoder {
-    pub fn from_file(file: &str, config: Option<&DecoderConfig>) -> Result<Box<Self>, Error> {
-        let decoder = Box::new(MaybeUninit::<Decoder>::uninit());
+    pub fn from_file(file: &str, config: Option<&DecoderConfig>) -> Result<Self, Error> {
+        let decoder = Box::new(MaybeUninit::<RawDecoder>::uninit());
         let filename = CString::new(file.to_string()).map_err(|_err| Error::InvalidFile)?;
 
         let result = unsafe {
             sys::ma_decoder_init_file(
                 filename.as_ptr() as *const _,
                 config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
-                &(*decoder.as_ptr()).inner as *const _ as *mut _,
+                &*decoder as *const _ as *mut _,
             )
         };
 
-        map_result!(result, unsafe { std::mem::transmute(decoder) })
+        map_result!(
+            result,
+            Decoder {
+                inner: unsafe { std::mem::transmute(decoder) }
+            }
+        )
     }
 
-    pub fn from_memory(data: &[u8], config: Option<&DecoderConfig>) -> Result<Box<Self>, Error> {
-        let decoder = Box::new(MaybeUninit::<Decoder>::uninit());
+    pub fn from_memory(data: &[u8], config: Option<&DecoderConfig>) -> Result<Self, Error> {
+        let decoder = Box::new(MaybeUninit::<RawDecoder>::uninit());
 
         let result = unsafe {
             sys::ma_decoder_init_memory(
                 data.as_ptr() as *const _,
                 data.len() as _,
                 config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
-                &(*decoder.as_ptr()).inner as *const _ as *mut _,
+                &*decoder as *const _ as *mut _,
             )
         };
 
-        map_result!(result, unsafe { std::mem::transmute(decoder) })
+        map_result!(
+            result,
+            Decoder {
+                inner: unsafe { std::mem::transmute(decoder) }
+            }
+        )
     }
 
     pub fn from_reader(

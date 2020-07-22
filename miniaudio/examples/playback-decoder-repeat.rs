@@ -17,7 +17,7 @@ pub fn main() {
     let rewind = Arc::new(AtomicBool::new(false));
 
     let playback_rewind = Arc::clone(&rewind);
-    let playback_decoder = Arc::clone(&decoder);
+    let playback_decoder = decoder.clone();
     config.set_data_callback(move |_device, output, _frames| {
         if !playback_rewind.load(Ordering::Acquire) {
             let frames = playback_decoder.read_pcm_frames(output);
