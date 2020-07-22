@@ -1,6 +1,6 @@
 [package]
 name = "miniaudio"
-version = "0.8.1"
+version = "0.9.0"
 authors = ["Adolph C. <adolphc@outlook.com>"]
 edition = "2018"
 description = "Bindings to the miniaudio C library."
