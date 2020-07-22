@@ -30,6 +30,13 @@ pub struct RawDecoder {
 impl RawDecoder {
     #[inline]
     pub fn read_pcm_frames(&mut self, output: &mut FramesMut) -> u64 {
+        assert!(
+            output.format() == self.output_format(),
+            "output and decoder format did not match (output: {:?}, input: {:?}",
+            output.format(),
+            self.output_format()
+        );
+
         unsafe {
             sys::ma_decoder_read_pcm_frames(
                 &self.inner as *const _ as *mut _,
