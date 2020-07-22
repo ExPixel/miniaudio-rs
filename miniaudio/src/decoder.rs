@@ -1,3 +1,4 @@
+use crate::base::*;
 use crate::lock::{RwLockReadGuard, RwLockWriteGuard, SpinRwLock};
 use crate::{Error, Format, FramesMut};
 use miniaudio_sys as sys;
@@ -74,6 +75,7 @@ impl Drop for RawDecoder {
 /// decoder will simply return another reference to the same decoder.
 pub struct SyncDecoder {
     inner: Arc<SpinRwLock<RawDecoder>>,
+    has_reader: bool,
 }
 
 impl SyncDecoder {
@@ -93,7 +95,8 @@ impl SyncDecoder {
         map_result!(
             result,
             SyncDecoder {
-                inner: unsafe { std::mem::transmute(decoder) }
+                inner: unsafe { std::mem::transmute(decoder) },
+                has_reader: false,
             }
         )
     }
@@ -113,7 +116,8 @@ impl SyncDecoder {
         map_result!(
             result,
             SyncDecoder {
-                inner: unsafe { std::mem::transmute(decoder) }
+                inner: unsafe { std::mem::transmute(decoder) },
+                has_reader: false,
             }
         )
     }
@@ -139,7 +143,8 @@ impl SyncDecoder {
         map_result!(
             result,
             SyncDecoder {
-                inner: unsafe { std::mem::transmute(decoder) }
+                inner: unsafe { std::mem::transmute(decoder) },
+                has_reader: true,
             }
         )
     }
@@ -212,6 +217,21 @@ impl Clone for SyncDecoder {
     fn clone(&self) -> SyncDecoder {
         SyncDecoder {
             inner: Arc::clone(&self.inner),
+            has_reader: self.has_reader,
+        }
+    }
+}
+
+impl Drop for SyncDecoder {
+    fn drop(&mut self) {
+        if self.has_reader {
+            if let Some(inner) = Arc::get_mut(&mut self.inner) {
+                // Recreate the box and allow it to be dropped.
+                let _reader: Box<Box<dyn SeekRead>> =
+                    unsafe { Box::from_raw((*inner.as_ptr()).inner.pUserData as *mut _) };
+                unsafe { (*inner.as_ptr()).inner.pUserData = std::ptr::null_mut() };
+                self.has_reader = false;
+            }
         }
     }
 }
@@ -221,6 +241,7 @@ unsafe impl Sync for SyncDecoder {}
 
 pub struct Decoder {
     inner: Box<RawDecoder>,
+    has_reader: bool,
 }
 
 impl Decoder {
@@ -239,7 +260,8 @@ impl Decoder {
         map_result!(
             result,
             Decoder {
-                inner: unsafe { std::mem::transmute(decoder) }
+                inner: unsafe { std::mem::transmute(decoder) },
+                has_reader: false,
             }
         )
     }
@@ -259,7 +281,8 @@ impl Decoder {
         map_result!(
             result,
             Decoder {
-                inner: unsafe { std::mem::transmute(decoder) }
+                inner: unsafe { std::mem::transmute(decoder) },
+                has_reader: false,
             }
         )
     }
@@ -284,7 +307,8 @@ impl Decoder {
         map_result!(
             result,
             Decoder {
-                inner: unsafe { std::mem::transmute(decoder) }
+                inner: unsafe { std::mem::transmute(decoder) },
+                has_reader: true,
             }
         )
     }
@@ -301,13 +325,14 @@ unsafe extern "C" fn decoder_read_with_reader(
     buffer_out: *mut std::ffi::c_void,
     bytes_to_read: usize,
 ) -> usize {
+    if decoder.is_null() {
+        return 0;
+    }
+
     let reader: &mut Box<dyn SeekRead> = std::mem::transmute((*decoder).pUserData);
     let buffer = std::slice::from_raw_parts_mut(buffer_out as _, bytes_to_read);
-    
-    // FIXME: unwinding from Rust code into foreign code results in undefined behavior so
-    //        we might have to use a "poisoning" scheme the same way it is implemented
-    //        in device_io. I'm not sure if the performance impact is worth it though.
-    reader.read(buffer).expect("failed to read in decoder")
+
+    reader.read(buffer).ok().unwrap_or(0)
 }
 
 unsafe extern "C" fn decoder_seek_with_reader(
@@ -315,18 +340,22 @@ unsafe extern "C" fn decoder_seek_with_reader(
     byte_offset: std::os::raw::c_int,
     origin: sys::ma_seek_origin,
 ) -> sys::ma_bool32 {
+    if decoder.is_null() {
+        return to_bool32(false);
+    }
+
     let reader: &mut Box<dyn SeekRead> = std::mem::transmute((*decoder).pUserData);
     let pos = match origin {
         sys::ma_seek_origin_start => io::SeekFrom::Start(byte_offset as _),
         sys::ma_seek_origin_current => io::SeekFrom::Current(byte_offset as _),
         sys::ma_seek_origin_end => io::SeekFrom::End(byte_offset as _),
-        
-        // FIXME: see fixme in decoder_read_with_reader
+
+        // FIXME: unwinding in foreign code causes undefined behavior, we shouldn't be hitting this
+        // path though.
         _ => unreachable!("unknown seek origin"),
     };
-    
-    // FIXME: see fixme in decoder_read_with_reader
-    reader.seek(pos).expect("failed to seek in decoder") as _
+
+    to_bool32(reader.seek(pos).is_ok())
 }
 
 impl Deref for Decoder {
@@ -340,6 +369,18 @@ impl Deref for Decoder {
 impl DerefMut for Decoder {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.inner
+    }
+}
+
+impl Drop for Decoder {
+    fn drop(&mut self) {
+        if self.has_reader {
+            // Recreate the box and allow it to be dropped.
+            let _reader: Box<Box<dyn SeekRead>> =
+                unsafe { Box::from_raw(self.inner.inner.pUserData as *mut _) };
+            self.has_reader = false;
+            self.inner.inner.pUserData = std::ptr::null_mut();
+        }
     }
 }
 
