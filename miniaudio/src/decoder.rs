@@ -111,25 +111,11 @@ impl SyncDecoder {
         )
     }
 
-    pub fn from_memory(data: &[u8], config: Option<&DecoderConfig>) -> Result<Self, Error> {
-        let decoder = Arc::new(SpinRwLock::new(MaybeUninit::<RawDecoder>::uninit()));
-
-        let result = unsafe {
-            sys::ma_decoder_init_memory(
-                data.as_ptr() as *const _,
-                data.len() as _,
-                config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
-                Arc::deref(&decoder).as_ptr() as *mut _,
-            )
-        };
-
-        map_result!(
-            result,
-            SyncDecoder {
-                inner: unsafe { std::mem::transmute(decoder) },
-                has_reader: false,
-            }
-        )
+    pub fn from_memory<M: Into<Vec<u8>>>(
+        data: M,
+        config: Option<&DecoderConfig>,
+    ) -> Result<Self, Error> {
+        Self::from_read(std::io::Cursor::new(data.into()), config)
     }
 
     pub fn from_read<T: 'static + SeekRead>(
@@ -292,25 +278,11 @@ impl Decoder {
         )
     }
 
-    pub fn from_memory(data: &[u8], config: Option<&DecoderConfig>) -> Result<Self, Error> {
-        let decoder = Box::new(MaybeUninit::<RawDecoder>::uninit());
-
-        let result = unsafe {
-            sys::ma_decoder_init_memory(
-                data.as_ptr() as *const _,
-                data.len() as _,
-                config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
-                decoder.as_ptr() as *mut _,
-            )
-        };
-
-        map_result!(
-            result,
-            Decoder {
-                inner: unsafe { std::mem::transmute(decoder) },
-                has_reader: false,
-            }
-        )
+    pub fn from_memory<M: Into<Vec<u8>>>(
+        data: M,
+        config: Option<&DecoderConfig>,
+    ) -> Result<Self, Error> {
+        Self::from_read(std::io::Cursor::new(data.into()), config)
     }
 
     pub fn from_read<T: 'static + SeekRead>(
