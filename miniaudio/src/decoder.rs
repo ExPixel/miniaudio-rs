@@ -6,6 +6,7 @@ use std::ffi::CString;
 use std::io;
 use std::mem::MaybeUninit;
 use std::ops::{Deref, DerefMut};
+use std::path::Path;
 use std::sync::Arc;
 
 #[repr(transparent)]
@@ -79,10 +80,19 @@ pub struct SyncDecoder {
 }
 
 impl SyncDecoder {
-    pub fn from_file(file: &str, config: Option<&DecoderConfig>) -> Result<Self, Error> {
+    /// Creates a `SyncDecoder` from a file. This will fail with an `InvalidFile` error if the path is
+    /// not valid utf-8.
+    pub fn from_file<P: AsRef<Path>>(
+        file: P,
+        config: Option<&DecoderConfig>,
+    ) -> Result<Self, Error> {
         let decoder = Arc::new(SpinRwLock::new(MaybeUninit::<RawDecoder>::uninit()));
 
-        let filename = CString::new(file.to_string()).map_err(|_err| Error::InvalidFile)?;
+        let filename = file
+            .as_ref()
+            .to_str()
+            .ok_or(Error::InvalidFile)
+            .and_then(|s| CString::new(s.to_string()).map_err(|_err| Error::InvalidFile))?;
 
         let result = unsafe {
             sys::ma_decoder_init_file(
@@ -122,7 +132,14 @@ impl SyncDecoder {
         )
     }
 
-    pub fn from_reader(
+    pub fn from_read<T: 'static + SeekRead>(
+        reader: T,
+        config: Option<&DecoderConfig>,
+    ) -> Result<Self, Error> {
+        Self::from_boxed_read(Box::new(reader), config)
+    }
+
+    pub fn from_boxed_read(
         reader: Box<dyn SeekRead>,
         config: Option<&DecoderConfig>,
     ) -> Result<Self, Error> {
@@ -245,9 +262,18 @@ pub struct Decoder {
 }
 
 impl Decoder {
-    pub fn from_file(file: &str, config: Option<&DecoderConfig>) -> Result<Self, Error> {
+    /// Creates a `Decoder` from a file. This will fail with an `InvalidFile` error if the path is
+    /// not valid utf-8.
+    pub fn from_file<P: AsRef<Path>>(
+        file: P,
+        config: Option<&DecoderConfig>,
+    ) -> Result<Self, Error> {
         let decoder = Box::new(MaybeUninit::<RawDecoder>::uninit());
-        let filename = CString::new(file.to_string()).map_err(|_err| Error::InvalidFile)?;
+        let filename = file
+            .as_ref()
+            .to_str()
+            .ok_or(Error::InvalidFile)
+            .and_then(|s| CString::new(s.to_string()).map_err(|_err| Error::InvalidFile))?;
 
         let result = unsafe {
             sys::ma_decoder_init_file(
@@ -287,7 +313,14 @@ impl Decoder {
         )
     }
 
-    pub fn from_reader(
+    pub fn from_read<T: 'static + SeekRead>(
+        reader: T,
+        config: Option<&DecoderConfig>,
+    ) -> Result<Self, Error> {
+        Self::from_boxed_read(Box::new(reader), config)
+    }
+
+    pub fn from_boxed_read(
         reader: Box<dyn SeekRead>,
         config: Option<&DecoderConfig>,
     ) -> Result<Self, Error> {
