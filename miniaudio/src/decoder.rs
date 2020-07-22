@@ -119,10 +119,11 @@ impl SyncDecoder {
     }
 
     pub fn from_reader(
-        reader: Box<dyn Reader>,
+        reader: Box<dyn SeekRead>,
         config: Option<&DecoderConfig>,
-    ) -> Result<Arc<Self>, Error> {
-        let decoder = Arc::new(MaybeUninit::<SyncDecoder>::uninit());
+    ) -> Result<Self, Error> {
+        let decoder = Arc::new(SpinRwLock::new(MaybeUninit::<RawDecoder>::uninit()));
+
         let user_data = Box::new(reader);
 
         let result = unsafe {
@@ -131,11 +132,16 @@ impl SyncDecoder {
                 Some(decoder_seek_with_reader),
                 Box::into_raw(user_data) as *mut _,
                 config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
-                (*Arc::deref(&decoder).as_ptr()).inner.as_ptr() as *const _ as *mut _,
+                Arc::deref(&decoder).as_ptr() as *const _ as *mut _,
             )
         };
 
-        map_result!(result, unsafe { std::mem::transmute(decoder) })
+        map_result!(
+            result,
+            SyncDecoder {
+                inner: unsafe { std::mem::transmute(decoder) }
+            }
+        )
     }
 
     /// This will block until the lock for the inner decoder is acquired before calling
@@ -259,10 +265,10 @@ impl Decoder {
     }
 
     pub fn from_reader(
-        reader: Box<dyn Reader>,
+        reader: Box<dyn SeekRead>,
         config: Option<&DecoderConfig>,
-    ) -> Result<Box<Self>, Error> {
-        let decoder = Box::new(MaybeUninit::<Decoder>::uninit());
+    ) -> Result<Self, Error> {
+        let decoder = Box::new(MaybeUninit::<RawDecoder>::uninit());
         let user_data = Box::new(reader);
 
         let result = unsafe {
@@ -271,23 +277,36 @@ impl Decoder {
                 Some(decoder_seek_with_reader),
                 Box::into_raw(user_data) as *mut _,
                 config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
-                &(*decoder.as_ptr()).inner as *const _ as *mut _,
+                decoder.as_ptr() as *mut _,
             )
         };
 
-        map_result!(result, unsafe { std::mem::transmute(decoder) })
+        map_result!(
+            result,
+            Decoder {
+                inner: unsafe { std::mem::transmute(decoder) }
+            }
+        )
     }
 }
 
-pub trait Reader: io::Read + io::Seek {}
+pub trait SeekRead: io::Read + io::Seek {}
+
+// Create a blanket implementation so that everything that implements both
+// io::Read and io::Seek also implements SeekRead.
+impl<T> SeekRead for T where T: io::Read + io::Seek {}
 
 unsafe extern "C" fn decoder_read_with_reader(
     decoder: *mut sys::ma_decoder,
     buffer_out: *mut std::ffi::c_void,
     bytes_to_read: usize,
 ) -> usize {
-    let reader: &mut Box<dyn Reader> = std::mem::transmute((*decoder).pUserData);
+    let reader: &mut Box<dyn SeekRead> = std::mem::transmute((*decoder).pUserData);
     let buffer = std::slice::from_raw_parts_mut(buffer_out as _, bytes_to_read);
+    
+    // FIXME: unwinding from Rust code into foreign code results in undefined behavior so
+    //        we might have to use a "poisoning" scheme the same way it is implemented
+    //        in device_io. I'm not sure if the performance impact is worth it though.
     reader.read(buffer).expect("failed to read in decoder")
 }
 
@@ -296,13 +315,17 @@ unsafe extern "C" fn decoder_seek_with_reader(
     byte_offset: std::os::raw::c_int,
     origin: sys::ma_seek_origin,
 ) -> sys::ma_bool32 {
-    let reader: &mut Box<dyn Reader> = std::mem::transmute((*decoder).pUserData);
+    let reader: &mut Box<dyn SeekRead> = std::mem::transmute((*decoder).pUserData);
     let pos = match origin {
         sys::ma_seek_origin_start => io::SeekFrom::Start(byte_offset as _),
         sys::ma_seek_origin_current => io::SeekFrom::Current(byte_offset as _),
         sys::ma_seek_origin_end => io::SeekFrom::End(byte_offset as _),
+        
+        // FIXME: see fixme in decoder_read_with_reader
         _ => unreachable!("unknown seek origin"),
     };
+    
+    // FIXME: see fixme in decoder_read_with_reader
     reader.seek(pos).expect("failed to seek in decoder") as _
 }
 
