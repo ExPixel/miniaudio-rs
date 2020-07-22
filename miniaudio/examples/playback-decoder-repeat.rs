@@ -3,8 +3,11 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 pub fn main() {
-    let decoder = SyncDecoder::from_file("miniaudio/examples/assets/exit.wav", None)
-        .expect("failed to initialize decoder from file");
+    let file =
+        std::fs::File::open("miniaudio/examples/assets/exit.wav").expect("failed to open exit.wav");
+
+    let decoder =
+        SyncDecoder::from_read(file, None).expect("failed to initialize decoder from file");
 
     let mut config = DeviceConfig::new(DeviceType::Playback);
     config.playback_mut().set_format(decoder.output_format());
