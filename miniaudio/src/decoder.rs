@@ -2,6 +2,7 @@ use crate::lock::{RwLockReadGuard, RwLockWriteGuard, SpinRwLock};
 use crate::{Error, Format, FramesMut};
 use miniaudio_sys as sys;
 use std::ffi::CString;
+use std::io;
 use std::mem::MaybeUninit;
 use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
@@ -48,6 +49,26 @@ impl SyncDecoder {
             sys::ma_decoder_init_memory(
                 data.as_ptr() as *const _,
                 data.len() as _,
+                config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
+                (*Arc::deref(&decoder).as_ptr()).inner.as_ptr() as *const _ as *mut _,
+            )
+        };
+
+        map_result!(result, unsafe { std::mem::transmute(decoder) })
+    }
+
+    pub fn from_reader(
+        reader: Box<dyn Reader>,
+        config: Option<&DecoderConfig>,
+    ) -> Result<Arc<Self>, Error> {
+        let decoder = Arc::new(MaybeUninit::<SyncDecoder>::uninit());
+        let user_data = Box::new(reader);
+
+        let result = unsafe {
+            sys::ma_decoder_init(
+                Some(decoder_read_with_reader),
+                Some(decoder_seek_with_reader),
+                Box::into_raw(user_data) as *mut _,
                 config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
                 (*Arc::deref(&decoder).as_ptr()).inner.as_ptr() as *const _ as *mut _,
             )
@@ -167,6 +188,9 @@ impl RawDecoder {
 
 impl Drop for RawDecoder {
     fn drop(&mut self) {
+        // Drop the user data allocated in `from_reader` functions.
+        let _: Option<Box<Box<dyn Reader>>> = unsafe { std::mem::transmute(self.inner.pUserData) };
+
         Error::from_c_result(unsafe { sys::ma_decoder_uninit(&mut self.inner) })
             .expect("failed to uninit decoder");
     }
@@ -206,6 +230,53 @@ impl Decoder {
 
         map_result!(result, unsafe { std::mem::transmute(decoder) })
     }
+
+    pub fn from_reader(
+        reader: Box<dyn Reader>,
+        config: Option<&DecoderConfig>,
+    ) -> Result<Box<Self>, Error> {
+        let decoder = Box::new(MaybeUninit::<Decoder>::uninit());
+        let user_data = Box::new(reader);
+
+        let result = unsafe {
+            sys::ma_decoder_init(
+                Some(decoder_read_with_reader),
+                Some(decoder_seek_with_reader),
+                Box::into_raw(user_data) as *mut _,
+                config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
+                &(*decoder.as_ptr()).inner as *const _ as *mut _,
+            )
+        };
+
+        map_result!(result, unsafe { std::mem::transmute(decoder) })
+    }
+}
+
+pub trait Reader: io::Read + io::Seek {}
+
+unsafe extern "C" fn decoder_read_with_reader(
+    decoder: *mut sys::ma_decoder,
+    buffer_out: *mut std::ffi::c_void,
+    bytes_to_read: usize,
+) -> usize {
+    let reader: &mut Box<dyn Reader> = std::mem::transmute((*decoder).pUserData);
+    let buffer = std::slice::from_raw_parts_mut(buffer_out as _, bytes_to_read);
+    reader.read(buffer).expect("failed to read in decoder")
+}
+
+unsafe extern "C" fn decoder_seek_with_reader(
+    decoder: *mut sys::ma_decoder,
+    byte_offset: std::os::raw::c_int,
+    origin: sys::ma_seek_origin,
+) -> sys::ma_bool32 {
+    let reader: &mut Box<dyn Reader> = std::mem::transmute((*decoder).pUserData);
+    let pos = match origin {
+        sys::ma_seek_origin_start => io::SeekFrom::Start(byte_offset as _),
+        sys::ma_seek_origin_current => io::SeekFrom::Current(byte_offset as _),
+        sys::ma_seek_origin_end => io::SeekFrom::End(byte_offset as _),
+        _ => unreachable!("unknown seek origin"),
+    };
+    reader.seek(pos).expect("failed to seek in decoder") as _
 }
 
 impl Deref for Decoder {
