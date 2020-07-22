@@ -88,7 +88,7 @@ impl SyncDecoder {
             sys::ma_decoder_init_file(
                 filename.as_ptr() as *const _,
                 config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
-                Arc::deref(&decoder).as_ptr() as *const _ as *mut _,
+                Arc::deref(&decoder).as_ptr() as *mut _,
             )
         };
 
@@ -109,7 +109,7 @@ impl SyncDecoder {
                 data.as_ptr() as *const _,
                 data.len() as _,
                 config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
-                Arc::deref(&decoder).as_ptr() as *const _ as *mut _,
+                Arc::deref(&decoder).as_ptr() as *mut _,
             )
         };
 
@@ -136,7 +136,7 @@ impl SyncDecoder {
                 Some(decoder_seek_with_reader),
                 Box::into_raw(user_data) as *mut _,
                 config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
-                Arc::deref(&decoder).as_ptr() as *const _ as *mut _,
+                Arc::deref(&decoder).as_ptr() as *mut _,
             )
         };
 
@@ -253,7 +253,7 @@ impl Decoder {
             sys::ma_decoder_init_file(
                 filename.as_ptr() as *const _,
                 config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
-                &*decoder as *const _ as *mut _,
+                decoder.as_ptr() as *mut _,
             )
         };
 
@@ -274,7 +274,7 @@ impl Decoder {
                 data.as_ptr() as *const _,
                 data.len() as _,
                 config.map(|c| &c.0 as *const _).unwrap_or(std::ptr::null()),
-                &*decoder as *const _ as *mut _,
+                decoder.as_ptr() as *mut _,
             )
         };
 
