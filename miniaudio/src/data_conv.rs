@@ -139,20 +139,6 @@ impl DataConverter {
         output: &mut FramesMut,
         input: &Frames,
     ) -> Result<(u64, u64), Error> {
-        if output.format() != input.format() {
-            ma_debug_panic!(
-                "output and input format did not match (output: {:?}, input: {:?}",
-                output.format(),
-                input.format()
-            );
-            return Err(Error::InvalidArgs);
-        }
-
-        if output.byte_count() != input.byte_count() {
-            ma_debug_panic!("output and input buffers did not have the same frame count (output: {}, input: {})", output.frame_count(), input.frame_count());
-            return Err(Error::InvalidArgs);
-        }
-
         let mut input_frame_count = input.frame_count() as u64;
         let mut output_frame_count = output.frame_count() as u64;
 
@@ -215,3 +201,6 @@ impl Drop for DataConverter {
         }
     }
 }
+
+unsafe impl Send for DataConverter {}
+unsafe impl Sync for DataConverter {}

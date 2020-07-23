@@ -220,7 +220,7 @@ impl ChannelConverter {
             return Err(Error::InvalidArgs);
         }
 
-        if output.byte_count() != input.byte_count() {
+        if output.frame_count() != input.frame_count() {
             ma_debug_panic!("output and input buffers did not have the same frame count (output: {}, input: {})", output.frame_count(), input.frame_count());
             return Err(Error::InvalidArgs);
         }
