@@ -1,3 +1,6 @@
+use std::env;
+use std::path::PathBuf;
+
 pub fn main() {
     let mut cc_builder = cc::Build::new();
     cc_builder.cpp(false).define("MINIAUDIO_IMPLEMENTATION", "");
@@ -22,10 +25,7 @@ pub fn main() {
 
     emit_supported_features();
 
-    #[cfg(feature = "bindgen")]
-    {
-        generate_bindings();
-    }
+    generate_bindings();
 
     // only rebuild if these files are changed.
     println!("cargo:rerun-if-changed=./miniaudio/miniaudio.h");
@@ -33,7 +33,6 @@ pub fn main() {
     println!("cargo:rerun-if-env-changed=CC");
 }
 
-#[cfg(feature = "bindgen")]
 fn generate_bindings() {
     let header = if cfg!(feature = "ma-enable-vorbis") {
         "./bindings-with-vorbis.h"

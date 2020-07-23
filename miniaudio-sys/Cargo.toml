@@ -1,6 +1,6 @@
 [package]
 name = "ep-miniaudio-sys"
-version = "2.3.1"
+version = "2.4.0"
 authors = ["ExPixel <adolphc@outlook.com>"]
 edition = "2018"
 description = "Raw bindings to the miniaudio C library."
@@ -73,4 +73,4 @@ bitflags = "1.2"
 
 [build-dependencies]
 cc = "1.0"
-bindgen = { version = "0.54", default-features = false, features = ["runtime"], optional = true }
+bindgen = { version = "0.54", default-features = false, features = ["runtime"] }

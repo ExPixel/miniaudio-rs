@@ -1,5 +1,8 @@
 [workspace]
 members = [
     "miniaudio-sys",
-    "miniaudio"
+    "miniaudio",
+    "tools"
 ]
+
+default-members = ["miniaudio"]
