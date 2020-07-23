@@ -2,7 +2,4 @@
 members = [
     "miniaudio-sys",
     "miniaudio",
-    "tools"
 ]
-
-default-members = ["miniaudio"]
