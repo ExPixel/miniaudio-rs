@@ -14,13 +14,8 @@ That can be found in the C library's main header file.
 
 Building
 ---
-If the `bindgen` feature is turned off:  
-    Then you shouldn't need to do anything special, the bindings should __just work__.
-    If they don't please open an issue.
-
-If the `bindgen` feature is turned on:  
-    LLVM must be installed in order to generate the bindings, but aside from that everything should __just work__.
-    Feel free to open an issue here if that is not the case.
+LLVM and clang must be installed in order to generate the bindings.
+Installation instructions can be found here: https://rust-lang.github.io/rust-bindgen/requirements.html
 
 
 Example Usage
