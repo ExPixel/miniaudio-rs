@@ -6,8 +6,9 @@ on:
             - master
         paths:
             - '.gitmodules'
-            - 'miniaudio-sys/miniaudio/**/*.c'
-            - 'miniaudio-sys/miniaudio/**/*.h'
+            - 'miniaudio-sys/miniaudio'
+            - 'miniaudio-sys/miniaudio'
+            - 'generate-bindings.rs'
 
 jobs:
     bindgen:

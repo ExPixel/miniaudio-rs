@@ -31,9 +31,9 @@ pub fn main() {
 }
 
 fn generate_bindings() -> Result<(), GenError> {
-    let os_name = std::env::consts::OS;
-    let os_arch = std::env::consts::ARCH;
-    let subdir = format!("{}-{}", os_name, os_arch);
+    let os = std::env::consts::OS;
+    let arch = std::env::consts::ARCH;
+    let subdir = format!("{}-{}", os, arch);
     println!("generating bindings for `{}`...", subdir);
 
     let output_dir = Path::new("miniaudio-sys/bindings").join(subdir);
