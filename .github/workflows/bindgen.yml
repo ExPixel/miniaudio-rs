@@ -4,7 +4,7 @@ on:
     push:
         branches:
             - master
-        paths-ignore:
+        paths:
             - '.gitmodules'
             - 'miniaudio-sys/miniaudio/**/*.c'
             - 'miniaudio-sys/miniaudio/**/*.h'
@@ -39,6 +39,10 @@ jobs:
           run: rustc -o generate-bindings generate-bindings.rs
         - name: Generate Bindings
           run: ./generate-bindings
+        - name: Setup Git
+          run:
+            git config --global user.email expixel+miniaudio-rs+bindgen@github.com
+            git config --global user.name miniaudio-rs-bindgen
         - name: Commit And Push Bindings
           run: |
             git add miniaudio-sys/bindings
