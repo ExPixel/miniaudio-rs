@@ -244,6 +244,39 @@ pub struct __pthread_internal_list {
     pub __prev: *mut __pthread_internal_list,
     pub __next: *mut __pthread_internal_list,
 }
+#[test]
+fn bindgen_test_layout___pthread_internal_list() {
+    assert_eq!(
+        ::core::mem::size_of::<__pthread_internal_list>(),
+        16usize,
+        concat!("Size of: ", stringify!(__pthread_internal_list))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<__pthread_internal_list>(),
+        8usize,
+        concat!("Alignment of ", stringify!(__pthread_internal_list))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<__pthread_internal_list>())).__prev as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_internal_list),
+            "::",
+            stringify!(__prev)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<__pthread_internal_list>())).__next as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_internal_list),
+            "::",
+            stringify!(__next)
+        )
+    );
+}
 pub type __pthread_list_t = __pthread_internal_list;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -256,6 +289,99 @@ pub struct __pthread_mutex_s {
     pub __spins: libc::c_short,
     pub __elision: libc::c_short,
     pub __list: __pthread_list_t,
+}
+#[test]
+fn bindgen_test_layout___pthread_mutex_s() {
+    assert_eq!(
+        ::core::mem::size_of::<__pthread_mutex_s>(),
+        40usize,
+        concat!("Size of: ", stringify!(__pthread_mutex_s))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<__pthread_mutex_s>(),
+        8usize,
+        concat!("Alignment of ", stringify!(__pthread_mutex_s))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<__pthread_mutex_s>())).__lock as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_mutex_s),
+            "::",
+            stringify!(__lock)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<__pthread_mutex_s>())).__count as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_mutex_s),
+            "::",
+            stringify!(__count)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<__pthread_mutex_s>())).__owner as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_mutex_s),
+            "::",
+            stringify!(__owner)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<__pthread_mutex_s>())).__nusers as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_mutex_s),
+            "::",
+            stringify!(__nusers)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<__pthread_mutex_s>())).__kind as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_mutex_s),
+            "::",
+            stringify!(__kind)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<__pthread_mutex_s>())).__spins as *const _ as usize },
+        20usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_mutex_s),
+            "::",
+            stringify!(__spins)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<__pthread_mutex_s>())).__elision as *const _ as usize },
+        22usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_mutex_s),
+            "::",
+            stringify!(__elision)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<__pthread_mutex_s>())).__list as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_mutex_s),
+            "::",
+            stringify!(__list)
+        )
+    );
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -281,6 +407,89 @@ pub struct __pthread_cond_s__bindgen_ty_1__bindgen_ty_1 {
     pub __low: libc::c_uint,
     pub __high: libc::c_uint,
 }
+#[test]
+fn bindgen_test_layout___pthread_cond_s__bindgen_ty_1__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<__pthread_cond_s__bindgen_ty_1__bindgen_ty_1>(),
+        8usize,
+        concat!(
+            "Size of: ",
+            stringify!(__pthread_cond_s__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<__pthread_cond_s__bindgen_ty_1__bindgen_ty_1>(),
+        4usize,
+        concat!(
+            "Alignment of ",
+            stringify!(__pthread_cond_s__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<__pthread_cond_s__bindgen_ty_1__bindgen_ty_1>())).__low
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_cond_s__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(__low)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<__pthread_cond_s__bindgen_ty_1__bindgen_ty_1>())).__high
+                as *const _ as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_cond_s__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(__high)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout___pthread_cond_s__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<__pthread_cond_s__bindgen_ty_1>(),
+        8usize,
+        concat!("Size of: ", stringify!(__pthread_cond_s__bindgen_ty_1))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<__pthread_cond_s__bindgen_ty_1>(),
+        8usize,
+        concat!("Alignment of ", stringify!(__pthread_cond_s__bindgen_ty_1))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<__pthread_cond_s__bindgen_ty_1>())).__wseq as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_cond_s__bindgen_ty_1),
+            "::",
+            stringify!(__wseq)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<__pthread_cond_s__bindgen_ty_1>())).__wseq32 as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_cond_s__bindgen_ty_1),
+            "::",
+            stringify!(__wseq32)
+        )
+    );
+}
 impl ::core::fmt::Debug for __pthread_cond_s__bindgen_ty_1 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write!(f, "__pthread_cond_s__bindgen_ty_1 {{ union }}")
@@ -299,10 +508,159 @@ pub struct __pthread_cond_s__bindgen_ty_2__bindgen_ty_1 {
     pub __low: libc::c_uint,
     pub __high: libc::c_uint,
 }
+#[test]
+fn bindgen_test_layout___pthread_cond_s__bindgen_ty_2__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<__pthread_cond_s__bindgen_ty_2__bindgen_ty_1>(),
+        8usize,
+        concat!(
+            "Size of: ",
+            stringify!(__pthread_cond_s__bindgen_ty_2__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<__pthread_cond_s__bindgen_ty_2__bindgen_ty_1>(),
+        4usize,
+        concat!(
+            "Alignment of ",
+            stringify!(__pthread_cond_s__bindgen_ty_2__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<__pthread_cond_s__bindgen_ty_2__bindgen_ty_1>())).__low
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_cond_s__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(__low)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<__pthread_cond_s__bindgen_ty_2__bindgen_ty_1>())).__high
+                as *const _ as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_cond_s__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(__high)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout___pthread_cond_s__bindgen_ty_2() {
+    assert_eq!(
+        ::core::mem::size_of::<__pthread_cond_s__bindgen_ty_2>(),
+        8usize,
+        concat!("Size of: ", stringify!(__pthread_cond_s__bindgen_ty_2))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<__pthread_cond_s__bindgen_ty_2>(),
+        8usize,
+        concat!("Alignment of ", stringify!(__pthread_cond_s__bindgen_ty_2))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<__pthread_cond_s__bindgen_ty_2>())).__g1_start as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_cond_s__bindgen_ty_2),
+            "::",
+            stringify!(__g1_start)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<__pthread_cond_s__bindgen_ty_2>())).__g1_start32 as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_cond_s__bindgen_ty_2),
+            "::",
+            stringify!(__g1_start32)
+        )
+    );
+}
 impl ::core::fmt::Debug for __pthread_cond_s__bindgen_ty_2 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write!(f, "__pthread_cond_s__bindgen_ty_2 {{ union }}")
     }
+}
+#[test]
+fn bindgen_test_layout___pthread_cond_s() {
+    assert_eq!(
+        ::core::mem::size_of::<__pthread_cond_s>(),
+        48usize,
+        concat!("Size of: ", stringify!(__pthread_cond_s))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<__pthread_cond_s>(),
+        8usize,
+        concat!("Alignment of ", stringify!(__pthread_cond_s))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<__pthread_cond_s>())).__g_refs as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_cond_s),
+            "::",
+            stringify!(__g_refs)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<__pthread_cond_s>())).__g_size as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_cond_s),
+            "::",
+            stringify!(__g_size)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<__pthread_cond_s>())).__g1_orig_size as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_cond_s),
+            "::",
+            stringify!(__g1_orig_size)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<__pthread_cond_s>())).__wrefs as *const _ as usize },
+        36usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_cond_s),
+            "::",
+            stringify!(__wrefs)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<__pthread_cond_s>())).__g_signals as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__pthread_cond_s),
+            "::",
+            stringify!(__g_signals)
+        )
+    );
 }
 impl ::core::fmt::Debug for __pthread_cond_s {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -318,6 +676,49 @@ pub union pthread_mutex_t {
     pub __align: libc::c_long,
     _bindgen_union_align: [u64; 5usize],
 }
+#[test]
+fn bindgen_test_layout_pthread_mutex_t() {
+    assert_eq!(
+        ::core::mem::size_of::<pthread_mutex_t>(),
+        40usize,
+        concat!("Size of: ", stringify!(pthread_mutex_t))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<pthread_mutex_t>(),
+        8usize,
+        concat!("Alignment of ", stringify!(pthread_mutex_t))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<pthread_mutex_t>())).__data as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(pthread_mutex_t),
+            "::",
+            stringify!(__data)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<pthread_mutex_t>())).__size as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(pthread_mutex_t),
+            "::",
+            stringify!(__size)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<pthread_mutex_t>())).__align as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(pthread_mutex_t),
+            "::",
+            stringify!(__align)
+        )
+    );
+}
 impl ::core::fmt::Debug for pthread_mutex_t {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write!(f, "pthread_mutex_t {{ union }}")
@@ -330,6 +731,49 @@ pub union pthread_cond_t {
     pub __size: [libc::c_char; 48usize],
     pub __align: libc::c_longlong,
     _bindgen_union_align: [u64; 6usize],
+}
+#[test]
+fn bindgen_test_layout_pthread_cond_t() {
+    assert_eq!(
+        ::core::mem::size_of::<pthread_cond_t>(),
+        48usize,
+        concat!("Size of: ", stringify!(pthread_cond_t))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<pthread_cond_t>(),
+        8usize,
+        concat!("Alignment of ", stringify!(pthread_cond_t))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<pthread_cond_t>())).__data as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(pthread_cond_t),
+            "::",
+            stringify!(__data)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<pthread_cond_t>())).__size as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(pthread_cond_t),
+            "::",
+            stringify!(__size)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<pthread_cond_t>())).__align as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(pthread_cond_t),
+            "::",
+            stringify!(__align)
+        )
+    );
 }
 impl ::core::fmt::Debug for pthread_cond_t {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -407,10 +851,92 @@ pub struct ma_allocation_callbacks {
         unsafe extern "C" fn(p: *mut libc::c_void, pUserData: *mut libc::c_void),
     >,
 }
+#[test]
+fn bindgen_test_layout_ma_allocation_callbacks() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_allocation_callbacks>(),
+        32usize,
+        concat!("Size of: ", stringify!(ma_allocation_callbacks))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_allocation_callbacks>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_allocation_callbacks))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_allocation_callbacks>())).pUserData as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_allocation_callbacks),
+            "::",
+            stringify!(pUserData)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_allocation_callbacks>())).onMalloc as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_allocation_callbacks),
+            "::",
+            stringify!(onMalloc)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_allocation_callbacks>())).onRealloc as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_allocation_callbacks),
+            "::",
+            stringify!(onRealloc)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_allocation_callbacks>())).onFree as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_allocation_callbacks),
+            "::",
+            stringify!(onFree)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ma_lcg {
     pub state: ma_int32,
+}
+#[test]
+fn bindgen_test_layout_ma_lcg() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_lcg>(),
+        4usize,
+        concat!("Size of: ", stringify!(ma_lcg))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_lcg>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_lcg))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lcg>())).state as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lcg),
+            "::",
+            stringify!(state)
+        )
+    );
 }
 pub const ma_thread_priority_idle: ma_thread_priority = -5;
 pub const ma_thread_priority_lowest: ma_thread_priority = -4;
@@ -431,6 +957,49 @@ pub struct ma_event {
     pub lock: pthread_mutex_t,
     pub cond: pthread_cond_t,
 }
+#[test]
+fn bindgen_test_layout_ma_event() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_event>(),
+        96usize,
+        concat!("Size of: ", stringify!(ma_event))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_event>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_event))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_event>())).value as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_event),
+            "::",
+            stringify!(value)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_event>())).lock as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_event),
+            "::",
+            stringify!(lock)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_event>())).cond as *const _ as usize },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_event),
+            "::",
+            stringify!(cond)
+        )
+    );
+}
 impl ::core::fmt::Debug for ma_event {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write!(
@@ -446,6 +1015,49 @@ pub struct ma_semaphore {
     pub value: libc::c_int,
     pub lock: pthread_mutex_t,
     pub cond: pthread_cond_t,
+}
+#[test]
+fn bindgen_test_layout_ma_semaphore() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_semaphore>(),
+        96usize,
+        concat!("Size of: ", stringify!(ma_semaphore))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_semaphore>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_semaphore))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_semaphore>())).value as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_semaphore),
+            "::",
+            stringify!(value)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_semaphore>())).lock as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_semaphore),
+            "::",
+            stringify!(lock)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_semaphore>())).cond as *const _ as usize },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_semaphore),
+            "::",
+            stringify!(cond)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_semaphore {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -470,6 +1082,39 @@ pub union ma_biquad_coefficient {
     pub s32: ma_int32,
     _bindgen_union_align: u32,
 }
+#[test]
+fn bindgen_test_layout_ma_biquad_coefficient() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_biquad_coefficient>(),
+        4usize,
+        concat!("Size of: ", stringify!(ma_biquad_coefficient))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_biquad_coefficient>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_biquad_coefficient))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad_coefficient>())).f32_ as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad_coefficient),
+            "::",
+            stringify!(f32_)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad_coefficient>())).s32 as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad_coefficient),
+            "::",
+            stringify!(s32)
+        )
+    );
+}
 impl ::core::fmt::Debug for ma_biquad_coefficient {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write!(f, "ma_biquad_coefficient {{ union }}")
@@ -486,6 +1131,99 @@ pub struct ma_biquad_config {
     pub a0: f64,
     pub a1: f64,
     pub a2: f64,
+}
+#[test]
+fn bindgen_test_layout_ma_biquad_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_biquad_config>(),
+        56usize,
+        concat!("Size of: ", stringify!(ma_biquad_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_biquad_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_biquad_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad_config>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad_config>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad_config>())).b0 as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad_config),
+            "::",
+            stringify!(b0)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad_config>())).b1 as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad_config),
+            "::",
+            stringify!(b1)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad_config>())).b2 as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad_config),
+            "::",
+            stringify!(b2)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad_config>())).a0 as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad_config),
+            "::",
+            stringify!(a0)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad_config>())).a1 as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad_config),
+            "::",
+            stringify!(a1)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad_config>())).a2 as *const _ as usize },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad_config),
+            "::",
+            stringify!(a2)
+        )
+    );
 }
 extern "C" {
     pub fn ma_biquad_config_init(
@@ -511,6 +1249,109 @@ pub struct ma_biquad {
     pub a2: ma_biquad_coefficient,
     pub r1: [ma_biquad_coefficient; 32usize],
     pub r2: [ma_biquad_coefficient; 32usize],
+}
+#[test]
+fn bindgen_test_layout_ma_biquad() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_biquad>(),
+        284usize,
+        concat!("Size of: ", stringify!(ma_biquad))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_biquad>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_biquad))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad>())).b0 as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad),
+            "::",
+            stringify!(b0)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad>())).b1 as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad),
+            "::",
+            stringify!(b1)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad>())).b2 as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad),
+            "::",
+            stringify!(b2)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad>())).a1 as *const _ as usize },
+        20usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad),
+            "::",
+            stringify!(a1)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad>())).a2 as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad),
+            "::",
+            stringify!(a2)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad>())).r1 as *const _ as usize },
+        28usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad),
+            "::",
+            stringify!(r1)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_biquad>())).r2 as *const _ as usize },
+        156usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_biquad),
+            "::",
+            stringify!(r2)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_biquad {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -544,6 +1385,69 @@ pub struct ma_lpf1_config {
     pub cutoffFrequency: f64,
     pub q: f64,
 }
+#[test]
+fn bindgen_test_layout_ma_lpf1_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_lpf1_config>(),
+        32usize,
+        concat!("Size of: ", stringify!(ma_lpf1_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_lpf1_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_lpf1_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf1_config>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf1_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf1_config>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf1_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf1_config>())).sampleRate as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf1_config),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf1_config>())).cutoffFrequency as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf1_config),
+            "::",
+            stringify!(cutoffFrequency)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf1_config>())).q as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf1_config),
+            "::",
+            stringify!(q)
+        )
+    );
+}
 pub type ma_lpf2_config = ma_lpf1_config;
 extern "C" {
     pub fn ma_lpf1_config_init(
@@ -569,6 +1473,59 @@ pub struct ma_lpf1 {
     pub channels: ma_uint32,
     pub a: ma_biquad_coefficient,
     pub r1: [ma_biquad_coefficient; 32usize],
+}
+#[test]
+fn bindgen_test_layout_ma_lpf1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_lpf1>(),
+        140usize,
+        concat!("Size of: ", stringify!(ma_lpf1))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_lpf1>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_lpf1))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf1>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf1),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf1>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf1),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf1>())).a as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf1),
+            "::",
+            stringify!(a)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf1>())).r1 as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf1),
+            "::",
+            stringify!(r1)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_lpf1 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -601,6 +1558,29 @@ extern "C" {
 pub struct ma_lpf2 {
     pub bq: ma_biquad,
 }
+#[test]
+fn bindgen_test_layout_ma_lpf2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_lpf2>(),
+        284usize,
+        concat!("Size of: ", stringify!(ma_lpf2))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_lpf2>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_lpf2))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf2>())).bq as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf2),
+            "::",
+            stringify!(bq)
+        )
+    );
+}
 impl ::core::fmt::Debug for ma_lpf2 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write!(f, "ma_lpf2 {{ bq: {:?} }}", self.bq)
@@ -632,6 +1612,69 @@ pub struct ma_lpf_config {
     pub cutoffFrequency: f64,
     pub order: ma_uint32,
 }
+#[test]
+fn bindgen_test_layout_ma_lpf_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_lpf_config>(),
+        32usize,
+        concat!("Size of: ", stringify!(ma_lpf_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_lpf_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_lpf_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf_config>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf_config>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf_config>())).sampleRate as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf_config),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf_config>())).cutoffFrequency as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf_config),
+            "::",
+            stringify!(cutoffFrequency)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf_config>())).order as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf_config),
+            "::",
+            stringify!(order)
+        )
+    );
+}
 extern "C" {
     pub fn ma_lpf_config_init(
         format: ma_format,
@@ -651,6 +1694,89 @@ pub struct ma_lpf {
     pub lpf2Count: ma_uint32,
     pub lpf1: [ma_lpf1; 1usize],
     pub lpf2: [ma_lpf2; 4usize],
+}
+#[test]
+fn bindgen_test_layout_ma_lpf() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_lpf>(),
+        1296usize,
+        concat!("Size of: ", stringify!(ma_lpf))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_lpf>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_lpf))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf>())).sampleRate as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf>())).lpf1Count as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf),
+            "::",
+            stringify!(lpf1Count)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf>())).lpf2Count as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf),
+            "::",
+            stringify!(lpf2Count)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf>())).lpf1 as *const _ as usize },
+        20usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf),
+            "::",
+            stringify!(lpf1)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_lpf>())).lpf2 as *const _ as usize },
+        160usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_lpf),
+            "::",
+            stringify!(lpf2)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_lpf {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -684,6 +1810,69 @@ pub struct ma_hpf1_config {
     pub cutoffFrequency: f64,
     pub q: f64,
 }
+#[test]
+fn bindgen_test_layout_ma_hpf1_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_hpf1_config>(),
+        32usize,
+        concat!("Size of: ", stringify!(ma_hpf1_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_hpf1_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_hpf1_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf1_config>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf1_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf1_config>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf1_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf1_config>())).sampleRate as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf1_config),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf1_config>())).cutoffFrequency as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf1_config),
+            "::",
+            stringify!(cutoffFrequency)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf1_config>())).q as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf1_config),
+            "::",
+            stringify!(q)
+        )
+    );
+}
 pub type ma_hpf2_config = ma_hpf1_config;
 extern "C" {
     pub fn ma_hpf1_config_init(
@@ -709,6 +1898,59 @@ pub struct ma_hpf1 {
     pub channels: ma_uint32,
     pub a: ma_biquad_coefficient,
     pub r1: [ma_biquad_coefficient; 32usize],
+}
+#[test]
+fn bindgen_test_layout_ma_hpf1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_hpf1>(),
+        140usize,
+        concat!("Size of: ", stringify!(ma_hpf1))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_hpf1>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_hpf1))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf1>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf1),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf1>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf1),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf1>())).a as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf1),
+            "::",
+            stringify!(a)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf1>())).r1 as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf1),
+            "::",
+            stringify!(r1)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_hpf1 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -741,6 +1983,29 @@ extern "C" {
 pub struct ma_hpf2 {
     pub bq: ma_biquad,
 }
+#[test]
+fn bindgen_test_layout_ma_hpf2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_hpf2>(),
+        284usize,
+        concat!("Size of: ", stringify!(ma_hpf2))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_hpf2>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_hpf2))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf2>())).bq as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf2),
+            "::",
+            stringify!(bq)
+        )
+    );
+}
 impl ::core::fmt::Debug for ma_hpf2 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write!(f, "ma_hpf2 {{ bq: {:?} }}", self.bq)
@@ -772,6 +2037,69 @@ pub struct ma_hpf_config {
     pub cutoffFrequency: f64,
     pub order: ma_uint32,
 }
+#[test]
+fn bindgen_test_layout_ma_hpf_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_hpf_config>(),
+        32usize,
+        concat!("Size of: ", stringify!(ma_hpf_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_hpf_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_hpf_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf_config>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf_config>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf_config>())).sampleRate as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf_config),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf_config>())).cutoffFrequency as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf_config),
+            "::",
+            stringify!(cutoffFrequency)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf_config>())).order as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf_config),
+            "::",
+            stringify!(order)
+        )
+    );
+}
 extern "C" {
     pub fn ma_hpf_config_init(
         format: ma_format,
@@ -791,6 +2119,89 @@ pub struct ma_hpf {
     pub hpf2Count: ma_uint32,
     pub hpf1: [ma_hpf1; 1usize],
     pub hpf2: [ma_hpf2; 4usize],
+}
+#[test]
+fn bindgen_test_layout_ma_hpf() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_hpf>(),
+        1296usize,
+        concat!("Size of: ", stringify!(ma_hpf))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_hpf>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_hpf))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf>())).sampleRate as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf>())).hpf1Count as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf),
+            "::",
+            stringify!(hpf1Count)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf>())).hpf2Count as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf),
+            "::",
+            stringify!(hpf2Count)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf>())).hpf1 as *const _ as usize },
+        20usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf),
+            "::",
+            stringify!(hpf1)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hpf>())).hpf2 as *const _ as usize },
+        160usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hpf),
+            "::",
+            stringify!(hpf2)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_hpf {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -824,6 +2235,69 @@ pub struct ma_bpf2_config {
     pub cutoffFrequency: f64,
     pub q: f64,
 }
+#[test]
+fn bindgen_test_layout_ma_bpf2_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_bpf2_config>(),
+        32usize,
+        concat!("Size of: ", stringify!(ma_bpf2_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_bpf2_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_bpf2_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_bpf2_config>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_bpf2_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_bpf2_config>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_bpf2_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_bpf2_config>())).sampleRate as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_bpf2_config),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_bpf2_config>())).cutoffFrequency as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_bpf2_config),
+            "::",
+            stringify!(cutoffFrequency)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_bpf2_config>())).q as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_bpf2_config),
+            "::",
+            stringify!(q)
+        )
+    );
+}
 extern "C" {
     pub fn ma_bpf2_config_init(
         format: ma_format,
@@ -837,6 +2311,29 @@ extern "C" {
 #[derive(Copy, Clone)]
 pub struct ma_bpf2 {
     pub bq: ma_biquad,
+}
+#[test]
+fn bindgen_test_layout_ma_bpf2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_bpf2>(),
+        284usize,
+        concat!("Size of: ", stringify!(ma_bpf2))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_bpf2>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_bpf2))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_bpf2>())).bq as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_bpf2),
+            "::",
+            stringify!(bq)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_bpf2 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -869,6 +2366,69 @@ pub struct ma_bpf_config {
     pub cutoffFrequency: f64,
     pub order: ma_uint32,
 }
+#[test]
+fn bindgen_test_layout_ma_bpf_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_bpf_config>(),
+        32usize,
+        concat!("Size of: ", stringify!(ma_bpf_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_bpf_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_bpf_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_bpf_config>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_bpf_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_bpf_config>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_bpf_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_bpf_config>())).sampleRate as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_bpf_config),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_bpf_config>())).cutoffFrequency as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_bpf_config),
+            "::",
+            stringify!(cutoffFrequency)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_bpf_config>())).order as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_bpf_config),
+            "::",
+            stringify!(order)
+        )
+    );
+}
 extern "C" {
     pub fn ma_bpf_config_init(
         format: ma_format,
@@ -885,6 +2445,59 @@ pub struct ma_bpf {
     pub channels: ma_uint32,
     pub bpf2Count: ma_uint32,
     pub bpf2: [ma_bpf2; 4usize],
+}
+#[test]
+fn bindgen_test_layout_ma_bpf() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_bpf>(),
+        1148usize,
+        concat!("Size of: ", stringify!(ma_bpf))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_bpf>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_bpf))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_bpf>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_bpf),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_bpf>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_bpf),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_bpf>())).bpf2Count as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_bpf),
+            "::",
+            stringify!(bpf2Count)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_bpf>())).bpf2 as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_bpf),
+            "::",
+            stringify!(bpf2)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_bpf {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -922,6 +2535,69 @@ pub struct ma_notch2_config {
     pub q: f64,
     pub frequency: f64,
 }
+#[test]
+fn bindgen_test_layout_ma_notch2_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_notch2_config>(),
+        32usize,
+        concat!("Size of: ", stringify!(ma_notch2_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_notch2_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_notch2_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_notch2_config>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_notch2_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_notch2_config>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_notch2_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_notch2_config>())).sampleRate as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_notch2_config),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_notch2_config>())).q as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_notch2_config),
+            "::",
+            stringify!(q)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_notch2_config>())).frequency as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_notch2_config),
+            "::",
+            stringify!(frequency)
+        )
+    );
+}
 extern "C" {
     pub fn ma_notch2_config_init(
         format: ma_format,
@@ -935,6 +2611,29 @@ extern "C" {
 #[derive(Copy, Clone)]
 pub struct ma_notch2 {
     pub bq: ma_biquad,
+}
+#[test]
+fn bindgen_test_layout_ma_notch2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_notch2>(),
+        284usize,
+        concat!("Size of: ", stringify!(ma_notch2))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_notch2>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_notch2))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_notch2>())).bq as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_notch2),
+            "::",
+            stringify!(bq)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_notch2 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -970,6 +2669,79 @@ pub struct ma_peak2_config {
     pub q: f64,
     pub frequency: f64,
 }
+#[test]
+fn bindgen_test_layout_ma_peak2_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_peak2_config>(),
+        40usize,
+        concat!("Size of: ", stringify!(ma_peak2_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_peak2_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_peak2_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_peak2_config>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_peak2_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_peak2_config>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_peak2_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_peak2_config>())).sampleRate as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_peak2_config),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_peak2_config>())).gainDB as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_peak2_config),
+            "::",
+            stringify!(gainDB)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_peak2_config>())).q as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_peak2_config),
+            "::",
+            stringify!(q)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_peak2_config>())).frequency as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_peak2_config),
+            "::",
+            stringify!(frequency)
+        )
+    );
+}
 extern "C" {
     pub fn ma_peak2_config_init(
         format: ma_format,
@@ -984,6 +2756,29 @@ extern "C" {
 #[derive(Copy, Clone)]
 pub struct ma_peak2 {
     pub bq: ma_biquad,
+}
+#[test]
+fn bindgen_test_layout_ma_peak2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_peak2>(),
+        284usize,
+        concat!("Size of: ", stringify!(ma_peak2))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_peak2>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_peak2))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_peak2>())).bq as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_peak2),
+            "::",
+            stringify!(bq)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_peak2 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -1018,6 +2813,79 @@ pub struct ma_loshelf2_config {
     pub shelfSlope: f64,
     pub frequency: f64,
 }
+#[test]
+fn bindgen_test_layout_ma_loshelf2_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_loshelf2_config>(),
+        40usize,
+        concat!("Size of: ", stringify!(ma_loshelf2_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_loshelf2_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_loshelf2_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_loshelf2_config>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_loshelf2_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_loshelf2_config>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_loshelf2_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_loshelf2_config>())).sampleRate as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_loshelf2_config),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_loshelf2_config>())).gainDB as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_loshelf2_config),
+            "::",
+            stringify!(gainDB)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_loshelf2_config>())).shelfSlope as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_loshelf2_config),
+            "::",
+            stringify!(shelfSlope)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_loshelf2_config>())).frequency as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_loshelf2_config),
+            "::",
+            stringify!(frequency)
+        )
+    );
+}
 extern "C" {
     pub fn ma_loshelf2_config_init(
         format: ma_format,
@@ -1032,6 +2900,29 @@ extern "C" {
 #[derive(Copy, Clone)]
 pub struct ma_loshelf2 {
     pub bq: ma_biquad,
+}
+#[test]
+fn bindgen_test_layout_ma_loshelf2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_loshelf2>(),
+        284usize,
+        concat!("Size of: ", stringify!(ma_loshelf2))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_loshelf2>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_loshelf2))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_loshelf2>())).bq as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_loshelf2),
+            "::",
+            stringify!(bq)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_loshelf2 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -1072,6 +2963,79 @@ pub struct ma_hishelf2_config {
     pub shelfSlope: f64,
     pub frequency: f64,
 }
+#[test]
+fn bindgen_test_layout_ma_hishelf2_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_hishelf2_config>(),
+        40usize,
+        concat!("Size of: ", stringify!(ma_hishelf2_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_hishelf2_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_hishelf2_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hishelf2_config>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hishelf2_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hishelf2_config>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hishelf2_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hishelf2_config>())).sampleRate as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hishelf2_config),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hishelf2_config>())).gainDB as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hishelf2_config),
+            "::",
+            stringify!(gainDB)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hishelf2_config>())).shelfSlope as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hishelf2_config),
+            "::",
+            stringify!(shelfSlope)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hishelf2_config>())).frequency as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hishelf2_config),
+            "::",
+            stringify!(frequency)
+        )
+    );
+}
 extern "C" {
     pub fn ma_hishelf2_config_init(
         format: ma_format,
@@ -1086,6 +3050,29 @@ extern "C" {
 #[derive(Copy, Clone)]
 pub struct ma_hishelf2 {
     pub bq: ma_biquad,
+}
+#[test]
+fn bindgen_test_layout_ma_hishelf2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_hishelf2>(),
+        284usize,
+        concat!("Size of: ", stringify!(ma_hishelf2))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_hishelf2>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_hishelf2))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_hishelf2>())).bq as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_hishelf2),
+            "::",
+            stringify!(bq)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_hishelf2 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -1126,6 +3113,94 @@ pub struct ma_linear_resampler_config {
     pub lpfOrder: ma_uint32,
     pub lpfNyquistFactor: f64,
 }
+#[test]
+fn bindgen_test_layout_ma_linear_resampler_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_linear_resampler_config>(),
+        32usize,
+        concat!("Size of: ", stringify!(ma_linear_resampler_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_linear_resampler_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_linear_resampler_config))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_linear_resampler_config>())).format as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_linear_resampler_config>())).channels as *const _ as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_linear_resampler_config>())).sampleRateIn as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler_config),
+            "::",
+            stringify!(sampleRateIn)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_linear_resampler_config>())).sampleRateOut as *const _
+                as usize
+        },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler_config),
+            "::",
+            stringify!(sampleRateOut)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_linear_resampler_config>())).lpfOrder as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler_config),
+            "::",
+            stringify!(lpfOrder)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_linear_resampler_config>())).lpfNyquistFactor as *const _
+                as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler_config),
+            "::",
+            stringify!(lpfNyquistFactor)
+        )
+    );
+}
 extern "C" {
     pub fn ma_linear_resampler_config_init(
         format: ma_format,
@@ -1153,6 +3228,46 @@ pub union ma_linear_resampler__bindgen_ty_1 {
     pub s16: [ma_int16; 32usize],
     _bindgen_union_align: [u32; 32usize],
 }
+#[test]
+fn bindgen_test_layout_ma_linear_resampler__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_linear_resampler__bindgen_ty_1>(),
+        128usize,
+        concat!("Size of: ", stringify!(ma_linear_resampler__bindgen_ty_1))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_linear_resampler__bindgen_ty_1>(),
+        4usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_linear_resampler__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_linear_resampler__bindgen_ty_1>())).f32_ as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler__bindgen_ty_1),
+            "::",
+            stringify!(f32_)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_linear_resampler__bindgen_ty_1>())).s16 as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler__bindgen_ty_1),
+            "::",
+            stringify!(s16)
+        )
+    );
+}
 impl ::core::fmt::Debug for ma_linear_resampler__bindgen_ty_1 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write!(f, "ma_linear_resampler__bindgen_ty_1 {{ union }}")
@@ -1165,10 +3280,147 @@ pub union ma_linear_resampler__bindgen_ty_2 {
     pub s16: [ma_int16; 32usize],
     _bindgen_union_align: [u32; 32usize],
 }
+#[test]
+fn bindgen_test_layout_ma_linear_resampler__bindgen_ty_2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_linear_resampler__bindgen_ty_2>(),
+        128usize,
+        concat!("Size of: ", stringify!(ma_linear_resampler__bindgen_ty_2))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_linear_resampler__bindgen_ty_2>(),
+        4usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_linear_resampler__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_linear_resampler__bindgen_ty_2>())).f32_ as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler__bindgen_ty_2),
+            "::",
+            stringify!(f32_)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_linear_resampler__bindgen_ty_2>())).s16 as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler__bindgen_ty_2),
+            "::",
+            stringify!(s16)
+        )
+    );
+}
 impl ::core::fmt::Debug for ma_linear_resampler__bindgen_ty_2 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write!(f, "ma_linear_resampler__bindgen_ty_2 {{ union }}")
     }
+}
+#[test]
+fn bindgen_test_layout_ma_linear_resampler() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_linear_resampler>(),
+        1600usize,
+        concat!("Size of: ", stringify!(ma_linear_resampler))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_linear_resampler>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_linear_resampler))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_linear_resampler>())).config as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler),
+            "::",
+            stringify!(config)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_linear_resampler>())).inAdvanceInt as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler),
+            "::",
+            stringify!(inAdvanceInt)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_linear_resampler>())).inAdvanceFrac as *const _ as usize
+        },
+        36usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler),
+            "::",
+            stringify!(inAdvanceFrac)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_linear_resampler>())).inTimeInt as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler),
+            "::",
+            stringify!(inTimeInt)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_linear_resampler>())).inTimeFrac as *const _ as usize },
+        44usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler),
+            "::",
+            stringify!(inTimeFrac)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_linear_resampler>())).x0 as *const _ as usize },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler),
+            "::",
+            stringify!(x0)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_linear_resampler>())).x1 as *const _ as usize },
+        176usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler),
+            "::",
+            stringify!(x1)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_linear_resampler>())).lpf as *const _ as usize },
+        304usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_linear_resampler),
+            "::",
+            stringify!(lpf)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_linear_resampler {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -1247,10 +3499,168 @@ pub struct ma_resampler_config__bindgen_ty_1 {
     pub lpfOrder: ma_uint32,
     pub lpfNyquistFactor: f64,
 }
+#[test]
+fn bindgen_test_layout_ma_resampler_config__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_resampler_config__bindgen_ty_1>(),
+        16usize,
+        concat!("Size of: ", stringify!(ma_resampler_config__bindgen_ty_1))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_resampler_config__bindgen_ty_1>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_resampler_config__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_resampler_config__bindgen_ty_1>())).lpfOrder as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_resampler_config__bindgen_ty_1),
+            "::",
+            stringify!(lpfOrder)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_resampler_config__bindgen_ty_1>())).lpfNyquistFactor
+                as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_resampler_config__bindgen_ty_1),
+            "::",
+            stringify!(lpfNyquistFactor)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ma_resampler_config__bindgen_ty_2 {
     pub quality: libc::c_int,
+}
+#[test]
+fn bindgen_test_layout_ma_resampler_config__bindgen_ty_2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_resampler_config__bindgen_ty_2>(),
+        4usize,
+        concat!("Size of: ", stringify!(ma_resampler_config__bindgen_ty_2))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_resampler_config__bindgen_ty_2>(),
+        4usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_resampler_config__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_resampler_config__bindgen_ty_2>())).quality as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_resampler_config__bindgen_ty_2),
+            "::",
+            stringify!(quality)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout_ma_resampler_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_resampler_config>(),
+        48usize,
+        concat!("Size of: ", stringify!(ma_resampler_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_resampler_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_resampler_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_resampler_config>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_resampler_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_resampler_config>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_resampler_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_resampler_config>())).sampleRateIn as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_resampler_config),
+            "::",
+            stringify!(sampleRateIn)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_resampler_config>())).sampleRateOut as *const _ as usize
+        },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_resampler_config),
+            "::",
+            stringify!(sampleRateOut)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_resampler_config>())).algorithm as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_resampler_config),
+            "::",
+            stringify!(algorithm)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_resampler_config>())).linear as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_resampler_config),
+            "::",
+            stringify!(linear)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_resampler_config>())).speex as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_resampler_config),
+            "::",
+            stringify!(speex)
+        )
+    );
 }
 extern "C" {
     pub fn ma_resampler_config_init(
@@ -1279,10 +3689,112 @@ pub union ma_resampler__bindgen_ty_1 {
 pub struct ma_resampler__bindgen_ty_1__bindgen_ty_1 {
     pub pSpeexResamplerState: *mut libc::c_void,
 }
+#[test]
+fn bindgen_test_layout_ma_resampler__bindgen_ty_1__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_resampler__bindgen_ty_1__bindgen_ty_1>(),
+        8usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_resampler__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_resampler__bindgen_ty_1__bindgen_ty_1>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_resampler__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_resampler__bindgen_ty_1__bindgen_ty_1>()))
+                .pSpeexResamplerState as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_resampler__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(pSpeexResamplerState)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout_ma_resampler__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_resampler__bindgen_ty_1>(),
+        1600usize,
+        concat!("Size of: ", stringify!(ma_resampler__bindgen_ty_1))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_resampler__bindgen_ty_1>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_resampler__bindgen_ty_1))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_resampler__bindgen_ty_1>())).linear as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_resampler__bindgen_ty_1),
+            "::",
+            stringify!(linear)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_resampler__bindgen_ty_1>())).speex as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_resampler__bindgen_ty_1),
+            "::",
+            stringify!(speex)
+        )
+    );
+}
 impl ::core::fmt::Debug for ma_resampler__bindgen_ty_1 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write!(f, "ma_resampler__bindgen_ty_1 {{ union }}")
     }
+}
+#[test]
+fn bindgen_test_layout_ma_resampler() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_resampler>(),
+        1648usize,
+        concat!("Size of: ", stringify!(ma_resampler))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_resampler>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_resampler))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_resampler>())).config as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_resampler),
+            "::",
+            stringify!(config)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_resampler>())).state as *const _ as usize },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_resampler),
+            "::",
+            stringify!(state)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_resampler {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -1351,6 +3863,106 @@ pub struct ma_channel_converter_config {
     pub mixingMode: ma_channel_mix_mode,
     pub weights: [[f32; 32usize]; 32usize],
 }
+#[test]
+fn bindgen_test_layout_ma_channel_converter_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_channel_converter_config>(),
+        4176usize,
+        concat!("Size of: ", stringify!(ma_channel_converter_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_channel_converter_config>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_channel_converter_config))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_channel_converter_config>())).format as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_channel_converter_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_channel_converter_config>())).channelsIn as *const _ as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_channel_converter_config),
+            "::",
+            stringify!(channelsIn)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_channel_converter_config>())).channelsOut as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_channel_converter_config),
+            "::",
+            stringify!(channelsOut)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_channel_converter_config>())).channelMapIn as *const _
+                as usize
+        },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_channel_converter_config),
+            "::",
+            stringify!(channelMapIn)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_channel_converter_config>())).channelMapOut as *const _
+                as usize
+        },
+        44usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_channel_converter_config),
+            "::",
+            stringify!(channelMapOut)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_channel_converter_config>())).mixingMode as *const _ as usize
+        },
+        76usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_channel_converter_config),
+            "::",
+            stringify!(mixingMode)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_channel_converter_config>())).weights as *const _ as usize
+        },
+        80usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_channel_converter_config),
+            "::",
+            stringify!(weights)
+        )
+    );
+}
 extern "C" {
     pub fn ma_channel_converter_config_init(
         format: ma_format,
@@ -1381,10 +3993,156 @@ pub union ma_channel_converter__bindgen_ty_1 {
     pub s16: [[ma_int32; 32usize]; 32usize],
     _bindgen_union_align: [u32; 1024usize],
 }
+#[test]
+fn bindgen_test_layout_ma_channel_converter__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_channel_converter__bindgen_ty_1>(),
+        4096usize,
+        concat!("Size of: ", stringify!(ma_channel_converter__bindgen_ty_1))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_channel_converter__bindgen_ty_1>(),
+        4usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_channel_converter__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_channel_converter__bindgen_ty_1>())).f32_ as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_channel_converter__bindgen_ty_1),
+            "::",
+            stringify!(f32_)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_channel_converter__bindgen_ty_1>())).s16 as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_channel_converter__bindgen_ty_1),
+            "::",
+            stringify!(s16)
+        )
+    );
+}
 impl ::core::fmt::Debug for ma_channel_converter__bindgen_ty_1 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write!(f, "ma_channel_converter__bindgen_ty_1 {{ union }}")
     }
+}
+#[test]
+fn bindgen_test_layout_ma_channel_converter() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_channel_converter>(),
+        4212usize,
+        concat!("Size of: ", stringify!(ma_channel_converter))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_channel_converter>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_channel_converter))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_channel_converter>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_channel_converter),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_channel_converter>())).channelsIn as *const _ as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_channel_converter),
+            "::",
+            stringify!(channelsIn)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_channel_converter>())).channelsOut as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_channel_converter),
+            "::",
+            stringify!(channelsOut)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_channel_converter>())).channelMapIn as *const _ as usize
+        },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_channel_converter),
+            "::",
+            stringify!(channelMapIn)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_channel_converter>())).channelMapOut as *const _ as usize
+        },
+        44usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_channel_converter),
+            "::",
+            stringify!(channelMapOut)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_channel_converter>())).mixingMode as *const _ as usize
+        },
+        76usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_channel_converter),
+            "::",
+            stringify!(mixingMode)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_channel_converter>())).weights as *const _ as usize },
+        80usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_channel_converter),
+            "::",
+            stringify!(weights)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_channel_converter>())).shuffleTable as *const _ as usize
+        },
+        4177usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_channel_converter),
+            "::",
+            stringify!(shuffleTable)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_channel_converter {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -1513,10 +4271,317 @@ pub struct ma_data_converter_config__bindgen_ty_1__bindgen_ty_1 {
     pub lpfOrder: ma_uint32,
     pub lpfNyquistFactor: f64,
 }
+#[test]
+fn bindgen_test_layout_ma_data_converter_config__bindgen_ty_1__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_data_converter_config__bindgen_ty_1__bindgen_ty_1>(),
+        16usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_data_converter_config__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_data_converter_config__bindgen_ty_1__bindgen_ty_1>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_data_converter_config__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config__bindgen_ty_1__bindgen_ty_1>()))
+                .lpfOrder as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(lpfOrder)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config__bindgen_ty_1__bindgen_ty_1>()))
+                .lpfNyquistFactor as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(lpfNyquistFactor)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ma_data_converter_config__bindgen_ty_1__bindgen_ty_2 {
     pub quality: libc::c_int,
+}
+#[test]
+fn bindgen_test_layout_ma_data_converter_config__bindgen_ty_1__bindgen_ty_2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_data_converter_config__bindgen_ty_1__bindgen_ty_2>(),
+        4usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_data_converter_config__bindgen_ty_1__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_data_converter_config__bindgen_ty_1__bindgen_ty_2>(),
+        4usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_data_converter_config__bindgen_ty_1__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config__bindgen_ty_1__bindgen_ty_2>()))
+                .quality as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(quality)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout_ma_data_converter_config__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_data_converter_config__bindgen_ty_1>(),
+        32usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_data_converter_config__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_data_converter_config__bindgen_ty_1>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_data_converter_config__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config__bindgen_ty_1>())).algorithm
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config__bindgen_ty_1),
+            "::",
+            stringify!(algorithm)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config__bindgen_ty_1>()))
+                .allowDynamicSampleRate as *const _ as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config__bindgen_ty_1),
+            "::",
+            stringify!(allowDynamicSampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config__bindgen_ty_1>())).linear as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config__bindgen_ty_1),
+            "::",
+            stringify!(linear)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config__bindgen_ty_1>())).speex as *const _
+                as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config__bindgen_ty_1),
+            "::",
+            stringify!(speex)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout_ma_data_converter_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_data_converter_config>(),
+        4224usize,
+        concat!("Size of: ", stringify!(ma_data_converter_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_data_converter_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_data_converter_config))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config>())).formatIn as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config),
+            "::",
+            stringify!(formatIn)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config>())).formatOut as *const _ as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config),
+            "::",
+            stringify!(formatOut)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config>())).channelsIn as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config),
+            "::",
+            stringify!(channelsIn)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config>())).channelsOut as *const _ as usize
+        },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config),
+            "::",
+            stringify!(channelsOut)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config>())).sampleRateIn as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config),
+            "::",
+            stringify!(sampleRateIn)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config>())).sampleRateOut as *const _ as usize
+        },
+        20usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config),
+            "::",
+            stringify!(sampleRateOut)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config>())).channelMapIn as *const _ as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config),
+            "::",
+            stringify!(channelMapIn)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config>())).channelMapOut as *const _ as usize
+        },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config),
+            "::",
+            stringify!(channelMapOut)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config>())).ditherMode as *const _ as usize
+        },
+        88usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config),
+            "::",
+            stringify!(ditherMode)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config>())).channelMixMode as *const _
+                as usize
+        },
+        92usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config),
+            "::",
+            stringify!(channelMixMode)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config>())).channelWeights as *const _
+                as usize
+        },
+        96usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config),
+            "::",
+            stringify!(channelWeights)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter_config>())).resampling as *const _ as usize
+        },
+        4192usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter_config),
+            "::",
+            stringify!(resampling)
+        )
+    );
 }
 extern "C" {
     pub fn ma_data_converter_config_init_default() -> ma_data_converter_config;
@@ -1539,6 +4604,51 @@ pub struct ma_data_converter {
     pub resampler: ma_resampler,
     pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize], u8>,
     pub __bindgen_padding_0: [u8; 7usize],
+}
+#[test]
+fn bindgen_test_layout_ma_data_converter() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_data_converter>(),
+        10096usize,
+        concat!("Size of: ", stringify!(ma_data_converter))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_data_converter>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_data_converter))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_data_converter>())).config as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter),
+            "::",
+            stringify!(config)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_converter>())).channelConverter as *const _ as usize
+        },
+        4224usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter),
+            "::",
+            stringify!(channelConverter)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_data_converter>())).resampler as *const _ as usize },
+        8440usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_converter),
+            "::",
+            stringify!(resampler)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_data_converter {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -1960,6 +5070,89 @@ pub struct ma_rb {
     pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize], u8>,
     pub allocationCallbacks: ma_allocation_callbacks,
 }
+#[test]
+fn bindgen_test_layout_ma_rb() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_rb>(),
+        64usize,
+        concat!("Size of: ", stringify!(ma_rb))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_rb>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_rb))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_rb>())).pBuffer as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_rb),
+            "::",
+            stringify!(pBuffer)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_rb>())).subbufferSizeInBytes as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_rb),
+            "::",
+            stringify!(subbufferSizeInBytes)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_rb>())).subbufferCount as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_rb),
+            "::",
+            stringify!(subbufferCount)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_rb>())).subbufferStrideInBytes as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_rb),
+            "::",
+            stringify!(subbufferStrideInBytes)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_rb>())).encodedReadOffset as *const _ as usize },
+        20usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_rb),
+            "::",
+            stringify!(encodedReadOffset)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_rb>())).encodedWriteOffset as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_rb),
+            "::",
+            stringify!(encodedWriteOffset)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_rb>())).allocationCallbacks as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_rb),
+            "::",
+            stringify!(allocationCallbacks)
+        )
+    );
+}
 impl ma_rb {
     #[inline]
     pub fn ownsBuffer(&self) -> ma_bool32 {
@@ -2090,6 +5283,49 @@ pub struct ma_pcm_rb {
     pub rb: ma_rb,
     pub format: ma_format,
     pub channels: ma_uint32,
+}
+#[test]
+fn bindgen_test_layout_ma_pcm_rb() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_pcm_rb>(),
+        72usize,
+        concat!("Size of: ", stringify!(ma_pcm_rb))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_pcm_rb>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_pcm_rb))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_pcm_rb>())).rb as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_pcm_rb),
+            "::",
+            stringify!(rb)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_pcm_rb>())).format as *const _ as usize },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_pcm_rb),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_pcm_rb>())).channels as *const _ as usize },
+        68usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_pcm_rb),
+            "::",
+            stringify!(channels)
+        )
+    );
 }
 extern "C" {
     pub fn ma_pcm_rb_init_ex(
@@ -2297,6 +5533,39 @@ pub union ma_timer {
     pub counterD: f64,
     _bindgen_union_align: u64,
 }
+#[test]
+fn bindgen_test_layout_ma_timer() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_timer>(),
+        8usize,
+        concat!("Size of: ", stringify!(ma_timer))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_timer>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_timer))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_timer>())).counter as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_timer),
+            "::",
+            stringify!(counter)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_timer>())).counterD as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_timer),
+            "::",
+            stringify!(counterD)
+        )
+    );
+}
 impl ::core::fmt::Debug for ma_timer {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write!(f, "ma_timer {{ union }}")
@@ -2321,6 +5590,159 @@ pub union ma_device_id {
     pub nullbackend: libc::c_int,
     _bindgen_union_align: [u32; 64usize],
 }
+#[test]
+fn bindgen_test_layout_ma_device_id() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device_id>(),
+        256usize,
+        concat!("Size of: ", stringify!(ma_device_id))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device_id>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_device_id))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id>())).wasapi as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id),
+            "::",
+            stringify!(wasapi)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id>())).dsound as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id),
+            "::",
+            stringify!(dsound)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id>())).winmm as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id),
+            "::",
+            stringify!(winmm)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id>())).alsa as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id),
+            "::",
+            stringify!(alsa)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id>())).pulse as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id),
+            "::",
+            stringify!(pulse)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id>())).jack as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id),
+            "::",
+            stringify!(jack)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id>())).coreaudio as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id),
+            "::",
+            stringify!(coreaudio)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id>())).sndio as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id),
+            "::",
+            stringify!(sndio)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id>())).audio4 as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id),
+            "::",
+            stringify!(audio4)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id>())).oss as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id),
+            "::",
+            stringify!(oss)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id>())).aaudio as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id),
+            "::",
+            stringify!(aaudio)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id>())).opensl as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id),
+            "::",
+            stringify!(opensl)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id>())).webaudio as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id),
+            "::",
+            stringify!(webaudio)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id>())).nullbackend as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id),
+            "::",
+            stringify!(nullbackend)
+        )
+    );
+}
 impl ::core::fmt::Debug for ma_device_id {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write!(f, "ma_device_id {{ union }}")
@@ -2343,6 +5765,134 @@ pub struct ma_device_info {
 #[derive(Debug, Copy, Clone)]
 pub struct ma_device_info__bindgen_ty_1 {
     pub isDefault: ma_bool32,
+}
+#[test]
+fn bindgen_test_layout_ma_device_info__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device_info__bindgen_ty_1>(),
+        4usize,
+        concat!("Size of: ", stringify!(ma_device_info__bindgen_ty_1))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device_info__bindgen_ty_1>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_device_info__bindgen_ty_1))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_info__bindgen_ty_1>())).isDefault as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_info__bindgen_ty_1),
+            "::",
+            stringify!(isDefault)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout_ma_device_info() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device_info>(),
+        560usize,
+        concat!("Size of: ", stringify!(ma_device_info))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device_info>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_device_info))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_info>())).id as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_info),
+            "::",
+            stringify!(id)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_info>())).name as *const _ as usize },
+        256usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_info),
+            "::",
+            stringify!(name)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_info>())).formatCount as *const _ as usize },
+        512usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_info),
+            "::",
+            stringify!(formatCount)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_info>())).formats as *const _ as usize },
+        516usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_info),
+            "::",
+            stringify!(formats)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_info>())).minChannels as *const _ as usize },
+        540usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_info),
+            "::",
+            stringify!(minChannels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_info>())).maxChannels as *const _ as usize },
+        544usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_info),
+            "::",
+            stringify!(maxChannels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_info>())).minSampleRate as *const _ as usize },
+        548usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_info),
+            "::",
+            stringify!(minSampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_info>())).maxSampleRate as *const _ as usize },
+        552usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_info),
+            "::",
+            stringify!(maxSampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_info>()))._private as *const _ as usize },
+        556usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_info),
+            "::",
+            stringify!(_private)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_device_info {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -2382,10 +5932,124 @@ pub struct ma_device_config__bindgen_ty_1 {
 pub struct ma_device_config__bindgen_ty_1__bindgen_ty_1 {
     pub lpfOrder: ma_uint32,
 }
+#[test]
+fn bindgen_test_layout_ma_device_config__bindgen_ty_1__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device_config__bindgen_ty_1__bindgen_ty_1>(),
+        4usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_device_config__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device_config__bindgen_ty_1__bindgen_ty_1>(),
+        4usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_device_config__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_1__bindgen_ty_1>())).lpfOrder
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(lpfOrder)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ma_device_config__bindgen_ty_1__bindgen_ty_2 {
     pub quality: libc::c_int,
+}
+#[test]
+fn bindgen_test_layout_ma_device_config__bindgen_ty_1__bindgen_ty_2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device_config__bindgen_ty_1__bindgen_ty_2>(),
+        4usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_device_config__bindgen_ty_1__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device_config__bindgen_ty_1__bindgen_ty_2>(),
+        4usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_device_config__bindgen_ty_1__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_1__bindgen_ty_2>())).quality
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(quality)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout_ma_device_config__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device_config__bindgen_ty_1>(),
+        12usize,
+        concat!("Size of: ", stringify!(ma_device_config__bindgen_ty_1))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device_config__bindgen_ty_1>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_device_config__bindgen_ty_1))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_1>())).algorithm as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_1),
+            "::",
+            stringify!(algorithm)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_1>())).linear as *const _ as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_1),
+            "::",
+            stringify!(linear)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_1>())).speex as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_1),
+            "::",
+            stringify!(speex)
+        )
+    );
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2396,6 +6060,83 @@ pub struct ma_device_config__bindgen_ty_2 {
     pub channelMap: [ma_channel; 32usize],
     pub shareMode: ma_share_mode,
 }
+#[test]
+fn bindgen_test_layout_ma_device_config__bindgen_ty_2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device_config__bindgen_ty_2>(),
+        56usize,
+        concat!("Size of: ", stringify!(ma_device_config__bindgen_ty_2))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device_config__bindgen_ty_2>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_device_config__bindgen_ty_2))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_2>())).pDeviceID as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_2),
+            "::",
+            stringify!(pDeviceID)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_2>())).format as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_2),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_2>())).channels as *const _
+                as usize
+        },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_2),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_2>())).channelMap as *const _
+                as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_2),
+            "::",
+            stringify!(channelMap)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_2>())).shareMode as *const _
+                as usize
+        },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_2),
+            "::",
+            stringify!(shareMode)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ma_device_config__bindgen_ty_3 {
@@ -2405,6 +6146,83 @@ pub struct ma_device_config__bindgen_ty_3 {
     pub channelMap: [ma_channel; 32usize],
     pub shareMode: ma_share_mode,
 }
+#[test]
+fn bindgen_test_layout_ma_device_config__bindgen_ty_3() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device_config__bindgen_ty_3>(),
+        56usize,
+        concat!("Size of: ", stringify!(ma_device_config__bindgen_ty_3))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device_config__bindgen_ty_3>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_device_config__bindgen_ty_3))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_3>())).pDeviceID as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_3),
+            "::",
+            stringify!(pDeviceID)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_3>())).format as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_3),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_3>())).channels as *const _
+                as usize
+        },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_3),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_3>())).channelMap as *const _
+                as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_3),
+            "::",
+            stringify!(channelMap)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_3>())).shareMode as *const _
+                as usize
+        },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_3),
+            "::",
+            stringify!(shareMode)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ma_device_config__bindgen_ty_4 {
@@ -2412,6 +6230,71 @@ pub struct ma_device_config__bindgen_ty_4 {
     pub noDefaultQualitySRC: ma_bool32,
     pub noAutoStreamRouting: ma_bool32,
     pub noHardwareOffloading: ma_bool32,
+}
+#[test]
+fn bindgen_test_layout_ma_device_config__bindgen_ty_4() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device_config__bindgen_ty_4>(),
+        16usize,
+        concat!("Size of: ", stringify!(ma_device_config__bindgen_ty_4))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device_config__bindgen_ty_4>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_device_config__bindgen_ty_4))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_4>())).noAutoConvertSRC as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_4),
+            "::",
+            stringify!(noAutoConvertSRC)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_4>())).noDefaultQualitySRC
+                as *const _ as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_4),
+            "::",
+            stringify!(noDefaultQualitySRC)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_4>())).noAutoStreamRouting
+                as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_4),
+            "::",
+            stringify!(noAutoStreamRouting)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_4>())).noHardwareOffloading
+                as *const _ as usize
+        },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_4),
+            "::",
+            stringify!(noHardwareOffloading)
+        )
+    );
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2421,11 +6304,307 @@ pub struct ma_device_config__bindgen_ty_5 {
     pub noAutoChannels: ma_bool32,
     pub noAutoResample: ma_bool32,
 }
+#[test]
+fn bindgen_test_layout_ma_device_config__bindgen_ty_5() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device_config__bindgen_ty_5>(),
+        16usize,
+        concat!("Size of: ", stringify!(ma_device_config__bindgen_ty_5))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device_config__bindgen_ty_5>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_device_config__bindgen_ty_5))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_5>())).noMMap as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_5),
+            "::",
+            stringify!(noMMap)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_5>())).noAutoFormat as *const _
+                as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_5),
+            "::",
+            stringify!(noAutoFormat)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_5>())).noAutoChannels as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_5),
+            "::",
+            stringify!(noAutoChannels)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_5>())).noAutoResample as *const _
+                as usize
+        },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_5),
+            "::",
+            stringify!(noAutoResample)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ma_device_config__bindgen_ty_6 {
     pub pStreamNamePlayback: *const libc::c_char,
     pub pStreamNameCapture: *const libc::c_char,
+}
+#[test]
+fn bindgen_test_layout_ma_device_config__bindgen_ty_6() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device_config__bindgen_ty_6>(),
+        16usize,
+        concat!("Size of: ", stringify!(ma_device_config__bindgen_ty_6))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device_config__bindgen_ty_6>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_device_config__bindgen_ty_6))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_6>())).pStreamNamePlayback
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_6),
+            "::",
+            stringify!(pStreamNamePlayback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_6>())).pStreamNameCapture
+                as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_6),
+            "::",
+            stringify!(pStreamNameCapture)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout_ma_device_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device_config>(),
+        232usize,
+        concat!("Size of: ", stringify!(ma_device_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_device_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_config>())).deviceType as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(deviceType)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_config>())).sampleRate as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config>())).periodSizeInFrames as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(periodSizeInFrames)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config>())).periodSizeInMilliseconds as *const _
+                as usize
+        },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(periodSizeInMilliseconds)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_config>())).periods as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(periods)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config>())).performanceProfile as *const _ as usize
+        },
+        20usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(performanceProfile)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config>())).noPreZeroedOutputBuffer as *const _
+                as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(noPreZeroedOutputBuffer)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_config>())).noClip as *const _ as usize },
+        28usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(noClip)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_config>())).dataCallback as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(dataCallback)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_config>())).stopCallback as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(stopCallback)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_config>())).pUserData as *const _ as usize },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(pUserData)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_config>())).resampling as *const _ as usize },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(resampling)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_config>())).playback as *const _ as usize },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(playback)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_config>())).capture as *const _ as usize },
+        128usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(capture)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_config>())).wasapi as *const _ as usize },
+        184usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(wasapi)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_config>())).alsa as *const _ as usize },
+        200usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(alsa)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_config>())).pulse as *const _ as usize },
+        216usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(pulse)
+        )
+    );
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2445,12 +6624,90 @@ pub struct ma_context_config {
 pub struct ma_context_config__bindgen_ty_1 {
     pub useVerboseDeviceEnumeration: ma_bool32,
 }
+#[test]
+fn bindgen_test_layout_ma_context_config__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_context_config__bindgen_ty_1>(),
+        4usize,
+        concat!("Size of: ", stringify!(ma_context_config__bindgen_ty_1))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_context_config__bindgen_ty_1>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_context_config__bindgen_ty_1))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context_config__bindgen_ty_1>())).useVerboseDeviceEnumeration
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config__bindgen_ty_1),
+            "::",
+            stringify!(useVerboseDeviceEnumeration)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ma_context_config__bindgen_ty_2 {
     pub pApplicationName: *const libc::c_char,
     pub pServerName: *const libc::c_char,
     pub tryAutoSpawn: ma_bool32,
+}
+#[test]
+fn bindgen_test_layout_ma_context_config__bindgen_ty_2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_context_config__bindgen_ty_2>(),
+        24usize,
+        concat!("Size of: ", stringify!(ma_context_config__bindgen_ty_2))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_context_config__bindgen_ty_2>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_context_config__bindgen_ty_2))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context_config__bindgen_ty_2>())).pApplicationName
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config__bindgen_ty_2),
+            "::",
+            stringify!(pApplicationName)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context_config__bindgen_ty_2>())).pServerName as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config__bindgen_ty_2),
+            "::",
+            stringify!(pServerName)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context_config__bindgen_ty_2>())).tryAutoSpawn as *const _
+                as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config__bindgen_ty_2),
+            "::",
+            stringify!(tryAutoSpawn)
+        )
+    );
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2460,11 +6717,224 @@ pub struct ma_context_config__bindgen_ty_3 {
     pub noAudioSessionActivate: ma_bool32,
     pub noAudioSessionDeactivate: ma_bool32,
 }
+#[test]
+fn bindgen_test_layout_ma_context_config__bindgen_ty_3() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_context_config__bindgen_ty_3>(),
+        16usize,
+        concat!("Size of: ", stringify!(ma_context_config__bindgen_ty_3))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_context_config__bindgen_ty_3>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_context_config__bindgen_ty_3))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context_config__bindgen_ty_3>())).sessionCategory as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config__bindgen_ty_3),
+            "::",
+            stringify!(sessionCategory)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context_config__bindgen_ty_3>())).sessionCategoryOptions
+                as *const _ as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config__bindgen_ty_3),
+            "::",
+            stringify!(sessionCategoryOptions)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context_config__bindgen_ty_3>())).noAudioSessionActivate
+                as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config__bindgen_ty_3),
+            "::",
+            stringify!(noAudioSessionActivate)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context_config__bindgen_ty_3>())).noAudioSessionDeactivate
+                as *const _ as usize
+        },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config__bindgen_ty_3),
+            "::",
+            stringify!(noAudioSessionDeactivate)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ma_context_config__bindgen_ty_4 {
     pub pClientName: *const libc::c_char,
     pub tryStartServer: ma_bool32,
+}
+#[test]
+fn bindgen_test_layout_ma_context_config__bindgen_ty_4() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_context_config__bindgen_ty_4>(),
+        16usize,
+        concat!("Size of: ", stringify!(ma_context_config__bindgen_ty_4))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_context_config__bindgen_ty_4>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_context_config__bindgen_ty_4))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context_config__bindgen_ty_4>())).pClientName as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config__bindgen_ty_4),
+            "::",
+            stringify!(pClientName)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context_config__bindgen_ty_4>())).tryStartServer as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config__bindgen_ty_4),
+            "::",
+            stringify!(tryStartServer)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout_ma_context_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_context_config>(),
+        128usize,
+        concat!("Size of: ", stringify!(ma_context_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_context_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_context_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context_config>())).logCallback as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config),
+            "::",
+            stringify!(logCallback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context_config>())).threadPriority as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config),
+            "::",
+            stringify!(threadPriority)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context_config>())).threadStackSize as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config),
+            "::",
+            stringify!(threadStackSize)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context_config>())).pUserData as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config),
+            "::",
+            stringify!(pUserData)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context_config>())).allocationCallbacks as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config),
+            "::",
+            stringify!(allocationCallbacks)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context_config>())).alsa as *const _ as usize },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config),
+            "::",
+            stringify!(alsa)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context_config>())).pulse as *const _ as usize },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config),
+            "::",
+            stringify!(pulse)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context_config>())).coreaudio as *const _ as usize },
+        96usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config),
+            "::",
+            stringify!(coreaudio)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context_config>())).jack as *const _ as usize },
+        112usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config),
+            "::",
+            stringify!(jack)
+        )
+    );
 }
 pub type ma_enum_devices_callback_proc = ::core::option::Option<
     unsafe extern "C" fn(
@@ -2603,6 +7073,779 @@ pub struct ma_context__bindgen_ty_1__bindgen_ty_1 {
     pub internalDeviceEnumLock: ma_mutex,
     pub useVerboseDeviceEnumeration: ma_bool32,
 }
+#[test]
+fn bindgen_test_layout_ma_context__bindgen_ty_1__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_context__bindgen_ty_1__bindgen_ty_1>(),
+        496usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_context__bindgen_ty_1__bindgen_ty_1>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).asoundSO as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(asoundSO)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_open
+                as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_open)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_close
+                as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_close)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_sizeof as *const _ as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_sizeof)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_any as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_any)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_set_format as *const _ as usize
+        },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_set_format)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_set_format_first as *const _ as usize
+        },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_set_format_first)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_get_format_mask as *const _ as usize
+        },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_get_format_mask)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_set_channels_near as *const _ as usize
+        },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_set_channels_near)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_set_rate_resample as *const _ as usize
+        },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_set_rate_resample)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_set_rate_near as *const _ as usize
+        },
+        80usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_set_rate_near)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_set_buffer_size_near as *const _ as usize
+        },
+        88usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_set_buffer_size_near)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_set_periods_near as *const _ as usize
+        },
+        96usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_set_periods_near)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_set_access as *const _ as usize
+        },
+        104usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_set_access)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_get_format as *const _ as usize
+        },
+        112usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_get_format)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_get_channels as *const _ as usize
+        },
+        120usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_get_channels)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_get_channels_min as *const _ as usize
+        },
+        128usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_get_channels_min)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_get_channels_max as *const _ as usize
+        },
+        136usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_get_channels_max)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_get_rate as *const _ as usize
+        },
+        144usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_get_rate)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_get_rate_min as *const _ as usize
+        },
+        152usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_get_rate_min)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_get_rate_max as *const _ as usize
+        },
+        160usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_get_rate_max)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_get_buffer_size as *const _ as usize
+        },
+        168usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_get_buffer_size)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_get_periods as *const _ as usize
+        },
+        176usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_get_periods)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_hw_params_get_access as *const _ as usize
+        },
+        184usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params_get_access)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_hw_params
+                as *const _ as usize
+        },
+        192usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_hw_params)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_sw_params_sizeof as *const _ as usize
+        },
+        200usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_sw_params_sizeof)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_sw_params_current as *const _ as usize
+        },
+        208usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_sw_params_current)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_sw_params_get_boundary as *const _ as usize
+        },
+        216usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_sw_params_get_boundary)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_sw_params_set_avail_min as *const _ as usize
+        },
+        224usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_sw_params_set_avail_min)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_sw_params_set_start_threshold as *const _ as usize
+        },
+        232usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_sw_params_set_start_threshold)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_sw_params_set_stop_threshold as *const _ as usize
+        },
+        240usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_sw_params_set_stop_threshold)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_sw_params
+                as *const _ as usize
+        },
+        248usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_sw_params)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_format_mask_sizeof as *const _ as usize
+        },
+        256usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_format_mask_sizeof)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_format_mask_test as *const _ as usize
+        },
+        264usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_format_mask_test)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_get_chmap
+                as *const _ as usize
+        },
+        272usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_get_chmap)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_state
+                as *const _ as usize
+        },
+        280usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_state)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_prepare
+                as *const _ as usize
+        },
+        288usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_prepare)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_start
+                as *const _ as usize
+        },
+        296usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_start)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_drop
+                as *const _ as usize
+        },
+        304usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_drop)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_drain
+                as *const _ as usize
+        },
+        312usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_drain)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_device_name_hint
+                as *const _ as usize
+        },
+        320usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_device_name_hint)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_device_name_get_hint as *const _ as usize
+        },
+        328usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_device_name_get_hint)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_card_get_index
+                as *const _ as usize
+        },
+        336usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_card_get_index)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_device_name_free_hint as *const _ as usize
+        },
+        344usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_device_name_free_hint)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_mmap_begin
+                as *const _ as usize
+        },
+        352usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_mmap_begin)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_mmap_commit
+                as *const _ as usize
+        },
+        360usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_mmap_commit)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_recover
+                as *const _ as usize
+        },
+        368usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_recover)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_readi
+                as *const _ as usize
+        },
+        376usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_readi)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_writei
+                as *const _ as usize
+        },
+        384usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_writei)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_avail
+                as *const _ as usize
+        },
+        392usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_avail)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_avail_update
+                as *const _ as usize
+        },
+        400usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_avail_update)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_wait
+                as *const _ as usize
+        },
+        408usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_wait)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_info
+                as *const _ as usize
+        },
+        416usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_info)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>())).snd_pcm_info_sizeof
+                as *const _ as usize
+        },
+        424usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_info_sizeof)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_pcm_info_get_name as *const _ as usize
+        },
+        432usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_pcm_info_get_name)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .snd_config_update_free_global as *const _ as usize
+        },
+        440usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(snd_config_update_free_global)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .internalDeviceEnumLock as *const _ as usize
+        },
+        448usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(internalDeviceEnumLock)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_1>()))
+                .useVerboseDeviceEnumeration as *const _ as usize
+        },
+        488usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(useVerboseDeviceEnumeration)
+        )
+    );
+}
 impl ::core::fmt::Debug for ma_context__bindgen_ty_1__bindgen_ty_1 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write ! (f , "ma_context__bindgen_ty_1__bindgen_ty_1 {{ asoundSO: {:?}, snd_pcm_open: {:?}, snd_pcm_close: {:?}, snd_pcm_hw_params_sizeof: {:?}, snd_pcm_hw_params_any: {:?}, snd_pcm_hw_params_set_format: {:?}, snd_pcm_hw_params_set_format_first: {:?}, snd_pcm_hw_params_get_format_mask: {:?}, snd_pcm_hw_params_set_channels_near: {:?}, snd_pcm_hw_params_set_rate_resample: {:?}, snd_pcm_hw_params_set_rate_near: {:?}, snd_pcm_hw_params_set_buffer_size_near: {:?}, snd_pcm_hw_params_set_periods_near: {:?}, snd_pcm_hw_params_set_access: {:?}, snd_pcm_hw_params_get_format: {:?}, snd_pcm_hw_params_get_channels: {:?}, snd_pcm_hw_params_get_channels_min: {:?}, snd_pcm_hw_params_get_channels_max: {:?}, snd_pcm_hw_params_get_rate: {:?}, snd_pcm_hw_params_get_rate_min: {:?}, snd_pcm_hw_params_get_rate_max: {:?}, snd_pcm_hw_params_get_buffer_size: {:?}, snd_pcm_hw_params_get_periods: {:?}, snd_pcm_hw_params_get_access: {:?}, snd_pcm_hw_params: {:?}, snd_pcm_sw_params_sizeof: {:?}, snd_pcm_sw_params_current: {:?}, snd_pcm_sw_params_get_boundary: {:?}, snd_pcm_sw_params_set_avail_min: {:?}, snd_pcm_sw_params_set_start_threshold: {:?}, snd_pcm_sw_params_set_stop_threshold: {:?}, snd_pcm_sw_params: {:?}, snd_pcm_format_mask_sizeof: {:?}, snd_pcm_format_mask_test: {:?}, snd_pcm_get_chmap: {:?}, snd_pcm_state: {:?}, snd_pcm_prepare: {:?}, snd_pcm_start: {:?}, snd_pcm_drop: {:?}, snd_pcm_drain: {:?}, snd_device_name_hint: {:?}, snd_device_name_get_hint: {:?}, snd_card_get_index: {:?}, snd_device_name_free_hint: {:?}, snd_pcm_mmap_begin: {:?}, snd_pcm_mmap_commit: {:?}, snd_pcm_recover: {:?}, snd_pcm_readi: {:?}, snd_pcm_writei: {:?}, snd_pcm_avail: {:?}, snd_pcm_avail_update: {:?}, snd_pcm_wait: {:?}, snd_pcm_info: {:?}, snd_pcm_info_sizeof: {:?}, snd_pcm_info_get_name: {:?}, snd_config_update_free_global: {:?}, internalDeviceEnumLock: {:?}, useVerboseDeviceEnumeration: {:?} }}" , self . asoundSO , self . snd_pcm_open , self . snd_pcm_close , self . snd_pcm_hw_params_sizeof , self . snd_pcm_hw_params_any , self . snd_pcm_hw_params_set_format , self . snd_pcm_hw_params_set_format_first , self . snd_pcm_hw_params_get_format_mask , self . snd_pcm_hw_params_set_channels_near , self . snd_pcm_hw_params_set_rate_resample , self . snd_pcm_hw_params_set_rate_near , self . snd_pcm_hw_params_set_buffer_size_near , self . snd_pcm_hw_params_set_periods_near , self . snd_pcm_hw_params_set_access , self . snd_pcm_hw_params_get_format , self . snd_pcm_hw_params_get_channels , self . snd_pcm_hw_params_get_channels_min , self . snd_pcm_hw_params_get_channels_max , self . snd_pcm_hw_params_get_rate , self . snd_pcm_hw_params_get_rate_min , self . snd_pcm_hw_params_get_rate_max , self . snd_pcm_hw_params_get_buffer_size , self . snd_pcm_hw_params_get_periods , self . snd_pcm_hw_params_get_access , self . snd_pcm_hw_params , self . snd_pcm_sw_params_sizeof , self . snd_pcm_sw_params_current , self . snd_pcm_sw_params_get_boundary , self . snd_pcm_sw_params_set_avail_min , self . snd_pcm_sw_params_set_start_threshold , self . snd_pcm_sw_params_set_stop_threshold , self . snd_pcm_sw_params , self . snd_pcm_format_mask_sizeof , self . snd_pcm_format_mask_test , self . snd_pcm_get_chmap , self . snd_pcm_state , self . snd_pcm_prepare , self . snd_pcm_start , self . snd_pcm_drop , self . snd_pcm_drain , self . snd_device_name_hint , self . snd_device_name_get_hint , self . snd_card_get_index , self . snd_device_name_free_hint , self . snd_pcm_mmap_begin , self . snd_pcm_mmap_commit , self . snd_pcm_recover , self . snd_pcm_readi , self . snd_pcm_writei , self . snd_pcm_avail , self . snd_pcm_avail_update , self . snd_pcm_wait , self . snd_pcm_info , self . snd_pcm_info_sizeof , self . snd_pcm_info_get_name , self . snd_config_update_free_global , self . internalDeviceEnumLock , self . useVerboseDeviceEnumeration)
@@ -2660,6 +7903,649 @@ pub struct ma_context__bindgen_ty_1__bindgen_ty_2 {
     pub pServerName: *mut libc::c_char,
     pub tryAutoSpawn: ma_bool32,
 }
+#[test]
+fn bindgen_test_layout_ma_context__bindgen_ty_1__bindgen_ty_2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_context__bindgen_ty_1__bindgen_ty_2>(),
+        384usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_context__bindgen_ty_1__bindgen_ty_2>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pulseSO as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pulseSO)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_mainloop_new
+                as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_mainloop_new)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_mainloop_free
+                as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_mainloop_free)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_mainloop_get_api
+                as *const _ as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_mainloop_get_api)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_mainloop_iterate
+                as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_mainloop_iterate)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_mainloop_wakeup
+                as *const _ as usize
+        },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_mainloop_wakeup)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_context_new
+                as *const _ as usize
+        },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_context_new)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_context_unref
+                as *const _ as usize
+        },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_context_unref)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_context_connect
+                as *const _ as usize
+        },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_context_connect)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_context_disconnect as *const _ as usize
+        },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_context_disconnect)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_context_set_state_callback as *const _ as usize
+        },
+        80usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_context_set_state_callback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_context_get_state
+                as *const _ as usize
+        },
+        88usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_context_get_state)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_context_get_sink_info_list as *const _ as usize
+        },
+        96usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_context_get_sink_info_list)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_context_get_source_info_list as *const _ as usize
+        },
+        104usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_context_get_source_info_list)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_context_get_sink_info_by_name as *const _ as usize
+        },
+        112usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_context_get_sink_info_by_name)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_context_get_source_info_by_name as *const _ as usize
+        },
+        120usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_context_get_source_info_by_name)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_operation_unref
+                as *const _ as usize
+        },
+        128usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_operation_unref)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_operation_get_state as *const _ as usize
+        },
+        136usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_operation_get_state)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_channel_map_init_extend as *const _ as usize
+        },
+        144usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_channel_map_init_extend)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_channel_map_valid
+                as *const _ as usize
+        },
+        152usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_channel_map_valid)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_channel_map_compatible as *const _ as usize
+        },
+        160usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_channel_map_compatible)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_stream_new
+                as *const _ as usize
+        },
+        168usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_new)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_stream_unref
+                as *const _ as usize
+        },
+        176usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_unref)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_stream_connect_playback as *const _ as usize
+        },
+        184usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_connect_playback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_stream_connect_record as *const _ as usize
+        },
+        192usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_connect_record)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_stream_disconnect
+                as *const _ as usize
+        },
+        200usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_disconnect)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_stream_get_state
+                as *const _ as usize
+        },
+        208usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_get_state)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_stream_get_sample_spec as *const _ as usize
+        },
+        216usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_get_sample_spec)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_stream_get_channel_map as *const _ as usize
+        },
+        224usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_get_channel_map)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_stream_get_buffer_attr as *const _ as usize
+        },
+        232usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_get_buffer_attr)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_stream_set_buffer_attr as *const _ as usize
+        },
+        240usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_set_buffer_attr)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_stream_get_device_name as *const _ as usize
+        },
+        248usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_get_device_name)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_stream_set_write_callback as *const _ as usize
+        },
+        256usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_set_write_callback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_stream_set_read_callback as *const _ as usize
+        },
+        264usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_set_read_callback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_stream_flush
+                as *const _ as usize
+        },
+        272usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_flush)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_stream_drain
+                as *const _ as usize
+        },
+        280usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_drain)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_stream_is_corked
+                as *const _ as usize
+        },
+        288usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_is_corked)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_stream_cork
+                as *const _ as usize
+        },
+        296usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_cork)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_stream_trigger
+                as *const _ as usize
+        },
+        304usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_trigger)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_stream_begin_write as *const _ as usize
+        },
+        312usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_begin_write)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_stream_write
+                as *const _ as usize
+        },
+        320usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_write)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_stream_peek
+                as *const _ as usize
+        },
+        328usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_peek)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pa_stream_drop
+                as *const _ as usize
+        },
+        336usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_drop)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_stream_writable_size as *const _ as usize
+        },
+        344usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_writable_size)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>()))
+                .pa_stream_readable_size as *const _ as usize
+        },
+        352usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pa_stream_readable_size)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pApplicationName
+                as *const _ as usize
+        },
+        360usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pApplicationName)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).pServerName
+                as *const _ as usize
+        },
+        368usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pServerName)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_2>())).tryAutoSpawn
+                as *const _ as usize
+        },
+        376usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(tryAutoSpawn)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ma_context__bindgen_ty_1__bindgen_ty_3 {
@@ -2683,10 +8569,363 @@ pub struct ma_context__bindgen_ty_1__bindgen_ty_3 {
     pub pClientName: *mut libc::c_char,
     pub tryStartServer: ma_bool32,
 }
+#[test]
+fn bindgen_test_layout_ma_context__bindgen_ty_1__bindgen_ty_3() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_context__bindgen_ty_1__bindgen_ty_3>(),
+        152usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_context__bindgen_ty_1__bindgen_ty_3>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>())).jackSO as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(jackSO)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>())).jack_client_open
+                as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(jack_client_open)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>())).jack_client_close
+                as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(jack_client_close)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>()))
+                .jack_client_name_size as *const _ as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(jack_client_name_size)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>()))
+                .jack_set_process_callback as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(jack_set_process_callback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>()))
+                .jack_set_buffer_size_callback as *const _ as usize
+        },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(jack_set_buffer_size_callback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>())).jack_on_shutdown
+                as *const _ as usize
+        },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(jack_on_shutdown)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>())).jack_get_sample_rate
+                as *const _ as usize
+        },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(jack_get_sample_rate)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>())).jack_get_buffer_size
+                as *const _ as usize
+        },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(jack_get_buffer_size)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>())).jack_get_ports
+                as *const _ as usize
+        },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(jack_get_ports)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>())).jack_activate
+                as *const _ as usize
+        },
+        80usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(jack_activate)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>())).jack_deactivate
+                as *const _ as usize
+        },
+        88usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(jack_deactivate)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>())).jack_connect
+                as *const _ as usize
+        },
+        96usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(jack_connect)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>())).jack_port_register
+                as *const _ as usize
+        },
+        104usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(jack_port_register)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>())).jack_port_name
+                as *const _ as usize
+        },
+        112usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(jack_port_name)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>())).jack_port_get_buffer
+                as *const _ as usize
+        },
+        120usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(jack_port_get_buffer)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>())).jack_free
+                as *const _ as usize
+        },
+        128usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(jack_free)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>())).pClientName
+                as *const _ as usize
+        },
+        136usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(pClientName)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_3>())).tryStartServer
+                as *const _ as usize
+        },
+        144usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_3),
+            "::",
+            stringify!(tryStartServer)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ma_context__bindgen_ty_1__bindgen_ty_4 {
     pub _unused: libc::c_int,
+}
+#[test]
+fn bindgen_test_layout_ma_context__bindgen_ty_1__bindgen_ty_4() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_context__bindgen_ty_1__bindgen_ty_4>(),
+        4usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_4)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_context__bindgen_ty_1__bindgen_ty_4>(),
+        4usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_4)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1__bindgen_ty_4>()))._unused as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1__bindgen_ty_4),
+            "::",
+            stringify!(_unused)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout_ma_context__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_context__bindgen_ty_1>(),
+        496usize,
+        concat!("Size of: ", stringify!(ma_context__bindgen_ty_1))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_context__bindgen_ty_1>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_context__bindgen_ty_1))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context__bindgen_ty_1>())).alsa as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1),
+            "::",
+            stringify!(alsa)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context__bindgen_ty_1>())).pulse as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1),
+            "::",
+            stringify!(pulse)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context__bindgen_ty_1>())).jack as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1),
+            "::",
+            stringify!(jack)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1>())).null_backend as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1),
+            "::",
+            stringify!(null_backend)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_context__bindgen_ty_1 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -2720,10 +8959,499 @@ pub struct ma_context__bindgen_ty_2__bindgen_ty_1 {
     pub pthread_attr_getschedparam: ma_proc,
     pub pthread_attr_setschedparam: ma_proc,
 }
+#[test]
+fn bindgen_test_layout_ma_context__bindgen_ty_2__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_context__bindgen_ty_2__bindgen_ty_1>(),
+        128usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_context__bindgen_ty_2__bindgen_ty_1>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_2__bindgen_ty_1>())).pthreadSO
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(pthreadSO)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_2__bindgen_ty_1>())).pthread_create
+                as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(pthread_create)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_2__bindgen_ty_1>())).pthread_join
+                as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(pthread_join)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_2__bindgen_ty_1>())).pthread_mutex_init
+                as *const _ as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(pthread_mutex_init)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_2__bindgen_ty_1>()))
+                .pthread_mutex_destroy as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(pthread_mutex_destroy)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_2__bindgen_ty_1>())).pthread_mutex_lock
+                as *const _ as usize
+        },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(pthread_mutex_lock)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_2__bindgen_ty_1>())).pthread_mutex_unlock
+                as *const _ as usize
+        },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(pthread_mutex_unlock)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_2__bindgen_ty_1>())).pthread_cond_init
+                as *const _ as usize
+        },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(pthread_cond_init)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_2__bindgen_ty_1>())).pthread_cond_destroy
+                as *const _ as usize
+        },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(pthread_cond_destroy)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_2__bindgen_ty_1>())).pthread_cond_wait
+                as *const _ as usize
+        },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(pthread_cond_wait)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_2__bindgen_ty_1>())).pthread_cond_signal
+                as *const _ as usize
+        },
+        80usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(pthread_cond_signal)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_2__bindgen_ty_1>())).pthread_attr_init
+                as *const _ as usize
+        },
+        88usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(pthread_attr_init)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_2__bindgen_ty_1>())).pthread_attr_destroy
+                as *const _ as usize
+        },
+        96usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(pthread_attr_destroy)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_2__bindgen_ty_1>()))
+                .pthread_attr_setschedpolicy as *const _ as usize
+        },
+        104usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(pthread_attr_setschedpolicy)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_2__bindgen_ty_1>()))
+                .pthread_attr_getschedparam as *const _ as usize
+        },
+        112usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(pthread_attr_getschedparam)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_2__bindgen_ty_1>()))
+                .pthread_attr_setschedparam as *const _ as usize
+        },
+        120usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2__bindgen_ty_1),
+            "::",
+            stringify!(pthread_attr_setschedparam)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout_ma_context__bindgen_ty_2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_context__bindgen_ty_2>(),
+        128usize,
+        concat!("Size of: ", stringify!(ma_context__bindgen_ty_2))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_context__bindgen_ty_2>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_context__bindgen_ty_2))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context__bindgen_ty_2>())).posix as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2),
+            "::",
+            stringify!(posix)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_2>()))._unused as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_2),
+            "::",
+            stringify!(_unused)
+        )
+    );
+}
 impl ::core::fmt::Debug for ma_context__bindgen_ty_2 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write!(f, "ma_context__bindgen_ty_2 {{ union }}")
     }
+}
+#[test]
+fn bindgen_test_layout_ma_context() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_context>(),
+        880usize,
+        concat!("Size of: ", stringify!(ma_context))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_context>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_context))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).backend as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(backend)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).logCallback as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(logCallback)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).threadPriority as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(threadPriority)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).threadStackSize as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(threadStackSize)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).pUserData as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(pUserData)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).allocationCallbacks as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(allocationCallbacks)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).deviceEnumLock as *const _ as usize },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(deviceEnumLock)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).deviceInfoLock as *const _ as usize },
+        112usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(deviceInfoLock)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).deviceInfoCapacity as *const _ as usize },
+        152usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(deviceInfoCapacity)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context>())).playbackDeviceInfoCount as *const _ as usize
+        },
+        156usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(playbackDeviceInfoCount)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_context>())).captureDeviceInfoCount as *const _ as usize
+        },
+        160usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(captureDeviceInfoCount)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).pDeviceInfos as *const _ as usize },
+        168usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(pDeviceInfos)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).onUninit as *const _ as usize },
+        184usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(onUninit)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).onDeviceIDEqual as *const _ as usize },
+        192usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(onDeviceIDEqual)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).onEnumDevices as *const _ as usize },
+        200usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(onEnumDevices)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).onGetDeviceInfo as *const _ as usize },
+        208usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(onGetDeviceInfo)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).onDeviceInit as *const _ as usize },
+        216usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(onDeviceInit)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).onDeviceUninit as *const _ as usize },
+        224usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(onDeviceUninit)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).onDeviceStart as *const _ as usize },
+        232usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(onDeviceStart)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).onDeviceStop as *const _ as usize },
+        240usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(onDeviceStop)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context>())).onDeviceMainLoop as *const _ as usize },
+        248usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context),
+            "::",
+            stringify!(onDeviceMainLoop)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_context {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -2791,10 +9519,119 @@ pub struct ma_device__bindgen_ty_1 {
 pub struct ma_device__bindgen_ty_1__bindgen_ty_1 {
     pub lpfOrder: ma_uint32,
 }
+#[test]
+fn bindgen_test_layout_ma_device__bindgen_ty_1__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device__bindgen_ty_1__bindgen_ty_1>(),
+        4usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_device__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device__bindgen_ty_1__bindgen_ty_1>(),
+        4usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_device__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_1__bindgen_ty_1>())).lpfOrder as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(lpfOrder)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ma_device__bindgen_ty_1__bindgen_ty_2 {
     pub quality: libc::c_int,
+}
+#[test]
+fn bindgen_test_layout_ma_device__bindgen_ty_1__bindgen_ty_2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device__bindgen_ty_1__bindgen_ty_2>(),
+        4usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_device__bindgen_ty_1__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device__bindgen_ty_1__bindgen_ty_2>(),
+        4usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_device__bindgen_ty_1__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_1__bindgen_ty_2>())).quality as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(quality)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout_ma_device__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device__bindgen_ty_1>(),
+        12usize,
+        concat!("Size of: ", stringify!(ma_device__bindgen_ty_1))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device__bindgen_ty_1>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_device__bindgen_ty_1))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_1>())).algorithm as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_1),
+            "::",
+            stringify!(algorithm)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device__bindgen_ty_1>())).linear as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_1),
+            "::",
+            stringify!(linear)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device__bindgen_ty_1>())).speex as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_1),
+            "::",
+            stringify!(speex)
+        )
+    );
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -2813,6 +9650,174 @@ pub struct ma_device__bindgen_ty_2 {
     pub internalPeriodSizeInFrames: ma_uint32,
     pub internalPeriods: ma_uint32,
     pub converter: ma_data_converter,
+}
+#[test]
+fn bindgen_test_layout_ma_device__bindgen_ty_2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device__bindgen_ty_2>(),
+        10712usize,
+        concat!("Size of: ", stringify!(ma_device__bindgen_ty_2))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device__bindgen_ty_2>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_device__bindgen_ty_2))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device__bindgen_ty_2>())).id as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_2),
+            "::",
+            stringify!(id)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device__bindgen_ty_2>())).name as *const _ as usize },
+        256usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_2),
+            "::",
+            stringify!(name)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_2>())).shareMode as *const _ as usize
+        },
+        512usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_2),
+            "::",
+            stringify!(shareMode)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device__bindgen_ty_2>())).format as *const _ as usize },
+        520usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_2),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_2>())).channels as *const _ as usize
+        },
+        524usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_2),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_2>())).channelMap as *const _ as usize
+        },
+        528usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_2),
+            "::",
+            stringify!(channelMap)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_2>())).internalFormat as *const _ as usize
+        },
+        560usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_2),
+            "::",
+            stringify!(internalFormat)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_2>())).internalChannels as *const _
+                as usize
+        },
+        564usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_2),
+            "::",
+            stringify!(internalChannels)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_2>())).internalSampleRate as *const _
+                as usize
+        },
+        568usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_2),
+            "::",
+            stringify!(internalSampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_2>())).internalChannelMap as *const _
+                as usize
+        },
+        572usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_2),
+            "::",
+            stringify!(internalChannelMap)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_2>())).internalPeriodSizeInFrames
+                as *const _ as usize
+        },
+        604usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_2),
+            "::",
+            stringify!(internalPeriodSizeInFrames)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_2>())).internalPeriods as *const _
+                as usize
+        },
+        608usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_2),
+            "::",
+            stringify!(internalPeriods)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_2>())).converter as *const _ as usize
+        },
+        616usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_2),
+            "::",
+            stringify!(converter)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_device__bindgen_ty_2 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -2895,6 +9900,174 @@ pub struct ma_device__bindgen_ty_3 {
     pub internalPeriods: ma_uint32,
     pub converter: ma_data_converter,
 }
+#[test]
+fn bindgen_test_layout_ma_device__bindgen_ty_3() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device__bindgen_ty_3>(),
+        10712usize,
+        concat!("Size of: ", stringify!(ma_device__bindgen_ty_3))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device__bindgen_ty_3>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_device__bindgen_ty_3))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device__bindgen_ty_3>())).id as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_3),
+            "::",
+            stringify!(id)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device__bindgen_ty_3>())).name as *const _ as usize },
+        256usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_3),
+            "::",
+            stringify!(name)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_3>())).shareMode as *const _ as usize
+        },
+        512usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_3),
+            "::",
+            stringify!(shareMode)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device__bindgen_ty_3>())).format as *const _ as usize },
+        520usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_3),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_3>())).channels as *const _ as usize
+        },
+        524usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_3),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_3>())).channelMap as *const _ as usize
+        },
+        528usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_3),
+            "::",
+            stringify!(channelMap)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_3>())).internalFormat as *const _ as usize
+        },
+        560usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_3),
+            "::",
+            stringify!(internalFormat)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_3>())).internalChannels as *const _
+                as usize
+        },
+        564usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_3),
+            "::",
+            stringify!(internalChannels)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_3>())).internalSampleRate as *const _
+                as usize
+        },
+        568usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_3),
+            "::",
+            stringify!(internalSampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_3>())).internalChannelMap as *const _
+                as usize
+        },
+        572usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_3),
+            "::",
+            stringify!(internalChannelMap)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_3>())).internalPeriodSizeInFrames
+                as *const _ as usize
+        },
+        604usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_3),
+            "::",
+            stringify!(internalPeriodSizeInFrames)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_3>())).internalPeriods as *const _
+                as usize
+        },
+        608usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_3),
+            "::",
+            stringify!(internalPeriods)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_3>())).converter as *const _ as usize
+        },
+        616usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_3),
+            "::",
+            stringify!(converter)
+        )
+    );
+}
 impl ::core::fmt::Debug for ma_device__bindgen_ty_3 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write ! (f , "ma_device__bindgen_ty_3 {{ id: {:?}, name: [...], shareMode: {:?}, usingDefaultFormat : {:?}, usingDefaultChannels : {:?}, usingDefaultChannelMap : {:?}, format: {:?}, channels: {:?}, channelMap: [...], internalFormat: {:?}, internalChannels: {:?}, internalSampleRate: {:?}, internalChannelMap: [...], internalPeriodSizeInFrames: {:?}, internalPeriods: {:?}, converter: {:?} }}" , self . id , self . shareMode , self . usingDefaultFormat () , self . usingDefaultChannels () , self . usingDefaultChannelMap () , self . format , self . channels , self . internalFormat , self . internalChannels , self . internalSampleRate , self . internalPeriodSizeInFrames , self . internalPeriods , self . converter)
@@ -2975,6 +10148,51 @@ pub struct ma_device__bindgen_ty_4__bindgen_ty_1 {
     pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize], u8>,
     pub __bindgen_padding_0: [u8; 7usize],
 }
+#[test]
+fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device__bindgen_ty_4__bindgen_ty_1>(),
+        24usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device__bindgen_ty_4__bindgen_ty_1>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_1>())).pPCMPlayback
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_1),
+            "::",
+            stringify!(pPCMPlayback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_1>())).pPCMCapture
+                as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_1),
+            "::",
+            stringify!(pPCMCapture)
+        )
+    );
+}
 impl ma_device__bindgen_ty_4__bindgen_ty_1 {
     #[inline]
     pub fn isUsingMMapPlayback(&self) -> ma_bool32 {
@@ -3034,6 +10252,181 @@ pub struct ma_device__bindgen_ty_4__bindgen_ty_2 {
     pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize], u8>,
     pub __bindgen_padding_0: [u8; 7usize],
 }
+#[test]
+fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device__bindgen_ty_4__bindgen_ty_2>(),
+        88usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device__bindgen_ty_4__bindgen_ty_2>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_2>())).pMainLoop as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_2),
+            "::",
+            stringify!(pMainLoop)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_2>())).pAPI as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_2),
+            "::",
+            stringify!(pAPI)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_2>())).pPulseContext
+                as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_2),
+            "::",
+            stringify!(pPulseContext)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_2>())).pStreamPlayback
+                as *const _ as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_2),
+            "::",
+            stringify!(pStreamPlayback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_2>())).pStreamCapture
+                as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_2),
+            "::",
+            stringify!(pStreamCapture)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_2>())).pulseContextState
+                as *const _ as usize
+        },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_2),
+            "::",
+            stringify!(pulseContextState)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_2>())).pMappedBufferPlayback
+                as *const _ as usize
+        },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_2),
+            "::",
+            stringify!(pMappedBufferPlayback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_2>())).pMappedBufferCapture
+                as *const _ as usize
+        },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_2),
+            "::",
+            stringify!(pMappedBufferCapture)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_2>()))
+                .mappedBufferFramesRemainingPlayback as *const _ as usize
+        },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_2),
+            "::",
+            stringify!(mappedBufferFramesRemainingPlayback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_2>()))
+                .mappedBufferFramesRemainingCapture as *const _ as usize
+        },
+        68usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_2),
+            "::",
+            stringify!(mappedBufferFramesRemainingCapture)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_2>()))
+                .mappedBufferFramesCapacityPlayback as *const _ as usize
+        },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_2),
+            "::",
+            stringify!(mappedBufferFramesCapacityPlayback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_2>()))
+                .mappedBufferFramesCapacityCapture as *const _ as usize
+        },
+        76usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_2),
+            "::",
+            stringify!(mappedBufferFramesCapacityCapture)
+        )
+    );
+}
 impl ma_device__bindgen_ty_4__bindgen_ty_2 {
     #[inline]
     pub fn breakFromMainLoop(&self) -> ma_bool32 {
@@ -3067,6 +10460,103 @@ pub struct ma_device__bindgen_ty_4__bindgen_ty_3 {
     pub pIntermediaryBufferCapture: *mut f32,
     pub duplexRB: ma_pcm_rb,
 }
+#[test]
+fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_3() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device__bindgen_ty_4__bindgen_ty_3>(),
+        608usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_3)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device__bindgen_ty_4__bindgen_ty_3>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_3)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_3>())).pClient as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_3),
+            "::",
+            stringify!(pClient)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_3>())).pPortsPlayback
+                as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_3),
+            "::",
+            stringify!(pPortsPlayback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_3>())).pPortsCapture
+                as *const _ as usize
+        },
+        264usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_3),
+            "::",
+            stringify!(pPortsCapture)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_3>()))
+                .pIntermediaryBufferPlayback as *const _ as usize
+        },
+        520usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_3),
+            "::",
+            stringify!(pIntermediaryBufferPlayback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_3>()))
+                .pIntermediaryBufferCapture as *const _ as usize
+        },
+        528usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_3),
+            "::",
+            stringify!(pIntermediaryBufferCapture)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_3>())).duplexRB as *const _
+                as usize
+        },
+        536usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_3),
+            "::",
+            stringify!(duplexRB)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct ma_device__bindgen_ty_4__bindgen_ty_4 {
@@ -3083,15 +10573,428 @@ pub struct ma_device__bindgen_ty_4__bindgen_ty_4 {
     pub lastProcessedFrameCapture: ma_uint32,
     pub isStarted: ma_bool32,
 }
+#[test]
+fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_4() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device__bindgen_ty_4__bindgen_ty_4>(),
+        248usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_4)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device__bindgen_ty_4__bindgen_ty_4>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_4)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_4>())).deviceThread
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_4),
+            "::",
+            stringify!(deviceThread)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_4>())).operationEvent
+                as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_4),
+            "::",
+            stringify!(operationEvent)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_4>()))
+                .operationCompletionEvent as *const _ as usize
+        },
+        104usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_4),
+            "::",
+            stringify!(operationCompletionEvent)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_4>())).operation as *const _
+                as usize
+        },
+        200usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_4),
+            "::",
+            stringify!(operation)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_4>())).operationResult
+                as *const _ as usize
+        },
+        204usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_4),
+            "::",
+            stringify!(operationResult)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_4>())).timer as *const _
+                as usize
+        },
+        208usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_4),
+            "::",
+            stringify!(timer)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_4>())).priorRunTime
+                as *const _ as usize
+        },
+        216usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_4),
+            "::",
+            stringify!(priorRunTime)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_4>()))
+                .currentPeriodFramesRemainingPlayback as *const _ as usize
+        },
+        224usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_4),
+            "::",
+            stringify!(currentPeriodFramesRemainingPlayback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_4>()))
+                .currentPeriodFramesRemainingCapture as *const _ as usize
+        },
+        228usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_4),
+            "::",
+            stringify!(currentPeriodFramesRemainingCapture)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_4>()))
+                .lastProcessedFramePlayback as *const _ as usize
+        },
+        232usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_4),
+            "::",
+            stringify!(lastProcessedFramePlayback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_4>()))
+                .lastProcessedFrameCapture as *const _ as usize
+        },
+        240usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_4),
+            "::",
+            stringify!(lastProcessedFrameCapture)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_4>())).isStarted as *const _
+                as usize
+        },
+        244usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_4),
+            "::",
+            stringify!(isStarted)
+        )
+    );
+}
 impl ::core::fmt::Debug for ma_device__bindgen_ty_4__bindgen_ty_4 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write ! (f , "ma_device__bindgen_ty_4__bindgen_ty_4 {{ deviceThread: {:?}, operationEvent: {:?}, operationCompletionEvent: {:?}, operation: {:?}, operationResult: {:?}, timer: {:?}, priorRunTime: {:?}, currentPeriodFramesRemainingPlayback: {:?}, currentPeriodFramesRemainingCapture: {:?}, lastProcessedFramePlayback: {:?}, lastProcessedFrameCapture: {:?}, isStarted: {:?} }}" , self . deviceThread , self . operationEvent , self . operationCompletionEvent , self . operation , self . operationResult , self . timer , self . priorRunTime , self . currentPeriodFramesRemainingPlayback , self . currentPeriodFramesRemainingCapture , self . lastProcessedFramePlayback , self . lastProcessedFrameCapture , self . isStarted)
     }
 }
+#[test]
+fn bindgen_test_layout_ma_device__bindgen_ty_4() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device__bindgen_ty_4>(),
+        608usize,
+        concat!("Size of: ", stringify!(ma_device__bindgen_ty_4))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device__bindgen_ty_4>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_device__bindgen_ty_4))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device__bindgen_ty_4>())).alsa as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4),
+            "::",
+            stringify!(alsa)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device__bindgen_ty_4>())).pulse as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4),
+            "::",
+            stringify!(pulse)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device__bindgen_ty_4>())).jack as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4),
+            "::",
+            stringify!(jack)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4>())).null_device as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4),
+            "::",
+            stringify!(null_device)
+        )
+    );
+}
 impl ::core::fmt::Debug for ma_device__bindgen_ty_4 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write!(f, "ma_device__bindgen_ty_4 {{ union }}")
     }
+}
+#[test]
+fn bindgen_test_layout_ma_device() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device>(),
+        22440usize,
+        concat!("Size of: ", stringify!(ma_device))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_device))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).pContext as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(pContext)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).type_ as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(type_)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).sampleRate as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).state as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(state)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).onData as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(onData)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).onStop as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(onStop)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).pUserData as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(pUserData)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).lock as *const _ as usize },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(lock)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).wakeupEvent as *const _ as usize },
+        88usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(wakeupEvent)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).startEvent as *const _ as usize },
+        184usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(startEvent)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).stopEvent as *const _ as usize },
+        280usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(stopEvent)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).thread as *const _ as usize },
+        376usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(thread)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).workResult as *const _ as usize },
+        384usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(workResult)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).masterVolumeFactor as *const _ as usize },
+        392usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(masterVolumeFactor)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).resampling as *const _ as usize },
+        396usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(resampling)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).playback as *const _ as usize },
+        408usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(playback)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).capture as *const _ as usize },
+        11120usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(capture)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_device {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -3600,6 +11503,102 @@ pub struct ma_data_source_callbacks {
         ) -> ma_result,
     >,
 }
+#[test]
+fn bindgen_test_layout_ma_data_source_callbacks() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_data_source_callbacks>(),
+        56usize,
+        concat!("Size of: ", stringify!(ma_data_source_callbacks))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_data_source_callbacks>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_data_source_callbacks))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_source_callbacks>())).onRead as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_source_callbacks),
+            "::",
+            stringify!(onRead)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_source_callbacks>())).onSeek as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_source_callbacks),
+            "::",
+            stringify!(onSeek)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_data_source_callbacks>())).onMap as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_source_callbacks),
+            "::",
+            stringify!(onMap)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_source_callbacks>())).onUnmap as *const _ as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_source_callbacks),
+            "::",
+            stringify!(onUnmap)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_source_callbacks>())).onGetDataFormat as *const _
+                as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_source_callbacks),
+            "::",
+            stringify!(onGetDataFormat)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_source_callbacks>())).onGetCursor as *const _ as usize
+        },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_source_callbacks),
+            "::",
+            stringify!(onGetCursor)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_data_source_callbacks>())).onGetLength as *const _ as usize
+        },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_data_source_callbacks),
+            "::",
+            stringify!(onGetLength)
+        )
+    );
+}
 extern "C" {
     pub fn ma_data_source_read_pcm_frames(
         pDataSource: *mut ma_data_source,
@@ -3665,6 +11664,76 @@ pub struct ma_audio_buffer_config {
     pub pData: *const libc::c_void,
     pub allocationCallbacks: ma_allocation_callbacks,
 }
+#[test]
+fn bindgen_test_layout_ma_audio_buffer_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_audio_buffer_config>(),
+        56usize,
+        concat!("Size of: ", stringify!(ma_audio_buffer_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_audio_buffer_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_audio_buffer_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_audio_buffer_config>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_audio_buffer_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_audio_buffer_config>())).channels as *const _ as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_audio_buffer_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_audio_buffer_config>())).sizeInFrames as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_audio_buffer_config),
+            "::",
+            stringify!(sizeInFrames)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_audio_buffer_config>())).pData as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_audio_buffer_config),
+            "::",
+            stringify!(pData)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_audio_buffer_config>())).allocationCallbacks as *const _
+                as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_audio_buffer_config),
+            "::",
+            stringify!(allocationCallbacks)
+        )
+    );
+}
 extern "C" {
     pub fn ma_audio_buffer_config_init(
         format: ma_format,
@@ -3686,6 +11755,111 @@ pub struct ma_audio_buffer {
     pub allocationCallbacks: ma_allocation_callbacks,
     pub ownsData: ma_bool32,
     pub _pExtraData: [ma_uint8; 1usize],
+}
+#[test]
+fn bindgen_test_layout_ma_audio_buffer() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_audio_buffer>(),
+        128usize,
+        concat!("Size of: ", stringify!(ma_audio_buffer))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_audio_buffer>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_audio_buffer))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_audio_buffer>())).ds as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_audio_buffer),
+            "::",
+            stringify!(ds)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_audio_buffer>())).format as *const _ as usize },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_audio_buffer),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_audio_buffer>())).channels as *const _ as usize },
+        60usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_audio_buffer),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_audio_buffer>())).cursor as *const _ as usize },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_audio_buffer),
+            "::",
+            stringify!(cursor)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_audio_buffer>())).sizeInFrames as *const _ as usize },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_audio_buffer),
+            "::",
+            stringify!(sizeInFrames)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_audio_buffer>())).pData as *const _ as usize },
+        80usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_audio_buffer),
+            "::",
+            stringify!(pData)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_audio_buffer>())).allocationCallbacks as *const _ as usize
+        },
+        88usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_audio_buffer),
+            "::",
+            stringify!(allocationCallbacks)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_audio_buffer>())).ownsData as *const _ as usize },
+        120usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_audio_buffer),
+            "::",
+            stringify!(ownsData)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_audio_buffer>()))._pExtraData as *const _ as usize },
+        124usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_audio_buffer),
+            "::",
+            stringify!(_pExtraData)
+        )
+    );
 }
 extern "C" {
     pub fn ma_audio_buffer_init(
@@ -3763,6 +11937,29 @@ pub type ma_seek_origin = libc::c_uint;
 pub struct ma_file_info {
     pub sizeInBytes: ma_uint64,
 }
+#[test]
+fn bindgen_test_layout_ma_file_info() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_file_info>(),
+        8usize,
+        concat!("Size of: ", stringify!(ma_file_info))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_file_info>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_file_info))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_file_info>())).sizeInBytes as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_file_info),
+            "::",
+            stringify!(sizeInBytes)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ma_vfs_callbacks {
@@ -3825,6 +12022,99 @@ pub struct ma_vfs_callbacks {
             pInfo: *mut ma_file_info,
         ) -> ma_result,
     >,
+}
+#[test]
+fn bindgen_test_layout_ma_vfs_callbacks() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_vfs_callbacks>(),
+        64usize,
+        concat!("Size of: ", stringify!(ma_vfs_callbacks))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_vfs_callbacks>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_vfs_callbacks))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_vfs_callbacks>())).onOpen as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_vfs_callbacks),
+            "::",
+            stringify!(onOpen)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_vfs_callbacks>())).onOpenW as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_vfs_callbacks),
+            "::",
+            stringify!(onOpenW)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_vfs_callbacks>())).onClose as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_vfs_callbacks),
+            "::",
+            stringify!(onClose)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_vfs_callbacks>())).onRead as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_vfs_callbacks),
+            "::",
+            stringify!(onRead)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_vfs_callbacks>())).onWrite as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_vfs_callbacks),
+            "::",
+            stringify!(onWrite)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_vfs_callbacks>())).onSeek as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_vfs_callbacks),
+            "::",
+            stringify!(onSeek)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_vfs_callbacks>())).onTell as *const _ as usize },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_vfs_callbacks),
+            "::",
+            stringify!(onTell)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_vfs_callbacks>())).onInfo as *const _ as usize },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_vfs_callbacks),
+            "::",
+            stringify!(onInfo)
+        )
+    );
 }
 extern "C" {
     pub fn ma_vfs_open(
@@ -3893,6 +12183,41 @@ pub struct ma_default_vfs {
     pub cb: ma_vfs_callbacks,
     pub allocationCallbacks: ma_allocation_callbacks,
 }
+#[test]
+fn bindgen_test_layout_ma_default_vfs() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_default_vfs>(),
+        96usize,
+        concat!("Size of: ", stringify!(ma_default_vfs))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_default_vfs>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_default_vfs))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_default_vfs>())).cb as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_default_vfs),
+            "::",
+            stringify!(cb)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_default_vfs>())).allocationCallbacks as *const _ as usize
+        },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_default_vfs),
+            "::",
+            stringify!(allocationCallbacks)
+        )
+    );
+}
 extern "C" {
     pub fn ma_default_vfs_init(
         pVFS: *mut ma_default_vfs,
@@ -3953,10 +12278,221 @@ pub struct ma_decoder_config__bindgen_ty_1 {
 pub struct ma_decoder_config__bindgen_ty_1__bindgen_ty_1 {
     pub lpfOrder: ma_uint32,
 }
+#[test]
+fn bindgen_test_layout_ma_decoder_config__bindgen_ty_1__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_decoder_config__bindgen_ty_1__bindgen_ty_1>(),
+        4usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_decoder_config__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_decoder_config__bindgen_ty_1__bindgen_ty_1>(),
+        4usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_decoder_config__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_decoder_config__bindgen_ty_1__bindgen_ty_1>())).lpfOrder
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder_config__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(lpfOrder)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ma_decoder_config__bindgen_ty_1__bindgen_ty_2 {
     pub quality: libc::c_int,
+}
+#[test]
+fn bindgen_test_layout_ma_decoder_config__bindgen_ty_1__bindgen_ty_2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_decoder_config__bindgen_ty_1__bindgen_ty_2>(),
+        4usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_decoder_config__bindgen_ty_1__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_decoder_config__bindgen_ty_1__bindgen_ty_2>(),
+        4usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_decoder_config__bindgen_ty_1__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_decoder_config__bindgen_ty_1__bindgen_ty_2>())).quality
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder_config__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(quality)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout_ma_decoder_config__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_decoder_config__bindgen_ty_1>(),
+        12usize,
+        concat!("Size of: ", stringify!(ma_decoder_config__bindgen_ty_1))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_decoder_config__bindgen_ty_1>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_decoder_config__bindgen_ty_1))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_decoder_config__bindgen_ty_1>())).algorithm as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder_config__bindgen_ty_1),
+            "::",
+            stringify!(algorithm)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_decoder_config__bindgen_ty_1>())).linear as *const _ as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder_config__bindgen_ty_1),
+            "::",
+            stringify!(linear)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_decoder_config__bindgen_ty_1>())).speex as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder_config__bindgen_ty_1),
+            "::",
+            stringify!(speex)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout_ma_decoder_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_decoder_config>(),
+        96usize,
+        concat!("Size of: ", stringify!(ma_decoder_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_decoder_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_decoder_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder_config>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder_config>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder_config>())).sampleRate as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder_config),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder_config>())).channelMap as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder_config),
+            "::",
+            stringify!(channelMap)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_decoder_config>())).channelMixMode as *const _ as usize
+        },
+        44usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder_config),
+            "::",
+            stringify!(channelMixMode)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder_config>())).ditherMode as *const _ as usize },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder_config),
+            "::",
+            stringify!(ditherMode)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder_config>())).resampling as *const _ as usize },
+        52usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder_config),
+            "::",
+            stringify!(resampling)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_decoder_config>())).allocationCallbacks as *const _ as usize
+        },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder_config),
+            "::",
+            stringify!(allocationCallbacks)
+        )
+    );
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -3997,6 +12533,51 @@ pub struct ma_decoder__bindgen_ty_1__bindgen_ty_1 {
     pub pVFS: *mut ma_vfs,
     pub file: ma_vfs_file,
 }
+#[test]
+fn bindgen_test_layout_ma_decoder__bindgen_ty_1__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_decoder__bindgen_ty_1__bindgen_ty_1>(),
+        16usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_decoder__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_decoder__bindgen_ty_1__bindgen_ty_1>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_decoder__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_decoder__bindgen_ty_1__bindgen_ty_1>())).pVFS as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(pVFS)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_decoder__bindgen_ty_1__bindgen_ty_1>())).file as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(file)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ma_decoder__bindgen_ty_1__bindgen_ty_2 {
@@ -4004,10 +12585,340 @@ pub struct ma_decoder__bindgen_ty_1__bindgen_ty_2 {
     pub dataSize: usize,
     pub currentReadPos: usize,
 }
+#[test]
+fn bindgen_test_layout_ma_decoder__bindgen_ty_1__bindgen_ty_2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_decoder__bindgen_ty_1__bindgen_ty_2>(),
+        24usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_decoder__bindgen_ty_1__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_decoder__bindgen_ty_1__bindgen_ty_2>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_decoder__bindgen_ty_1__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_decoder__bindgen_ty_1__bindgen_ty_2>())).pData as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(pData)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_decoder__bindgen_ty_1__bindgen_ty_2>())).dataSize as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(dataSize)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_decoder__bindgen_ty_1__bindgen_ty_2>())).currentReadPos
+                as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(currentReadPos)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout_ma_decoder__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_decoder__bindgen_ty_1>(),
+        24usize,
+        concat!("Size of: ", stringify!(ma_decoder__bindgen_ty_1))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_decoder__bindgen_ty_1>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_decoder__bindgen_ty_1))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder__bindgen_ty_1>())).vfs as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder__bindgen_ty_1),
+            "::",
+            stringify!(vfs)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_decoder__bindgen_ty_1>())).memory as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder__bindgen_ty_1),
+            "::",
+            stringify!(memory)
+        )
+    );
+}
 impl ::core::fmt::Debug for ma_decoder__bindgen_ty_1 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write!(f, "ma_decoder__bindgen_ty_1 {{ union }}")
     }
+}
+#[test]
+fn bindgen_test_layout_ma_decoder() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_decoder>(),
+        10376usize,
+        concat!("Size of: ", stringify!(ma_decoder))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_decoder>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_decoder))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).ds as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(ds)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).onRead as *const _ as usize },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(onRead)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).onSeek as *const _ as usize },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(onSeek)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).pUserData as *const _ as usize },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(pUserData)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).readPointerInBytes as *const _ as usize },
+        80usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(readPointerInBytes)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_decoder>())).readPointerInPCMFrames as *const _ as usize
+        },
+        88usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(readPointerInPCMFrames)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).internalFormat as *const _ as usize },
+        96usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(internalFormat)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).internalChannels as *const _ as usize },
+        100usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(internalChannels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).internalSampleRate as *const _ as usize },
+        104usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(internalSampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).internalChannelMap as *const _ as usize },
+        108usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(internalChannelMap)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).outputFormat as *const _ as usize },
+        140usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(outputFormat)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).outputChannels as *const _ as usize },
+        144usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(outputChannels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).outputSampleRate as *const _ as usize },
+        148usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(outputSampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).outputChannelMap as *const _ as usize },
+        152usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(outputChannelMap)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).converter as *const _ as usize },
+        184usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(converter)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).allocationCallbacks as *const _ as usize },
+        10280usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(allocationCallbacks)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).onReadPCMFrames as *const _ as usize },
+        10312usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(onReadPCMFrames)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).onSeekToPCMFrame as *const _ as usize },
+        10320usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(onSeekToPCMFrame)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).onUninit as *const _ as usize },
+        10328usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(onUninit)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_decoder>())).onGetLengthInPCMFrames as *const _ as usize
+        },
+        10336usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(onGetLengthInPCMFrames)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).pInternalDecoder as *const _ as usize },
+        10344usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(pInternalDecoder)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_decoder>())).backend as *const _ as usize },
+        10352usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_decoder),
+            "::",
+            stringify!(backend)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_decoder {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
@@ -4366,6 +13277,73 @@ pub struct ma_encoder_config {
     pub sampleRate: ma_uint32,
     pub allocationCallbacks: ma_allocation_callbacks,
 }
+#[test]
+fn bindgen_test_layout_ma_encoder_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_encoder_config>(),
+        48usize,
+        concat!("Size of: ", stringify!(ma_encoder_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_encoder_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_encoder_config))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_encoder_config>())).resourceFormat as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_encoder_config),
+            "::",
+            stringify!(resourceFormat)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_encoder_config>())).format as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_encoder_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_encoder_config>())).channels as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_encoder_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_encoder_config>())).sampleRate as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_encoder_config),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_encoder_config>())).allocationCallbacks as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_encoder_config),
+            "::",
+            stringify!(allocationCallbacks)
+        )
+    );
+}
 extern "C" {
     pub fn ma_encoder_config_init(
         resourceFormat: ma_resource_format,
@@ -4386,6 +13364,109 @@ pub struct ma_encoder {
     pub pUserData: *mut libc::c_void,
     pub pInternalEncoder: *mut libc::c_void,
     pub pFile: *mut libc::c_void,
+}
+#[test]
+fn bindgen_test_layout_ma_encoder() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_encoder>(),
+        112usize,
+        concat!("Size of: ", stringify!(ma_encoder))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_encoder>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_encoder))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_encoder>())).config as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_encoder),
+            "::",
+            stringify!(config)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_encoder>())).onWrite as *const _ as usize },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_encoder),
+            "::",
+            stringify!(onWrite)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_encoder>())).onSeek as *const _ as usize },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_encoder),
+            "::",
+            stringify!(onSeek)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_encoder>())).onInit as *const _ as usize },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_encoder),
+            "::",
+            stringify!(onInit)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_encoder>())).onUninit as *const _ as usize },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_encoder),
+            "::",
+            stringify!(onUninit)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_encoder>())).onWritePCMFrames as *const _ as usize },
+        80usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_encoder),
+            "::",
+            stringify!(onWritePCMFrames)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_encoder>())).pUserData as *const _ as usize },
+        88usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_encoder),
+            "::",
+            stringify!(pUserData)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_encoder>())).pInternalEncoder as *const _ as usize },
+        96usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_encoder),
+            "::",
+            stringify!(pInternalEncoder)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_encoder>())).pFile as *const _ as usize },
+        104usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_encoder),
+            "::",
+            stringify!(pFile)
+        )
+    );
 }
 extern "C" {
     pub fn ma_encoder_init(
@@ -4435,6 +13516,79 @@ pub struct ma_waveform_config {
     pub amplitude: f64,
     pub frequency: f64,
 }
+#[test]
+fn bindgen_test_layout_ma_waveform_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_waveform_config>(),
+        32usize,
+        concat!("Size of: ", stringify!(ma_waveform_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_waveform_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_waveform_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_waveform_config>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_waveform_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_waveform_config>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_waveform_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_waveform_config>())).sampleRate as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_waveform_config),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_waveform_config>())).type_ as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_waveform_config),
+            "::",
+            stringify!(type_)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_waveform_config>())).amplitude as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_waveform_config),
+            "::",
+            stringify!(amplitude)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_waveform_config>())).frequency as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_waveform_config),
+            "::",
+            stringify!(frequency)
+        )
+    );
+}
 extern "C" {
     pub fn ma_waveform_config_init(
         format: ma_format,
@@ -4452,6 +13606,59 @@ pub struct ma_waveform {
     pub config: ma_waveform_config,
     pub advance: f64,
     pub time: f64,
+}
+#[test]
+fn bindgen_test_layout_ma_waveform() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_waveform>(),
+        104usize,
+        concat!("Size of: ", stringify!(ma_waveform))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_waveform>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_waveform))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_waveform>())).ds as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_waveform),
+            "::",
+            stringify!(ds)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_waveform>())).config as *const _ as usize },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_waveform),
+            "::",
+            stringify!(config)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_waveform>())).advance as *const _ as usize },
+        88usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_waveform),
+            "::",
+            stringify!(advance)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_waveform>())).time as *const _ as usize },
+        96usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_waveform),
+            "::",
+            stringify!(time)
+        )
+    );
 }
 extern "C" {
     pub fn ma_waveform_init(
@@ -4498,6 +13705,81 @@ pub struct ma_noise_config {
     pub amplitude: f64,
     pub duplicateChannels: ma_bool32,
 }
+#[test]
+fn bindgen_test_layout_ma_noise_config() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_noise_config>(),
+        32usize,
+        concat!("Size of: ", stringify!(ma_noise_config))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_noise_config>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_noise_config))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_noise_config>())).format as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_noise_config),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_noise_config>())).channels as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_noise_config),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_noise_config>())).type_ as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_noise_config),
+            "::",
+            stringify!(type_)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_noise_config>())).seed as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_noise_config),
+            "::",
+            stringify!(seed)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_noise_config>())).amplitude as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_noise_config),
+            "::",
+            stringify!(amplitude)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_noise_config>())).duplicateChannels as *const _ as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_noise_config),
+            "::",
+            stringify!(duplicateChannels)
+        )
+    );
+}
 extern "C" {
     pub fn ma_noise_config_init(
         format: ma_format,
@@ -4529,15 +13811,193 @@ pub struct ma_noise__bindgen_ty_1__bindgen_ty_1 {
     pub accumulation: [f64; 32usize],
     pub counter: [ma_uint32; 32usize],
 }
+#[test]
+fn bindgen_test_layout_ma_noise__bindgen_ty_1__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_noise__bindgen_ty_1__bindgen_ty_1>(),
+        4480usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_noise__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_noise__bindgen_ty_1__bindgen_ty_1>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_noise__bindgen_ty_1__bindgen_ty_1)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_noise__bindgen_ty_1__bindgen_ty_1>())).bin as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_noise__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(bin)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_noise__bindgen_ty_1__bindgen_ty_1>())).accumulation
+                as *const _ as usize
+        },
+        4096usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_noise__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(accumulation)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_noise__bindgen_ty_1__bindgen_ty_1>())).counter as *const _
+                as usize
+        },
+        4352usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_noise__bindgen_ty_1__bindgen_ty_1),
+            "::",
+            stringify!(counter)
+        )
+    );
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ma_noise__bindgen_ty_1__bindgen_ty_2 {
     pub accumulation: [f64; 32usize],
 }
+#[test]
+fn bindgen_test_layout_ma_noise__bindgen_ty_1__bindgen_ty_2() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_noise__bindgen_ty_1__bindgen_ty_2>(),
+        256usize,
+        concat!(
+            "Size of: ",
+            stringify!(ma_noise__bindgen_ty_1__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_noise__bindgen_ty_1__bindgen_ty_2>(),
+        8usize,
+        concat!(
+            "Alignment of ",
+            stringify!(ma_noise__bindgen_ty_1__bindgen_ty_2)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_noise__bindgen_ty_1__bindgen_ty_2>())).accumulation
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_noise__bindgen_ty_1__bindgen_ty_2),
+            "::",
+            stringify!(accumulation)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout_ma_noise__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_noise__bindgen_ty_1>(),
+        4480usize,
+        concat!("Size of: ", stringify!(ma_noise__bindgen_ty_1))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_noise__bindgen_ty_1>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_noise__bindgen_ty_1))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_noise__bindgen_ty_1>())).pink as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_noise__bindgen_ty_1),
+            "::",
+            stringify!(pink)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_noise__bindgen_ty_1>())).brownian as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_noise__bindgen_ty_1),
+            "::",
+            stringify!(brownian)
+        )
+    );
+}
 impl ::core::fmt::Debug for ma_noise__bindgen_ty_1 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
         write!(f, "ma_noise__bindgen_ty_1 {{ union }}")
     }
+}
+#[test]
+fn bindgen_test_layout_ma_noise() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_noise>(),
+        4576usize,
+        concat!("Size of: ", stringify!(ma_noise))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_noise>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_noise))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_noise>())).ds as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_noise),
+            "::",
+            stringify!(ds)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_noise>())).config as *const _ as usize },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_noise),
+            "::",
+            stringify!(config)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_noise>())).lcg as *const _ as usize },
+        88usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_noise),
+            "::",
+            stringify!(lcg)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_noise>())).state as *const _ as usize },
+        96usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_noise),
+            "::",
+            stringify!(state)
+        )
+    );
 }
 impl ::core::fmt::Debug for ma_noise {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
