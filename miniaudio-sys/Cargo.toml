@@ -14,7 +14,7 @@ categories = ["multimedia::audio", "multimedia"]
 
 include = [
     "src/**/*.rs",
-    "generated-bindings/**/*.rs",
+    "bindings/**/*.rs",
     "build.rs",
     "bindings.h",
     "bindings-with-vorbis.h",
