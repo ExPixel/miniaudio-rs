@@ -79,7 +79,6 @@ fn base_command() -> Command {
     let mut cmd = Command::new("bindgen");
     cmd.args(&[
         "--verbose",
-        "--no-layout-tests",
         "--use-core",
         "--size_t-is-usize",
         "--impl-debug",
