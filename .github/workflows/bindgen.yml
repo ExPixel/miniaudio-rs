@@ -48,6 +48,6 @@ jobs:
         - name: Commit And Push Bindings
           run: |
             git add miniaudio-sys/bindings
-            git commit -m "Updated bindings for ${{ matrix.os }}"
+            git diff --quiet && git diff --staged --quiet || git commit -m "Updated bindings for ${{ matrix.os }}"
             git pull --rebase origin master
             git push origin master
