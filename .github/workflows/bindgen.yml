@@ -1,0 +1,46 @@
+name: Bindgen
+
+on:
+    push:
+        branches:
+            - master
+        paths-ignore:
+            - '.gitmodules'
+            - 'miniaudio-sys/miniaudio/**/*.c'
+            - 'miniaudio-sys/miniaudio/**/*.h'
+
+jobs:
+    bindgen:
+        name: ${{ matrix.rust_channel }} ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
+
+        strategy:
+            matrix:
+                os: [ubuntu-latest, windows-latest, macOS-latest]
+        steps:
+        - uses: actions/checkout@v2
+        - name: Checkout Submodules
+          shell: bash
+          run: |
+            auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+            git submodule sync --recursive
+            git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+        - uses: actions-rs/toolchain@v1
+          with:
+              toolchain: stable
+              profile: default
+              override: true
+        - name: Install LLVM (Windows)
+          run: choco install llvm
+          if: matrix.os == 'windows-latest'
+        - name: Install Bindgen
+          run: cargo install bindgen
+        - name: Compile Bindings Generator
+          run: rustc -o generate-bindings generate-bindings.rs
+        - name: Generate Bindings
+          run: ./generate-bindings
+        - name: Commit And Push Bindings
+          run: |
+            git add miniaudio-sys/bindings
+            git commit -m "Updated bindings for ${{ matrix.os }}"
+            git push origin master
