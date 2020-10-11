@@ -23,7 +23,8 @@ path = "src/lib.rs"
 crate_type = ["lib"]
 
 [features]
-default = ["ma-log-level-error"]
+default = ["ma-log-level-error", "bindgen"]
+bindgen = ["ep-miniaudio-sys/bindgen"]
 
 ma-enable-vorbis = ["ep-miniaudio-sys/ma-enable-vorbis"]
 
@@ -61,5 +62,5 @@ ma-log-level-error = ["ep-miniaudio-sys/ma-log-level-error"]
 ma-debug-output = ["ep-miniaudio-sys/ma-debug-output"]
 
 [dependencies]
-ep-miniaudio-sys = { version = "2", path = "../miniaudio-sys" }
+ep-miniaudio-sys = { version = "2", path = "../miniaudio-sys", default-features = false }
 bitflags = "1.2"
