@@ -48,6 +48,11 @@ jobs:
             rustc -o generate-bindings.exe generate-bindings.rs
             .\generate-bindings.exe
           if: matrix.os == 'windows-latest'
+
+        # Run Tests:
+        - name: Test
+          run: cargo test -vv --manifest-path=miniaudio-sys/Cargo.toml --no-default-features --features ma-log-level-error
+
         - name: Setup Git
           run: |
             git config --global user.email expixel+miniaudio-rs+bindgen@github.com

@@ -5,4 +5,16 @@
 
 pub mod util;
 
-include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+include!(env!("MINIAUDIO_SYS_BINDINGS_FILE"));
+
+#[cfg(feature = "bindgen")]
+#[test]
+fn bindgen_is_enabled() {
+    println!("bindgen is enabled");
+}
+
+#[cfg(not(feature = "bindgen"))]
+#[test]
+fn bindgen_is_not_enabled() {
+    println!("bindgen is not enabled");
+}
