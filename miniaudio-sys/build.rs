@@ -1,6 +1,3 @@
-use std::env;
-use std::path::PathBuf;
-
 #[allow(unused_macros)]
 macro_rules! warn {
     ($fmt:literal $(,$arg:expr)*) => {
@@ -90,6 +87,8 @@ fn check_pregenerated_bindings() {
 
 #[cfg(feature = "bindgen")]
 fn generate_bindings() {
+    use std::path::PathBuf;
+
     let header = if cfg!(feature = "ma-enable-vorbis") {
         "./bindings-with-vorbis.h"
     } else {
@@ -113,7 +112,7 @@ fn generate_bindings() {
         .generate()
         .expect("failed to generate bindings");
 
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap()).join("bindings.rs");
+    let out_path = PathBuf::from(std::env::var("OUT_DIR").unwrap()).join("bindings.rs");
     bindings
         .write_to_file(&out_path)
         .expect("failed to write bindings");
