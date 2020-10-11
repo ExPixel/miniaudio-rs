@@ -32,15 +32,22 @@ jobs:
               toolchain: stable
               profile: default
               override: true
+              components: rustfmt
         - name: Install LLVM (Windows)
           run: choco install llvm
           if: matrix.os == 'windows-latest'
         - name: Install Bindgen
           run: cargo install bindgen
-        - name: Compile Bindings Generator
-          run: rustc -o generate-bindings generate-bindings.rs
         - name: Generate Bindings
-          run: ./generate-bindings
+          run: |
+            rustc -o generate-bindings generate-bindings.rs
+            ./generate-bindings
+          if: matrix.os != 'windows-latest'
+        - name: Generate Bindings (Windows)
+          run: |
+            rustc -o generate-bindings.exe generate-bindings.rs
+            .\generate-bindings.exe
+          if: matrix.os == 'windows-latest'
         - name: Setup Git
           run: |
             git config --global user.email expixel+miniaudio-rs+bindgen@github.com
