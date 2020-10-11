@@ -9,6 +9,7 @@ on:
             - 'miniaudio-sys/miniaudio'
             - 'miniaudio-sys/miniaudio'
             - 'generate-bindings.rs'
+            - '.github/workflows/bindgen.yml'
 
 jobs:
     bindgen:
@@ -41,7 +42,7 @@ jobs:
         - name: Generate Bindings
           run: ./generate-bindings
         - name: Setup Git
-          run:
+          run: |
             git config --global user.email expixel+miniaudio-rs+bindgen@github.com
             git config --global user.name miniaudio-rs-bindgen
         - name: Commit And Push Bindings
