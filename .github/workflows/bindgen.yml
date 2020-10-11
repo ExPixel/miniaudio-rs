@@ -49,4 +49,5 @@ jobs:
           run: |
             git add miniaudio-sys/bindings
             git commit -m "Updated bindings for ${{ matrix.os }}"
+            git pull --rebase origin master
             git push origin master
