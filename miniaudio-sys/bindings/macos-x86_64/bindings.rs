@@ -83,7 +83,7 @@ where
 }
 pub const MA_VERSION_MAJOR: u32 = 0;
 pub const MA_VERSION_MINOR: u32 = 10;
-pub const MA_VERSION_REVISION: u32 = 20;
+pub const MA_VERSION_REVISION: u32 = 21;
 pub const MA_TRUE: u32 = 1;
 pub const MA_FALSE: u32 = 0;
 pub const MA_SIZE_MAX: u32 = 4294967295;
@@ -8321,7 +8321,7 @@ impl ma_device__bindgen_ty_3 {
 pub union ma_device__bindgen_ty_4 {
     pub coreaudio: ma_device__bindgen_ty_4__bindgen_ty_1,
     pub null_device: ma_device__bindgen_ty_4__bindgen_ty_2,
-    _bindgen_union_align: [u64; 37usize],
+    _bindgen_union_align: [u64; 38usize],
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -8574,14 +8574,14 @@ pub struct ma_device__bindgen_ty_4__bindgen_ty_2 {
     pub currentPeriodFramesRemainingPlayback: ma_uint32,
     pub currentPeriodFramesRemainingCapture: ma_uint32,
     pub lastProcessedFramePlayback: ma_uint64,
-    pub lastProcessedFrameCapture: ma_uint32,
+    pub lastProcessedFrameCapture: ma_uint64,
     pub isStarted: ma_bool32,
 }
 #[test]
 fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_2() {
     assert_eq!(
         ::core::mem::size_of::<ma_device__bindgen_ty_4__bindgen_ty_2>(),
-        296usize,
+        304usize,
         concat!(
             "Size of: ",
             stringify!(ma_device__bindgen_ty_4__bindgen_ty_2)
@@ -8743,7 +8743,7 @@ fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_2() {
             &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_2>())).isStarted as *const _
                 as usize
         },
-        292usize,
+        296usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device__bindgen_ty_4__bindgen_ty_2),
@@ -8761,7 +8761,7 @@ impl ::core::fmt::Debug for ma_device__bindgen_ty_4__bindgen_ty_2 {
 fn bindgen_test_layout_ma_device__bindgen_ty_4() {
     assert_eq!(
         ::core::mem::size_of::<ma_device__bindgen_ty_4>(),
-        296usize,
+        304usize,
         concat!("Size of: ", stringify!(ma_device__bindgen_ty_4))
     );
     assert_eq!(
@@ -8803,7 +8803,7 @@ impl ::core::fmt::Debug for ma_device__bindgen_ty_4 {
 fn bindgen_test_layout_ma_device() {
     assert_eq!(
         ::core::mem::size_of::<ma_device>(),
-        22224usize,
+        22232usize,
         concat!("Size of: ", stringify!(ma_device))
     );
     assert_eq!(
@@ -9185,6 +9185,16 @@ extern "C" {
 }
 extern "C" {
     pub fn ma_get_backend_name(backend: ma_backend) -> *const libc::c_char;
+}
+extern "C" {
+    pub fn ma_is_backend_enabled(backend: ma_backend) -> ma_bool32;
+}
+extern "C" {
+    pub fn ma_get_enabled_backends(
+        pBackends: *mut ma_backend,
+        backendCap: usize,
+        pBackendCount: *mut usize,
+    ) -> ma_result;
 }
 extern "C" {
     pub fn ma_is_loopback_supported(backend: ma_backend) -> ma_bool32;
