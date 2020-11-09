@@ -83,7 +83,7 @@ where
 }
 pub const MA_VERSION_MAJOR: u32 = 0;
 pub const MA_VERSION_MINOR: u32 = 10;
-pub const MA_VERSION_REVISION: u32 = 21;
+pub const MA_VERSION_REVISION: u32 = 23;
 pub const MA_TRUE: u32 = 1;
 pub const MA_FALSE: u32 = 0;
 pub const MA_SIZE_MAX: u32 = 4294967295;
@@ -236,6 +236,12 @@ pub const MA_MAX_CHANNELS: u32 = 32;
 pub const MA_MIN_SAMPLE_RATE: u32 = 8000;
 pub const MA_MAX_SAMPLE_RATE: u32 = 384000;
 pub const MA_MAX_FILTER_ORDER: u32 = 8;
+pub const MA_STATE_UNINITIALIZED: u32 = 0;
+pub const MA_STATE_STOPPED: u32 = 1;
+pub const MA_STATE_STARTED: u32 = 2;
+pub const MA_STATE_STARTING: u32 = 3;
+pub const MA_STATE_STOPPING: u32 = 4;
+pub const MA_DATA_FORMAT_FLAG_EXCLUSIVE_MODE: u32 = 2;
 pub const MA_OPEN_MODE_READ: u32 = 1;
 pub const MA_OPEN_MODE_WRITE: u32 = 2;
 pub type __darwin_size_t = libc::c_ulong;
@@ -5101,6 +5107,48 @@ extern "C" {
         pBuffer: *mut libc::c_void,
     ) -> *mut libc::c_void;
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ma_duplex_rb {
+    pub rb: ma_pcm_rb,
+}
+#[test]
+fn bindgen_test_layout_ma_duplex_rb() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_duplex_rb>(),
+        72usize,
+        concat!("Size of: ", stringify!(ma_duplex_rb))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_duplex_rb>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_duplex_rb))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_duplex_rb>())).rb as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_duplex_rb),
+            "::",
+            stringify!(rb)
+        )
+    );
+}
+extern "C" {
+    pub fn ma_duplex_rb_init(
+        inputSampleRate: ma_uint32,
+        captureFormat: ma_format,
+        captureChannels: ma_uint32,
+        captureSampleRate: ma_uint32,
+        capturePeriodSizeInFrames: ma_uint32,
+        pAllocationCallbacks: *const ma_allocation_callbacks,
+        pRB: *mut ma_duplex_rb,
+    ) -> ma_result;
+}
+extern "C" {
+    pub fn ma_duplex_rb_uninit(pRB: *mut ma_duplex_rb) -> ma_result;
+}
 extern "C" {
     #[doc = "Miscellaneous Helpers"]
     pub fn ma_result_description(result: ma_result) -> *const libc::c_char;
@@ -5165,7 +5213,8 @@ pub const ma_backend_jack: ma_backend = 9;
 pub const ma_backend_aaudio: ma_backend = 10;
 pub const ma_backend_opensl: ma_backend = 11;
 pub const ma_backend_webaudio: ma_backend = 12;
-pub const ma_backend_null: ma_backend = 13;
+pub const ma_backend_custom: ma_backend = 13;
+pub const ma_backend_null: ma_backend = 14;
 pub type ma_backend = libc::c_uint;
 pub type ma_device_callback_proc = ::core::option::Option<
     unsafe extern "C" fn(
@@ -5210,6 +5259,53 @@ pub const ma_ios_session_category_option_interrupt_spoken_audio_and_mix_with_oth
 pub const ma_ios_session_category_option_allow_bluetooth_a2dp: ma_ios_session_category_option = 32;
 pub const ma_ios_session_category_option_allow_air_play: ma_ios_session_category_option = 64;
 pub type ma_ios_session_category_option = libc::c_uint;
+pub const ma_opensl_stream_type_default: ma_opensl_stream_type = 0;
+pub const ma_opensl_stream_type_voice: ma_opensl_stream_type = 1;
+pub const ma_opensl_stream_type_system: ma_opensl_stream_type = 2;
+pub const ma_opensl_stream_type_ring: ma_opensl_stream_type = 3;
+pub const ma_opensl_stream_type_media: ma_opensl_stream_type = 4;
+pub const ma_opensl_stream_type_alarm: ma_opensl_stream_type = 5;
+pub const ma_opensl_stream_type_notification: ma_opensl_stream_type = 6;
+pub type ma_opensl_stream_type = libc::c_uint;
+pub const ma_opensl_recording_preset_default: ma_opensl_recording_preset = 0;
+pub const ma_opensl_recording_preset_generic: ma_opensl_recording_preset = 1;
+pub const ma_opensl_recording_preset_camcorder: ma_opensl_recording_preset = 2;
+pub const ma_opensl_recording_preset_voice_recognition: ma_opensl_recording_preset = 3;
+pub const ma_opensl_recording_preset_voice_communication: ma_opensl_recording_preset = 4;
+pub const ma_opensl_recording_preset_voice_unprocessed: ma_opensl_recording_preset = 5;
+pub type ma_opensl_recording_preset = libc::c_uint;
+pub const ma_aaudio_usage_default: ma_aaudio_usage = 0;
+pub const ma_aaudio_usage_announcement: ma_aaudio_usage = 1;
+pub const ma_aaudio_usage_emergency: ma_aaudio_usage = 2;
+pub const ma_aaudio_usage_safety: ma_aaudio_usage = 3;
+pub const ma_aaudio_usage_vehicle_status: ma_aaudio_usage = 4;
+pub const ma_aaudio_usage_alarm: ma_aaudio_usage = 5;
+pub const ma_aaudio_usage_assistance_accessibility: ma_aaudio_usage = 6;
+pub const ma_aaudio_usage_assistance_navigation_guidance: ma_aaudio_usage = 7;
+pub const ma_aaudio_usage_assistance_sonification: ma_aaudio_usage = 8;
+pub const ma_aaudio_usage_assitant: ma_aaudio_usage = 9;
+pub const ma_aaudio_usage_game: ma_aaudio_usage = 10;
+pub const ma_aaudio_usage_media: ma_aaudio_usage = 11;
+pub const ma_aaudio_usage_notification: ma_aaudio_usage = 12;
+pub const ma_aaudio_usage_notification_event: ma_aaudio_usage = 13;
+pub const ma_aaudio_usage_notification_ringtone: ma_aaudio_usage = 14;
+pub const ma_aaudio_usage_voice_communication: ma_aaudio_usage = 15;
+pub const ma_aaudio_usage_voice_communication_signalling: ma_aaudio_usage = 16;
+pub type ma_aaudio_usage = libc::c_uint;
+pub const ma_aaudio_content_type_default: ma_aaudio_content_type = 0;
+pub const ma_aaudio_content_type_movie: ma_aaudio_content_type = 1;
+pub const ma_aaudio_content_type_music: ma_aaudio_content_type = 2;
+pub const ma_aaudio_content_type_sonification: ma_aaudio_content_type = 3;
+pub const ma_aaudio_content_type_speech: ma_aaudio_content_type = 4;
+pub type ma_aaudio_content_type = libc::c_uint;
+pub const ma_aaudio_input_preset_default: ma_aaudio_input_preset = 0;
+pub const ma_aaudio_input_preset_generic: ma_aaudio_input_preset = 1;
+pub const ma_aaudio_input_preset_camcorder: ma_aaudio_input_preset = 2;
+pub const ma_aaudio_input_preset_unprocessed: ma_aaudio_input_preset = 3;
+pub const ma_aaudio_input_preset_voice_recognition: ma_aaudio_input_preset = 4;
+pub const ma_aaudio_input_preset_voice_communication: ma_aaudio_input_preset = 5;
+pub const ma_aaudio_input_preset_voice_performance: ma_aaudio_input_preset = 6;
+pub type ma_aaudio_input_preset = libc::c_uint;
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union ma_timer {
@@ -5271,8 +5367,65 @@ pub union ma_device_id {
     pub aaudio: ma_int32,
     pub opensl: ma_uint32,
     pub webaudio: [libc::c_char; 32usize],
+    pub custom: ma_device_id__bindgen_ty_1,
     pub nullbackend: libc::c_int,
-    _bindgen_union_align: [u32; 64usize],
+    _bindgen_union_align: [u64; 32usize],
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union ma_device_id__bindgen_ty_1 {
+    pub i: libc::c_int,
+    pub s: [libc::c_char; 256usize],
+    pub p: *mut libc::c_void,
+    _bindgen_union_align: [u64; 32usize],
+}
+#[test]
+fn bindgen_test_layout_ma_device_id__bindgen_ty_1() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device_id__bindgen_ty_1>(),
+        256usize,
+        concat!("Size of: ", stringify!(ma_device_id__bindgen_ty_1))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device_id__bindgen_ty_1>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_device_id__bindgen_ty_1))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id__bindgen_ty_1>())).i as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id__bindgen_ty_1),
+            "::",
+            stringify!(i)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id__bindgen_ty_1>())).s as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id__bindgen_ty_1),
+            "::",
+            stringify!(s)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id__bindgen_ty_1>())).p as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id__bindgen_ty_1),
+            "::",
+            stringify!(p)
+        )
+    );
+}
+impl ::core::fmt::Debug for ma_device_id__bindgen_ty_1 {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        write!(f, "ma_device_id__bindgen_ty_1 {{ union }}")
+    }
 }
 #[test]
 fn bindgen_test_layout_ma_device_id() {
@@ -5283,7 +5436,7 @@ fn bindgen_test_layout_ma_device_id() {
     );
     assert_eq!(
         ::core::mem::align_of::<ma_device_id>(),
-        4usize,
+        8usize,
         concat!("Alignment of ", stringify!(ma_device_id))
     );
     assert_eq!(
@@ -5417,6 +5570,16 @@ fn bindgen_test_layout_ma_device_id() {
         )
     );
     assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_id>())).custom as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_id),
+            "::",
+            stringify!(custom)
+        )
+    );
+    assert_eq!(
         unsafe { &(*(::core::ptr::null::<ma_device_id>())).nullbackend as *const _ as usize },
         0usize,
         concat!(
@@ -5437,24 +5600,29 @@ impl ::core::fmt::Debug for ma_device_id {
 pub struct ma_device_info {
     pub id: ma_device_id,
     pub name: [libc::c_char; 256usize],
+    pub isDefault: ma_bool32,
     pub formatCount: ma_uint32,
     pub formats: [ma_format; 6usize],
     pub minChannels: ma_uint32,
     pub maxChannels: ma_uint32,
     pub minSampleRate: ma_uint32,
     pub maxSampleRate: ma_uint32,
-    pub _private: ma_device_info__bindgen_ty_1,
+    pub nativeDataFormatCount: ma_uint32,
+    pub nativeDataFormats: [ma_device_info__bindgen_ty_1; 64usize],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ma_device_info__bindgen_ty_1 {
-    pub isDefault: ma_bool32,
+    pub format: ma_format,
+    pub channels: ma_uint32,
+    pub sampleRate: ma_uint32,
+    pub flags: ma_uint32,
 }
 #[test]
 fn bindgen_test_layout_ma_device_info__bindgen_ty_1() {
     assert_eq!(
         ::core::mem::size_of::<ma_device_info__bindgen_ty_1>(),
-        4usize,
+        16usize,
         concat!("Size of: ", stringify!(ma_device_info__bindgen_ty_1))
     );
     assert_eq!(
@@ -5464,14 +5632,51 @@ fn bindgen_test_layout_ma_device_info__bindgen_ty_1() {
     );
     assert_eq!(
         unsafe {
-            &(*(::core::ptr::null::<ma_device_info__bindgen_ty_1>())).isDefault as *const _ as usize
+            &(*(::core::ptr::null::<ma_device_info__bindgen_ty_1>())).format as *const _ as usize
         },
         0usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device_info__bindgen_ty_1),
             "::",
-            stringify!(isDefault)
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_info__bindgen_ty_1>())).channels as *const _ as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_info__bindgen_ty_1),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_info__bindgen_ty_1>())).sampleRate as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_info__bindgen_ty_1),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_info__bindgen_ty_1>())).flags as *const _ as usize
+        },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_info__bindgen_ty_1),
+            "::",
+            stringify!(flags)
         )
     );
 }
@@ -5479,12 +5684,12 @@ fn bindgen_test_layout_ma_device_info__bindgen_ty_1() {
 fn bindgen_test_layout_ma_device_info() {
     assert_eq!(
         ::core::mem::size_of::<ma_device_info>(),
-        560usize,
+        1592usize,
         concat!("Size of: ", stringify!(ma_device_info))
     );
     assert_eq!(
         ::core::mem::align_of::<ma_device_info>(),
-        4usize,
+        8usize,
         concat!("Alignment of ", stringify!(ma_device_info))
     );
     assert_eq!(
@@ -5508,8 +5713,18 @@ fn bindgen_test_layout_ma_device_info() {
         )
     );
     assert_eq!(
-        unsafe { &(*(::core::ptr::null::<ma_device_info>())).formatCount as *const _ as usize },
+        unsafe { &(*(::core::ptr::null::<ma_device_info>())).isDefault as *const _ as usize },
         512usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_info),
+            "::",
+            stringify!(isDefault)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_info>())).formatCount as *const _ as usize },
+        516usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device_info),
@@ -5519,7 +5734,7 @@ fn bindgen_test_layout_ma_device_info() {
     );
     assert_eq!(
         unsafe { &(*(::core::ptr::null::<ma_device_info>())).formats as *const _ as usize },
-        516usize,
+        520usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device_info),
@@ -5529,7 +5744,7 @@ fn bindgen_test_layout_ma_device_info() {
     );
     assert_eq!(
         unsafe { &(*(::core::ptr::null::<ma_device_info>())).minChannels as *const _ as usize },
-        540usize,
+        544usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device_info),
@@ -5539,7 +5754,7 @@ fn bindgen_test_layout_ma_device_info() {
     );
     assert_eq!(
         unsafe { &(*(::core::ptr::null::<ma_device_info>())).maxChannels as *const _ as usize },
-        544usize,
+        548usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device_info),
@@ -5549,7 +5764,7 @@ fn bindgen_test_layout_ma_device_info() {
     );
     assert_eq!(
         unsafe { &(*(::core::ptr::null::<ma_device_info>())).minSampleRate as *const _ as usize },
-        548usize,
+        552usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device_info),
@@ -5559,7 +5774,7 @@ fn bindgen_test_layout_ma_device_info() {
     );
     assert_eq!(
         unsafe { &(*(::core::ptr::null::<ma_device_info>())).maxSampleRate as *const _ as usize },
-        552usize,
+        556usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device_info),
@@ -5568,19 +5783,33 @@ fn bindgen_test_layout_ma_device_info() {
         )
     );
     assert_eq!(
-        unsafe { &(*(::core::ptr::null::<ma_device_info>()))._private as *const _ as usize },
-        556usize,
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_info>())).nativeDataFormatCount as *const _ as usize
+        },
+        560usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device_info),
             "::",
-            stringify!(_private)
+            stringify!(nativeDataFormatCount)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_info>())).nativeDataFormats as *const _ as usize
+        },
+        564usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_info),
+            "::",
+            stringify!(nativeDataFormats)
         )
     );
 }
 impl ::core::fmt::Debug for ma_device_info {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        write ! (f , "ma_device_info {{ id: {:?}, name: [...], formatCount: {:?}, formats: {:?}, minChannels: {:?}, maxChannels: {:?}, minSampleRate: {:?}, maxSampleRate: {:?}, _private: {:?} }}" , self . id , self . formatCount , self . formats , self . minChannels , self . maxChannels , self . minSampleRate , self . maxSampleRate , self . _private)
+        write ! (f , "ma_device_info {{ id: {:?}, name: [...], isDefault: {:?}, formatCount: {:?}, formats: {:?}, minChannels: {:?}, maxChannels: {:?}, minSampleRate: {:?}, maxSampleRate: {:?}, nativeDataFormatCount: {:?}, nativeDataFormats: [...] }}" , self . id , self . isDefault , self . formatCount , self . formats , self . minChannels , self . maxChannels , self . minSampleRate , self . maxSampleRate , self . nativeDataFormatCount)
     }
 }
 #[repr(C)]
@@ -5603,6 +5832,9 @@ pub struct ma_device_config {
     pub wasapi: ma_device_config__bindgen_ty_4,
     pub alsa: ma_device_config__bindgen_ty_5,
     pub pulse: ma_device_config__bindgen_ty_6,
+    pub coreaudio: ma_device_config__bindgen_ty_7,
+    pub opensl: ma_device_config__bindgen_ty_8,
+    pub aaudio: ma_device_config__bindgen_ty_9,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -6097,11 +6329,145 @@ fn bindgen_test_layout_ma_device_config__bindgen_ty_6() {
         )
     );
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ma_device_config__bindgen_ty_7 {
+    pub allowNominalSampleRateChange: ma_bool32,
+}
+#[test]
+fn bindgen_test_layout_ma_device_config__bindgen_ty_7() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device_config__bindgen_ty_7>(),
+        4usize,
+        concat!("Size of: ", stringify!(ma_device_config__bindgen_ty_7))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device_config__bindgen_ty_7>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_device_config__bindgen_ty_7))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_7>())).allowNominalSampleRateChange
+                as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_7),
+            "::",
+            stringify!(allowNominalSampleRateChange)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ma_device_config__bindgen_ty_8 {
+    pub streamType: ma_opensl_stream_type,
+    pub recordingPreset: ma_opensl_recording_preset,
+}
+#[test]
+fn bindgen_test_layout_ma_device_config__bindgen_ty_8() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device_config__bindgen_ty_8>(),
+        8usize,
+        concat!("Size of: ", stringify!(ma_device_config__bindgen_ty_8))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device_config__bindgen_ty_8>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_device_config__bindgen_ty_8))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_8>())).streamType as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_8),
+            "::",
+            stringify!(streamType)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_8>())).recordingPreset as *const _
+                as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_8),
+            "::",
+            stringify!(recordingPreset)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ma_device_config__bindgen_ty_9 {
+    pub usage: ma_aaudio_usage,
+    pub contentType: ma_aaudio_content_type,
+    pub inputPreset: ma_aaudio_input_preset,
+}
+#[test]
+fn bindgen_test_layout_ma_device_config__bindgen_ty_9() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device_config__bindgen_ty_9>(),
+        12usize,
+        concat!("Size of: ", stringify!(ma_device_config__bindgen_ty_9))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device_config__bindgen_ty_9>(),
+        4usize,
+        concat!("Alignment of ", stringify!(ma_device_config__bindgen_ty_9))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_9>())).usage as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_9),
+            "::",
+            stringify!(usage)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_9>())).contentType as *const _
+                as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_9),
+            "::",
+            stringify!(contentType)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_config__bindgen_ty_9>())).inputPreset as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config__bindgen_ty_9),
+            "::",
+            stringify!(inputPreset)
+        )
+    );
+}
 #[test]
 fn bindgen_test_layout_ma_device_config() {
     assert_eq!(
         ::core::mem::size_of::<ma_device_config>(),
-        232usize,
+        256usize,
         concat!("Size of: ", stringify!(ma_device_config))
     );
     assert_eq!(
@@ -6289,6 +6655,379 @@ fn bindgen_test_layout_ma_device_config() {
             stringify!(pulse)
         )
     );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_config>())).coreaudio as *const _ as usize },
+        232usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(coreaudio)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_config>())).opensl as *const _ as usize },
+        236usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(opensl)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_config>())).aaudio as *const _ as usize },
+        244usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_config),
+            "::",
+            stringify!(aaudio)
+        )
+    );
+}
+pub type ma_enum_devices_callback_proc = ::core::option::Option<
+    unsafe extern "C" fn(
+        pContext: *mut ma_context,
+        deviceType: ma_device_type,
+        pInfo: *const ma_device_info,
+        pUserData: *mut libc::c_void,
+    ) -> ma_bool32,
+>;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ma_device_descriptor {
+    pub pDeviceID: *const ma_device_id,
+    pub shareMode: ma_share_mode,
+    pub format: ma_format,
+    pub channels: ma_uint32,
+    pub sampleRate: ma_uint32,
+    pub channelMap: [ma_channel; 32usize],
+    pub periodSizeInFrames: ma_uint32,
+    pub periodSizeInMilliseconds: ma_uint32,
+    pub periodCount: ma_uint32,
+}
+#[test]
+fn bindgen_test_layout_ma_device_descriptor() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_device_descriptor>(),
+        72usize,
+        concat!("Size of: ", stringify!(ma_device_descriptor))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_device_descriptor>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_device_descriptor))
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_descriptor>())).pDeviceID as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_descriptor),
+            "::",
+            stringify!(pDeviceID)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_descriptor>())).shareMode as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_descriptor),
+            "::",
+            stringify!(shareMode)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_descriptor>())).format as *const _ as usize },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_descriptor),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device_descriptor>())).channels as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_descriptor),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_descriptor>())).sampleRate as *const _ as usize
+        },
+        20usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_descriptor),
+            "::",
+            stringify!(sampleRate)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_descriptor>())).channelMap as *const _ as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_descriptor),
+            "::",
+            stringify!(channelMap)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_descriptor>())).periodSizeInFrames as *const _
+                as usize
+        },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_descriptor),
+            "::",
+            stringify!(periodSizeInFrames)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_descriptor>())).periodSizeInMilliseconds as *const _
+                as usize
+        },
+        60usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_descriptor),
+            "::",
+            stringify!(periodSizeInMilliseconds)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_device_descriptor>())).periodCount as *const _ as usize
+        },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device_descriptor),
+            "::",
+            stringify!(periodCount)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ma_backend_callbacks {
+    pub onContextInit: ::core::option::Option<
+        unsafe extern "C" fn(
+            pContext: *mut ma_context,
+            pCallbacks: *mut ma_backend_callbacks,
+        ) -> ma_result,
+    >,
+    pub onContextUninit:
+        ::core::option::Option<unsafe extern "C" fn(pContext: *mut ma_context) -> ma_result>,
+    pub onContextEnumerateDevices: ::core::option::Option<
+        unsafe extern "C" fn(
+            pContext: *mut ma_context,
+            callback: ma_enum_devices_callback_proc,
+            pUserData: *mut libc::c_void,
+        ) -> ma_result,
+    >,
+    pub onContextGetDeviceInfo: ::core::option::Option<
+        unsafe extern "C" fn(
+            pContext: *mut ma_context,
+            deviceType: ma_device_type,
+            pDeviceID: *const ma_device_id,
+            pDeviceInfo: *mut ma_device_info,
+        ) -> ma_result,
+    >,
+    pub onDeviceInit: ::core::option::Option<
+        unsafe extern "C" fn(
+            pDevice: *mut ma_device,
+            deviceType: ma_device_type,
+            pDescriptorPlayback: *mut ma_device_descriptor,
+            pDescriptorCapture: *mut ma_device_descriptor,
+        ) -> ma_result,
+    >,
+    pub onDeviceUninit:
+        ::core::option::Option<unsafe extern "C" fn(pDevice: *mut ma_device) -> ma_result>,
+    pub onDeviceStart:
+        ::core::option::Option<unsafe extern "C" fn(pDevice: *mut ma_device) -> ma_result>,
+    pub onDeviceStop:
+        ::core::option::Option<unsafe extern "C" fn(pDevice: *mut ma_device) -> ma_result>,
+    pub onDeviceRead: ::core::option::Option<
+        unsafe extern "C" fn(
+            pDevice: *mut ma_device,
+            pFrames: *mut libc::c_void,
+            frameCount: ma_uint32,
+            pFramesRead: *mut ma_uint32,
+        ) -> ma_result,
+    >,
+    pub onDeviceWrite: ::core::option::Option<
+        unsafe extern "C" fn(
+            pDevice: *mut ma_device,
+            pFrames: *const libc::c_void,
+            frameCount: ma_uint32,
+            pFramesWritten: *mut ma_uint32,
+        ) -> ma_result,
+    >,
+    pub onDeviceAudioThread:
+        ::core::option::Option<unsafe extern "C" fn(pDevice: *mut ma_device) -> ma_result>,
+}
+#[test]
+fn bindgen_test_layout_ma_backend_callbacks() {
+    assert_eq!(
+        ::core::mem::size_of::<ma_backend_callbacks>(),
+        88usize,
+        concat!("Size of: ", stringify!(ma_backend_callbacks))
+    );
+    assert_eq!(
+        ::core::mem::align_of::<ma_backend_callbacks>(),
+        8usize,
+        concat!("Alignment of ", stringify!(ma_backend_callbacks))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_backend_callbacks>())).onContextInit as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_backend_callbacks),
+            "::",
+            stringify!(onContextInit)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_backend_callbacks>())).onContextUninit as *const _ as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_backend_callbacks),
+            "::",
+            stringify!(onContextUninit)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_backend_callbacks>())).onContextEnumerateDevices as *const _
+                as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_backend_callbacks),
+            "::",
+            stringify!(onContextEnumerateDevices)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_backend_callbacks>())).onContextGetDeviceInfo as *const _
+                as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_backend_callbacks),
+            "::",
+            stringify!(onContextGetDeviceInfo)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_backend_callbacks>())).onDeviceInit as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_backend_callbacks),
+            "::",
+            stringify!(onDeviceInit)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_backend_callbacks>())).onDeviceUninit as *const _ as usize
+        },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_backend_callbacks),
+            "::",
+            stringify!(onDeviceUninit)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_backend_callbacks>())).onDeviceStart as *const _ as usize
+        },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_backend_callbacks),
+            "::",
+            stringify!(onDeviceStart)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_backend_callbacks>())).onDeviceStop as *const _ as usize
+        },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_backend_callbacks),
+            "::",
+            stringify!(onDeviceStop)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_backend_callbacks>())).onDeviceRead as *const _ as usize
+        },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_backend_callbacks),
+            "::",
+            stringify!(onDeviceRead)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_backend_callbacks>())).onDeviceWrite as *const _ as usize
+        },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_backend_callbacks),
+            "::",
+            stringify!(onDeviceWrite)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::core::ptr::null::<ma_backend_callbacks>())).onDeviceAudioThread as *const _
+                as usize
+        },
+        80usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_backend_callbacks),
+            "::",
+            stringify!(onDeviceAudioThread)
+        )
+    );
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -6302,6 +7041,7 @@ pub struct ma_context_config {
     pub pulse: ma_context_config__bindgen_ty_2,
     pub coreaudio: ma_context_config__bindgen_ty_3,
     pub jack: ma_context_config__bindgen_ty_4,
+    pub custom: ma_backend_callbacks,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -6515,7 +7255,7 @@ fn bindgen_test_layout_ma_context_config__bindgen_ty_4() {
 fn bindgen_test_layout_ma_context_config() {
     assert_eq!(
         ::core::mem::size_of::<ma_context_config>(),
-        128usize,
+        216usize,
         concat!("Size of: ", stringify!(ma_context_config))
     );
     assert_eq!(
@@ -6619,15 +7359,17 @@ fn bindgen_test_layout_ma_context_config() {
             stringify!(jack)
         )
     );
+    assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_context_config>())).custom as *const _ as usize },
+        128usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context_config),
+            "::",
+            stringify!(custom)
+        )
+    );
 }
-pub type ma_enum_devices_callback_proc = ::core::option::Option<
-    unsafe extern "C" fn(
-        pContext: *mut ma_context,
-        deviceType: ma_device_type,
-        pInfo: *const ma_device_info,
-        pUserData: *mut libc::c_void,
-    ) -> ma_bool32,
->;
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct ma_context {
@@ -6646,13 +7388,6 @@ pub struct ma_context {
     pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize], u8>,
     pub onUninit:
         ::core::option::Option<unsafe extern "C" fn(pContext: *mut ma_context) -> ma_result>,
-    pub onDeviceIDEqual: ::core::option::Option<
-        unsafe extern "C" fn(
-            pContext: *mut ma_context,
-            pID0: *const ma_device_id,
-            pID1: *const ma_device_id,
-        ) -> ma_bool32,
-    >,
     pub onEnumDevices: ::core::option::Option<
         unsafe extern "C" fn(
             pContext: *mut ma_context,
@@ -6690,6 +7425,7 @@ pub struct ma_context {
 #[derive(Copy, Clone)]
 pub union ma_context__bindgen_ty_1 {
     pub coreaudio: ma_context__bindgen_ty_1__bindgen_ty_1,
+    pub custom: ma_backend_callbacks,
     pub null_backend: ma_context__bindgen_ty_1__bindgen_ty_2,
     _bindgen_union_align: [u64; 23usize],
 }
@@ -7101,6 +7837,18 @@ fn bindgen_test_layout_ma_context__bindgen_ty_1() {
     );
     assert_eq!(
         unsafe {
+            &(*(::core::ptr::null::<ma_context__bindgen_ty_1>())).custom as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_context__bindgen_ty_1),
+            "::",
+            stringify!(custom)
+        )
+    );
+    assert_eq!(
+        unsafe {
             &(*(::core::ptr::null::<ma_context__bindgen_ty_1>())).null_backend as *const _ as usize
         },
         0usize,
@@ -7415,7 +8163,7 @@ impl ::core::fmt::Debug for ma_context__bindgen_ty_2 {
 fn bindgen_test_layout_ma_context() {
     assert_eq!(
         ::core::mem::size_of::<ma_context>(),
-        616usize,
+        608usize,
         concat!("Size of: ", stringify!(ma_context))
     );
     assert_eq!(
@@ -7558,18 +8306,8 @@ fn bindgen_test_layout_ma_context() {
         )
     );
     assert_eq!(
-        unsafe { &(*(::core::ptr::null::<ma_context>())).onDeviceIDEqual as *const _ as usize },
-        240usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(ma_context),
-            "::",
-            stringify!(onDeviceIDEqual)
-        )
-    );
-    assert_eq!(
         unsafe { &(*(::core::ptr::null::<ma_context>())).onEnumDevices as *const _ as usize },
-        248usize,
+        240usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_context),
@@ -7579,7 +8317,7 @@ fn bindgen_test_layout_ma_context() {
     );
     assert_eq!(
         unsafe { &(*(::core::ptr::null::<ma_context>())).onGetDeviceInfo as *const _ as usize },
-        256usize,
+        248usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_context),
@@ -7589,7 +8327,7 @@ fn bindgen_test_layout_ma_context() {
     );
     assert_eq!(
         unsafe { &(*(::core::ptr::null::<ma_context>())).onDeviceInit as *const _ as usize },
-        264usize,
+        256usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_context),
@@ -7599,7 +8337,7 @@ fn bindgen_test_layout_ma_context() {
     );
     assert_eq!(
         unsafe { &(*(::core::ptr::null::<ma_context>())).onDeviceUninit as *const _ as usize },
-        272usize,
+        264usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_context),
@@ -7609,7 +8347,7 @@ fn bindgen_test_layout_ma_context() {
     );
     assert_eq!(
         unsafe { &(*(::core::ptr::null::<ma_context>())).onDeviceStart as *const _ as usize },
-        280usize,
+        272usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_context),
@@ -7619,7 +8357,7 @@ fn bindgen_test_layout_ma_context() {
     );
     assert_eq!(
         unsafe { &(*(::core::ptr::null::<ma_context>())).onDeviceStop as *const _ as usize },
-        288usize,
+        280usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_context),
@@ -7629,7 +8367,7 @@ fn bindgen_test_layout_ma_context() {
     );
     assert_eq!(
         unsafe { &(*(::core::ptr::null::<ma_context>())).onDeviceMainLoop as *const _ as usize },
-        296usize,
+        288usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_context),
@@ -7640,7 +8378,7 @@ fn bindgen_test_layout_ma_context() {
 }
 impl ::core::fmt::Debug for ma_context {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        write ! (f , "ma_context {{ backend: {:?}, logCallback: {:?}, threadPriority: {:?}, threadStackSize: {:?}, pUserData: {:?}, allocationCallbacks: {:?}, deviceEnumLock: {:?}, deviceInfoLock: {:?}, deviceInfoCapacity: {:?}, playbackDeviceInfoCount: {:?}, captureDeviceInfoCount: {:?}, pDeviceInfos: {:?}, isBackendAsynchronous : {:?}, onUninit: {:?}, onDeviceIDEqual: {:?}, onEnumDevices: {:?}, onGetDeviceInfo: {:?}, onDeviceInit: {:?}, onDeviceUninit: {:?}, onDeviceStart: {:?}, onDeviceStop: {:?}, onDeviceMainLoop: {:?}, __bindgen_anon_1: {:?}, __bindgen_anon_2: {:?} }}" , self . backend , self . logCallback , self . threadPriority , self . threadStackSize , self . pUserData , self . allocationCallbacks , self . deviceEnumLock , self . deviceInfoLock , self . deviceInfoCapacity , self . playbackDeviceInfoCount , self . captureDeviceInfoCount , self . pDeviceInfos , self . isBackendAsynchronous () , self . onUninit , self . onDeviceIDEqual , self . onEnumDevices , self . onGetDeviceInfo , self . onDeviceInit , self . onDeviceUninit , self . onDeviceStart , self . onDeviceStop , self . onDeviceMainLoop , self . __bindgen_anon_1 , self . __bindgen_anon_2)
+        write ! (f , "ma_context {{ backend: {:?}, logCallback: {:?}, threadPriority: {:?}, threadStackSize: {:?}, pUserData: {:?}, allocationCallbacks: {:?}, deviceEnumLock: {:?}, deviceInfoLock: {:?}, deviceInfoCapacity: {:?}, playbackDeviceInfoCount: {:?}, captureDeviceInfoCount: {:?}, pDeviceInfos: {:?}, isBackendAsynchronous : {:?}, onUninit: {:?}, onEnumDevices: {:?}, onGetDeviceInfo: {:?}, onDeviceInit: {:?}, onDeviceUninit: {:?}, onDeviceStart: {:?}, onDeviceStop: {:?}, onDeviceMainLoop: {:?}, __bindgen_anon_1: {:?}, __bindgen_anon_2: {:?} }}" , self . backend , self . logCallback , self . threadPriority , self . threadStackSize , self . pUserData , self . allocationCallbacks , self . deviceEnumLock , self . deviceInfoLock , self . deviceInfoCapacity , self . playbackDeviceInfoCount , self . captureDeviceInfoCount , self . pDeviceInfos , self . isBackendAsynchronous () , self . onUninit , self . onEnumDevices , self . onGetDeviceInfo , self . onDeviceInit , self . onDeviceUninit , self . onDeviceStart , self . onDeviceStop , self . onDeviceMainLoop , self . __bindgen_anon_1 , self . __bindgen_anon_2)
     }
 }
 impl ma_context {
@@ -7687,6 +8425,7 @@ pub struct ma_device {
     pub workResult: ma_result,
     pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize], u8>,
     pub masterVolumeFactor: f32,
+    pub duplexRB: ma_duplex_rb,
     pub resampling: ma_device__bindgen_ty_1,
     pub playback: ma_device__bindgen_ty_2,
     pub capture: ma_device__bindgen_ty_3,
@@ -8331,6 +9070,7 @@ pub struct ma_device__bindgen_ty_4__bindgen_ty_1 {
     pub audioUnitPlayback: ma_ptr,
     pub audioUnitCapture: ma_ptr,
     pub pAudioBufferList: ma_ptr,
+    pub audioBufferSizeInBytes: ma_uint32,
     pub stopEvent: ma_event,
     pub originalPeriodSizeInFrames: ma_uint32,
     pub originalPeriodSizeInMilliseconds: ma_uint32,
@@ -8346,7 +9086,7 @@ pub struct ma_device__bindgen_ty_4__bindgen_ty_1 {
 fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_1() {
     assert_eq!(
         ::core::mem::size_of::<ma_device__bindgen_ty_4__bindgen_ty_1>(),
-        264usize,
+        272usize,
         concat!(
             "Size of: ",
             stringify!(ma_device__bindgen_ty_4__bindgen_ty_1)
@@ -8427,10 +9167,23 @@ fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_1() {
     );
     assert_eq!(
         unsafe {
+            &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_1>()))
+                .audioBufferSizeInBytes as *const _ as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device__bindgen_ty_4__bindgen_ty_1),
+            "::",
+            stringify!(audioBufferSizeInBytes)
+        )
+    );
+    assert_eq!(
+        unsafe {
             &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_1>())).stopEvent as *const _
                 as usize
         },
-        32usize,
+        40usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device__bindgen_ty_4__bindgen_ty_1),
@@ -8443,7 +9196,7 @@ fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_1() {
             &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_1>()))
                 .originalPeriodSizeInFrames as *const _ as usize
         },
-        152usize,
+        160usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device__bindgen_ty_4__bindgen_ty_1),
@@ -8456,7 +9209,7 @@ fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_1() {
             &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_1>()))
                 .originalPeriodSizeInMilliseconds as *const _ as usize
         },
-        156usize,
+        164usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device__bindgen_ty_4__bindgen_ty_1),
@@ -8469,7 +9222,7 @@ fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_1() {
             &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_1>())).originalPeriods
                 as *const _ as usize
         },
-        160usize,
+        168usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device__bindgen_ty_4__bindgen_ty_1),
@@ -8482,7 +9235,7 @@ fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_1() {
             &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_1>()))
                 .isDefaultPlaybackDevice as *const _ as usize
         },
-        164usize,
+        172usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device__bindgen_ty_4__bindgen_ty_1),
@@ -8495,7 +9248,7 @@ fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_1() {
             &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_1>()))
                 .isDefaultCaptureDevice as *const _ as usize
         },
-        168usize,
+        176usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device__bindgen_ty_4__bindgen_ty_1),
@@ -8508,7 +9261,7 @@ fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_1() {
             &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_1>()))
                 .isSwitchingPlaybackDevice as *const _ as usize
         },
-        172usize,
+        180usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device__bindgen_ty_4__bindgen_ty_1),
@@ -8521,7 +9274,7 @@ fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_1() {
             &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_1>()))
                 .isSwitchingCaptureDevice as *const _ as usize
         },
-        176usize,
+        184usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device__bindgen_ty_4__bindgen_ty_1),
@@ -8534,7 +9287,7 @@ fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_1() {
             &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_1>())).duplexRB as *const _
                 as usize
         },
-        184usize,
+        192usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device__bindgen_ty_4__bindgen_ty_1),
@@ -8547,7 +9300,7 @@ fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_1() {
             &(*(::core::ptr::null::<ma_device__bindgen_ty_4__bindgen_ty_1>())).pRouteChangeHandler
                 as *const _ as usize
         },
-        256usize,
+        264usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device__bindgen_ty_4__bindgen_ty_1),
@@ -8558,7 +9311,7 @@ fn bindgen_test_layout_ma_device__bindgen_ty_4__bindgen_ty_1() {
 }
 impl ::core::fmt::Debug for ma_device__bindgen_ty_4__bindgen_ty_1 {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        write ! (f , "ma_device__bindgen_ty_4__bindgen_ty_1 {{ deviceObjectIDPlayback: {:?}, deviceObjectIDCapture: {:?}, audioUnitPlayback: {:?}, audioUnitCapture: {:?}, pAudioBufferList: {:?}, stopEvent: {:?}, originalPeriodSizeInFrames: {:?}, originalPeriodSizeInMilliseconds: {:?}, originalPeriods: {:?}, isDefaultPlaybackDevice: {:?}, isDefaultCaptureDevice: {:?}, isSwitchingPlaybackDevice: {:?}, isSwitchingCaptureDevice: {:?}, duplexRB: {:?}, pRouteChangeHandler: {:?} }}" , self . deviceObjectIDPlayback , self . deviceObjectIDCapture , self . audioUnitPlayback , self . audioUnitCapture , self . pAudioBufferList , self . stopEvent , self . originalPeriodSizeInFrames , self . originalPeriodSizeInMilliseconds , self . originalPeriods , self . isDefaultPlaybackDevice , self . isDefaultCaptureDevice , self . isSwitchingPlaybackDevice , self . isSwitchingCaptureDevice , self . duplexRB , self . pRouteChangeHandler)
+        write ! (f , "ma_device__bindgen_ty_4__bindgen_ty_1 {{ deviceObjectIDPlayback: {:?}, deviceObjectIDCapture: {:?}, audioUnitPlayback: {:?}, audioUnitCapture: {:?}, pAudioBufferList: {:?}, audioBufferSizeInBytes: {:?}, stopEvent: {:?}, originalPeriodSizeInFrames: {:?}, originalPeriodSizeInMilliseconds: {:?}, originalPeriods: {:?}, isDefaultPlaybackDevice: {:?}, isDefaultCaptureDevice: {:?}, isSwitchingPlaybackDevice: {:?}, isSwitchingCaptureDevice: {:?}, duplexRB: {:?}, pRouteChangeHandler: {:?} }}" , self . deviceObjectIDPlayback , self . deviceObjectIDCapture , self . audioUnitPlayback , self . audioUnitCapture , self . pAudioBufferList , self . audioBufferSizeInBytes , self . stopEvent , self . originalPeriodSizeInFrames , self . originalPeriodSizeInMilliseconds , self . originalPeriods , self . isDefaultPlaybackDevice , self . isDefaultCaptureDevice , self . isSwitchingPlaybackDevice , self . isSwitchingCaptureDevice , self . duplexRB , self . pRouteChangeHandler)
     }
 }
 #[repr(C)]
@@ -8803,7 +9556,7 @@ impl ::core::fmt::Debug for ma_device__bindgen_ty_4 {
 fn bindgen_test_layout_ma_device() {
     assert_eq!(
         ::core::mem::size_of::<ma_device>(),
-        22232usize,
+        22312usize,
         concat!("Size of: ", stringify!(ma_device))
     );
     assert_eq!(
@@ -8952,8 +9705,18 @@ fn bindgen_test_layout_ma_device() {
         )
     );
     assert_eq!(
+        unsafe { &(*(::core::ptr::null::<ma_device>())).duplexRB as *const _ as usize },
+        496usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(ma_device),
+            "::",
+            stringify!(duplexRB)
+        )
+    );
+    assert_eq!(
         unsafe { &(*(::core::ptr::null::<ma_device>())).resampling as *const _ as usize },
-        492usize,
+        568usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device),
@@ -8963,7 +9726,7 @@ fn bindgen_test_layout_ma_device() {
     );
     assert_eq!(
         unsafe { &(*(::core::ptr::null::<ma_device>())).playback as *const _ as usize },
-        504usize,
+        584usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device),
@@ -8973,7 +9736,7 @@ fn bindgen_test_layout_ma_device() {
     );
     assert_eq!(
         unsafe { &(*(::core::ptr::null::<ma_device>())).capture as *const _ as usize },
-        11216usize,
+        11296usize,
         concat!(
             "Offset of field: ",
             stringify!(ma_device),
@@ -8984,7 +9747,7 @@ fn bindgen_test_layout_ma_device() {
 }
 impl ::core::fmt::Debug for ma_device {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        write ! (f , "ma_device {{ pContext: {:?}, type: {:?}, sampleRate: {:?}, state: {:?}, onData: {:?}, onStop: {:?}, pUserData: {:?}, lock: {:?}, wakeupEvent: {:?}, startEvent: {:?}, stopEvent: {:?}, thread: {:?}, workResult: {:?}, usingDefaultSampleRate : {:?}, usingDefaultBufferSize : {:?}, usingDefaultPeriods : {:?}, isOwnerOfContext : {:?}, noPreZeroedOutputBuffer : {:?}, noClip : {:?}, masterVolumeFactor: {:?}, resampling: {:?}, playback: {:?}, capture: {:?}, __bindgen_anon_1: {:?} }}" , self . pContext , self . type_ , self . sampleRate , self . state , self . onData , self . onStop , self . pUserData , self . lock , self . wakeupEvent , self . startEvent , self . stopEvent , self . thread , self . workResult , self . usingDefaultSampleRate () , self . usingDefaultBufferSize () , self . usingDefaultPeriods () , self . isOwnerOfContext () , self . noPreZeroedOutputBuffer () , self . noClip () , self . masterVolumeFactor , self . resampling , self . playback , self . capture , self . __bindgen_anon_1)
+        write ! (f , "ma_device {{ pContext: {:?}, type: {:?}, sampleRate: {:?}, state: {:?}, onData: {:?}, onStop: {:?}, pUserData: {:?}, lock: {:?}, wakeupEvent: {:?}, startEvent: {:?}, stopEvent: {:?}, thread: {:?}, workResult: {:?}, usingDefaultSampleRate : {:?}, usingDefaultBufferSize : {:?}, usingDefaultPeriods : {:?}, isOwnerOfContext : {:?}, noPreZeroedOutputBuffer : {:?}, noClip : {:?}, masterVolumeFactor: {:?}, duplexRB: {:?}, resampling: {:?}, playback: {:?}, capture: {:?}, __bindgen_anon_1: {:?} }}" , self . pContext , self . type_ , self . sampleRate , self . state , self . onData , self . onStop , self . pUserData , self . lock , self . wakeupEvent , self . startEvent , self . stopEvent , self . thread , self . workResult , self . usingDefaultSampleRate () , self . usingDefaultBufferSize () , self . usingDefaultPeriods () , self . isOwnerOfContext () , self . noPreZeroedOutputBuffer () , self . noClip () , self . masterVolumeFactor , self . duplexRB , self . resampling , self . playback , self . capture , self . __bindgen_anon_1)
     }
 }
 impl ma_device {
@@ -9169,7 +9932,10 @@ extern "C" {
     pub fn ma_device_stop(pDevice: *mut ma_device) -> ma_result;
 }
 extern "C" {
-    pub fn ma_device_is_started(pDevice: *mut ma_device) -> ma_bool32;
+    pub fn ma_device_is_started(pDevice: *const ma_device) -> ma_bool32;
+}
+extern "C" {
+    pub fn ma_device_get_state(pDevice: *const ma_device) -> ma_uint32;
 }
 extern "C" {
     pub fn ma_device_set_master_volume(pDevice: *mut ma_device, volume: f32) -> ma_result;
@@ -9182,6 +9948,14 @@ extern "C" {
 }
 extern "C" {
     pub fn ma_device_get_master_gain_db(pDevice: *mut ma_device, pGainDB: *mut f32) -> ma_result;
+}
+extern "C" {
+    pub fn ma_device_handle_backend_data_callback(
+        pDevice: *mut ma_device,
+        pOutput: *mut libc::c_void,
+        pInput: *const libc::c_void,
+        frameCount: ma_uint32,
+    ) -> ma_result;
 }
 extern "C" {
     pub fn ma_get_backend_name(backend: ma_backend) -> *const libc::c_char;
