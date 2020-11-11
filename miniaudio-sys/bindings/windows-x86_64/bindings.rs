@@ -83,7 +83,7 @@ where
 }
 pub const MA_VERSION_MAJOR: u32 = 0;
 pub const MA_VERSION_MINOR: u32 = 10;
-pub const MA_VERSION_REVISION: u32 = 23;
+pub const MA_VERSION_REVISION: u32 = 24;
 pub const MA_TRUE: u32 = 1;
 pub const MA_FALSE: u32 = 0;
 pub const MA_SIZE_MAX: u32 = 4294967295;
