@@ -73,4 +73,4 @@ bitflags = "1.2"
 
 [build-dependencies]
 cc = "1.0"
-bindgen = { version = "0.54", default-features = false, features = ["runtime"], optional = true }
+bindgen = { version = "0.56", default-features = false, features = ["runtime"], optional = true }
