@@ -277,6 +277,8 @@ impl std::fmt::Debug for Error {
     }
 }
 
+impl std::error::Error for Error {}
+
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Channel {
