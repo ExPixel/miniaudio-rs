@@ -209,7 +209,7 @@ impl DeviceConfig {
         config.0.dataCallback = Some(device_data_callback_trampoline);
         config.0.stopCallback = Some(device_stop_callback_trampoline);
 
-        return config;
+        config
     }
 
     pub fn device_type(&self) -> DeviceType {
