@@ -172,19 +172,7 @@ impl LPF1 {
 impl Filter for LPF1 {
     #[inline]
     fn process_pcm_frames(&mut self, output: &mut FramesMut, input: &Frames) -> Result<(), Error> {
-        if output.format() != input.format() {
-            ma_debug_panic!(
-                "output and input format did not match (output: {:?}, input: {:?}",
-                output.format(),
-                input.format()
-            );
-            return Err(Error::InvalidArgs);
-        }
-
-        if output.frame_count() != input.frame_count() {
-            ma_debug_panic!("output and input buffers did not have the same frame count (output: {}, input: {})", output.frame_count(), input.frame_count());
-            return Err(Error::InvalidArgs);
-        }
+        super::ensure_frames_compat(output, input)?;
 
         Error::from_c_result(unsafe {
             sys::ma_lpf1_process_pcm_frames(
@@ -232,19 +220,7 @@ impl LPF2 {
 impl Filter for LPF2 {
     #[inline]
     fn process_pcm_frames(&mut self, output: &mut FramesMut, input: &Frames) -> Result<(), Error> {
-        if output.format() != input.format() {
-            ma_debug_panic!(
-                "output and input format did not match (output: {:?}, input: {:?}",
-                output.format(),
-                input.format()
-            );
-            return Err(Error::InvalidArgs);
-        }
-
-        if output.frame_count() != input.frame_count() {
-            ma_debug_panic!("output and input buffers did not have the same frame count (output: {}, input: {})", output.frame_count(), input.frame_count());
-            return Err(Error::InvalidArgs);
-        }
+        super::ensure_frames_compat(output, input)?;
 
         Error::from_c_result(unsafe {
             sys::ma_lpf2_process_pcm_frames(
@@ -356,19 +332,7 @@ impl LPF {
 impl Filter for LPF {
     #[inline]
     fn process_pcm_frames(&mut self, output: &mut FramesMut, input: &Frames) -> Result<(), Error> {
-        if output.format() != input.format() {
-            ma_debug_panic!(
-                "output and input format did not match (output: {:?}, input: {:?}",
-                output.format(),
-                input.format()
-            );
-            return Err(Error::InvalidArgs);
-        }
-
-        if output.frame_count() != input.frame_count() {
-            ma_debug_panic!("output and input buffers did not have the same frame count (output: {}, input: {})", output.frame_count(), input.frame_count());
-            return Err(Error::InvalidArgs);
-        }
+        super::ensure_frames_compat(output, input)?;
 
         Error::from_c_result(unsafe {
             sys::ma_lpf_process_pcm_frames(
