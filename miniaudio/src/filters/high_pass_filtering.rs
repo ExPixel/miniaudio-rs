@@ -1,4 +1,5 @@
 use super::biquad_filtering::Biquad;
+use super::Filter;
 use crate::base::{Error, Format};
 use crate::frames::{Frames, FramesMut};
 use miniaudio_sys as sys;
@@ -163,12 +164,14 @@ impl HPF1 {
         })
     }
 
+    pub fn latency(&self) -> u32 {
+        unsafe { sys::ma_hpf1_get_latency(&self.0 as *const _ as *mut _) }
+    }
+}
+
+impl Filter for HPF1 {
     #[inline]
-    pub fn process_pcm_frames(
-        &mut self,
-        output: &mut FramesMut,
-        input: &Frames,
-    ) -> Result<(), Error> {
+    fn process_pcm_frames(&mut self, output: &mut FramesMut, input: &Frames) -> Result<(), Error> {
         if output.format() != input.format() {
             ma_debug_panic!(
                 "output and input format did not match (output: {:?}, input: {:?}",
@@ -191,10 +194,6 @@ impl HPF1 {
                 output.frame_count() as u64,
             )
         })
-    }
-
-    pub fn latency(&self) -> u32 {
-        unsafe { sys::ma_hpf1_get_latency(&self.0 as *const _ as *mut _) }
     }
 }
 
@@ -225,12 +224,14 @@ impl HPF2 {
         unsafe { (&self.0.bq as *const _ as *const Biquad).as_ref().unwrap() }
     }
 
+    pub fn latency(&self) -> u32 {
+        unsafe { sys::ma_hpf2_get_latency(&self.0 as *const _ as *mut _) }
+    }
+}
+
+impl Filter for HPF2 {
     #[inline]
-    pub fn process_pcm_frames(
-        &mut self,
-        output: &mut FramesMut,
-        input: &Frames,
-    ) -> Result<(), Error> {
+    fn process_pcm_frames(&mut self, output: &mut FramesMut, input: &Frames) -> Result<(), Error> {
         if output.format() != input.format() {
             ma_debug_panic!(
                 "output and input format did not match (output: {:?}, input: {:?}",
@@ -253,10 +254,6 @@ impl HPF2 {
                 output.frame_count() as u64,
             )
         })
-    }
-
-    pub fn latency(&self) -> u32 {
-        unsafe { sys::ma_hpf2_get_latency(&self.0 as *const _ as *mut _) }
     }
 }
 
@@ -353,12 +350,14 @@ impl HPF {
         })
     }
 
+    pub fn latency(&self) -> u32 {
+        unsafe { sys::ma_hpf_get_latency(&self.0 as *const _ as *mut _) }
+    }
+}
+
+impl Filter for HPF {
     #[inline]
-    pub fn process_pcm_frames(
-        &mut self,
-        output: &mut FramesMut,
-        input: &Frames,
-    ) -> Result<(), Error> {
+    fn process_pcm_frames(&mut self, output: &mut FramesMut, input: &Frames) -> Result<(), Error> {
         if output.format() != input.format() {
             ma_debug_panic!(
                 "output and input format did not match (output: {:?}, input: {:?}",
@@ -381,9 +380,5 @@ impl HPF {
                 output.frame_count() as u64,
             )
         })
-    }
-
-    pub fn latency(&self) -> u32 {
-        unsafe { sys::ma_hpf_get_latency(&self.0 as *const _ as *mut _) }
     }
 }

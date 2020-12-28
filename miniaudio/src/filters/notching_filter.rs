@@ -1,4 +1,5 @@
 use super::biquad_filtering::Biquad;
+use super::Filter;
 use crate::base::{Error, Format};
 use crate::frames::{Frames, FramesMut};
 use miniaudio_sys as sys;
@@ -98,11 +99,19 @@ impl Notch2 {
     }
 
     #[inline]
-    pub fn process_pcm_frames(
-        &mut self,
-        output: &mut FramesMut,
-        input: &Frames,
-    ) -> Result<(), Error> {
+    pub fn bq(&self) -> &Biquad {
+        unsafe { &*(&self.0.bq as *const sys::ma_biquad as *const Biquad) }
+    }
+
+    #[inline]
+    pub fn latency(&self) -> u32 {
+        unsafe { sys::ma_notch2_get_latency(&self.0 as *const _ as *mut _) }
+    }
+}
+
+impl Filter for Notch2 {
+    #[inline]
+    fn process_pcm_frames(&mut self, output: &mut FramesMut, input: &Frames) -> Result<(), Error> {
         if output.format() != input.format() {
             ma_debug_panic!(
                 "output and input format did not match (output: {:?}, input: {:?}",
@@ -125,15 +134,5 @@ impl Notch2 {
                 output.frame_count() as u64,
             )
         })
-    }
-
-    #[inline]
-    pub fn bq(&self) -> &Biquad {
-        unsafe { &*(&self.0.bq as *const sys::ma_biquad as *const Biquad) }
-    }
-
-    #[inline]
-    pub fn latency(&self) -> u32 {
-        unsafe { sys::ma_notch2_get_latency(&self.0 as *const _ as *mut _) }
     }
 }

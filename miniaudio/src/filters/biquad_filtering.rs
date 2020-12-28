@@ -1,3 +1,4 @@
+use super::Filter;
 use crate::base::*;
 use crate::frames::{Frames, FramesMut};
 use miniaudio_sys as sys;
@@ -114,11 +115,26 @@ impl Biquad {
     }
 
     #[inline]
-    pub fn process_pcm_frames(
-        &mut self,
-        output: &mut FramesMut,
-        input: &Frames,
-    ) -> Result<(), Error> {
+    pub fn format(&self) -> Format {
+        Format::from_c(self.0.format)
+    }
+
+    #[inline]
+    pub fn channels(&self) -> u32 {
+        self.0.channels
+    }
+
+    // FIXME the pointer is not marked as const in the C source even though it could be. I should
+    // probably try to get that fixed.
+    #[inline]
+    pub fn latency(&mut self) -> u32 {
+        unsafe { sys::ma_biquad_get_latency(&mut self.0) }
+    }
+}
+
+impl Filter for Biquad {
+    #[inline]
+    fn process_pcm_frames(&mut self, output: &mut FramesMut, input: &Frames) -> Result<(), Error> {
         if output.format() != input.format() {
             ma_debug_panic!(
                 "output and input format did not match (output: {:?}, input: {:?}",
@@ -142,22 +158,5 @@ impl Biquad {
             )
         };
         Error::from_c_result(result)
-    }
-
-    #[inline]
-    pub fn format(&self) -> Format {
-        Format::from_c(self.0.format)
-    }
-
-    #[inline]
-    pub fn channels(&self) -> u32 {
-        self.0.channels
-    }
-
-    // FIXME the pointer is not marked as const in the C source even though it could be. I should
-    // probably try to get that fixed.
-    #[inline]
-    pub fn latency(&mut self) -> u32 {
-        unsafe { sys::ma_biquad_get_latency(&mut self.0) }
     }
 }

@@ -1,4 +1,5 @@
 use super::biquad_filtering::Biquad;
+use super::Filter;
 use crate::base::{Error, Format, MAX_FILTER_ORDER};
 use crate::frames::{Frames, FramesMut};
 use miniaudio_sys as sys;
@@ -104,11 +105,19 @@ impl BPF2 {
     }
 
     #[inline]
-    pub fn process_pcm_frames(
-        &mut self,
-        output: &mut FramesMut,
-        input: &Frames,
-    ) -> Result<(), Error> {
+    pub fn bq(&self) -> &Biquad {
+        unsafe { &*(&self.0.bq as *const sys::ma_biquad as *const Biquad) }
+    }
+
+    #[inline]
+    pub fn latency(&self) -> u32 {
+        unsafe { sys::ma_bpf2_get_latency(&self.0 as *const _ as *mut _) }
+    }
+}
+
+impl Filter for BPF2 {
+    #[inline]
+    fn process_pcm_frames(&mut self, output: &mut FramesMut, input: &Frames) -> Result<(), Error> {
         if output.format() != input.format() {
             ma_debug_panic!(
                 "output and input format did not match (output: {:?}, input: {:?}",
@@ -131,16 +140,6 @@ impl BPF2 {
                 output.frame_count() as u64,
             )
         })
-    }
-
-    #[inline]
-    pub fn bq(&self) -> &Biquad {
-        unsafe { &*(&self.0.bq as *const sys::ma_biquad as *const Biquad) }
-    }
-
-    #[inline]
-    pub fn latency(&self) -> u32 {
-        unsafe { sys::ma_bpf2_get_latency(&self.0 as *const _ as *mut _) }
     }
 }
 
@@ -244,36 +243,6 @@ impl BPF {
     }
 
     #[inline]
-    pub fn process_pcm_frames(
-        &mut self,
-        output: &mut FramesMut,
-        input: &Frames,
-    ) -> Result<(), Error> {
-        if output.format() != input.format() {
-            ma_debug_panic!(
-                "output and input format did not match (output: {:?}, input: {:?}",
-                output.format(),
-                input.format()
-            );
-            return Err(Error::InvalidArgs);
-        }
-
-        if output.frame_count() != input.frame_count() {
-            ma_debug_panic!("output and input buffers did not have the same frame count (output: {}, input: {})", output.frame_count(), input.frame_count());
-            return Err(Error::InvalidArgs);
-        }
-
-        Error::from_c_result(unsafe {
-            sys::ma_bpf_process_pcm_frames(
-                &mut self.0 as *mut _,
-                output.as_mut_ptr() as *mut _,
-                input.as_ptr() as *const _,
-                output.frame_count() as u64,
-            )
-        })
-    }
-
-    #[inline]
     pub fn format(&self) -> Format {
         Format::from_c(self.0.format)
     }
@@ -299,5 +268,33 @@ impl BPF {
     #[inline]
     pub fn latency(&self) -> u32 {
         unsafe { sys::ma_bpf_get_latency(&self.0 as *const _ as *mut _) }
+    }
+}
+
+impl Filter for BPF {
+    #[inline]
+    fn process_pcm_frames(&mut self, output: &mut FramesMut, input: &Frames) -> Result<(), Error> {
+        if output.format() != input.format() {
+            ma_debug_panic!(
+                "output and input format did not match (output: {:?}, input: {:?}",
+                output.format(),
+                input.format()
+            );
+            return Err(Error::InvalidArgs);
+        }
+
+        if output.frame_count() != input.frame_count() {
+            ma_debug_panic!("output and input buffers did not have the same frame count (output: {}, input: {})", output.frame_count(), input.frame_count());
+            return Err(Error::InvalidArgs);
+        }
+
+        Error::from_c_result(unsafe {
+            sys::ma_bpf_process_pcm_frames(
+                &mut self.0 as *mut _,
+                output.as_mut_ptr() as *mut _,
+                input.as_ptr() as *const _,
+                output.frame_count() as u64,
+            )
+        })
     }
 }
