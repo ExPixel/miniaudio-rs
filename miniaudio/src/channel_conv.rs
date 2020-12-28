@@ -1,4 +1,4 @@
-use crate::base::{from_bool32, Channel, ChannelMixMode, Error, Format, MAX_CHANNELS};
+use crate::base::{from_bool8, Channel, ChannelMixMode, Error, Format, MAX_CHANNELS};
 use crate::frames::{Frames, FramesMut};
 use miniaudio_sys as sys;
 
@@ -182,22 +182,22 @@ impl ChannelConverter {
 
     #[inline]
     pub fn is_passthrough(&self) -> bool {
-        from_bool32(self.0.isPassthrough())
+        from_bool8(self.0.isPassthrough)
     }
 
     #[inline]
     pub fn is_simple_shuffle(&self) -> bool {
-        from_bool32(self.0.isSimpleShuffle())
+        from_bool8(self.0.isSimpleShuffle)
     }
 
     #[inline]
     pub fn is_simple_mono_expansion(&self) -> bool {
-        from_bool32(self.0.isSimpleMonoExpansion())
+        from_bool8(self.0.isSimpleMonoExpansion)
     }
 
     #[inline]
     pub fn is_stereo_to_mono(&self) -> bool {
-        from_bool32(self.0.isStereoToMono())
+        from_bool8(self.0.isStereoToMono)
     }
 
     #[inline]

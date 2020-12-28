@@ -10,6 +10,15 @@ pub(crate) const fn from_bool32(b32: sys::ma_bool32) -> bool {
     b32 != 0
 }
 
+pub(crate) const fn to_bool8(b: bool) -> sys::ma_bool8 {
+    b as u8 as _
+}
+
+#[inline(always)]
+pub(crate) const fn from_bool8(b8: sys::ma_bool8) -> bool {
+    b8 != 0
+}
+
 #[repr(i32)]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Error {

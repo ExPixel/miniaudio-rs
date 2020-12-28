@@ -261,19 +261,19 @@ impl DeviceConfig {
     }
 
     pub fn no_pre_zeroed_output_buffer(&self) -> bool {
-        from_bool32(self.0.noPreZeroedOutputBuffer)
+        from_bool8(self.0.noPreZeroedOutputBuffer)
     }
 
     pub fn set_no_pre_zeroed_output_buffer(&mut self, value: bool) {
-        self.0.noPreZeroedOutputBuffer = to_bool32(value);
+        self.0.noPreZeroedOutputBuffer = to_bool8(value);
     }
 
     pub fn no_clip(&self) -> bool {
-        from_bool32(self.0.noClip)
+        from_bool8(self.0.noClip)
     }
 
     pub fn set_no_clip(&mut self, no_clip: bool) {
-        self.0.noClip = to_bool32(no_clip);
+        self.0.noClip = to_bool8(no_clip);
     }
 
     #[inline]
@@ -1020,7 +1020,7 @@ impl RawContext {
     }
 
     pub fn is_backend_asynchronous(&self) -> bool {
-        from_bool32(self.0.isBackendAsynchronous())
+        from_bool8(self.0.isBackendAsynchronous)
     }
 
     /// Retrieves basic information about every active playback and capture device. This function
@@ -1381,7 +1381,7 @@ impl RawDevice {
     /// Rust side.
     #[inline]
     fn is_owner_of_context(&self) -> bool {
-        from_bool32(self.0.isOwnerOfContext())
+        from_bool8(self.0.isOwnerOfContext)
     }
 
     #[inline]
@@ -1536,15 +1536,15 @@ impl DeviceCapture {
     }
 
     pub fn using_default_format(&self) -> bool {
-        from_bool32(self.0.usingDefaultFormat())
+        from_bool8(self.0.usingDefaultFormat)
     }
 
     pub fn using_default_channels(&self) -> bool {
-        from_bool32(self.0.usingDefaultChannels())
+        from_bool8(self.0.usingDefaultChannels)
     }
 
     pub fn using_default_channel_map(&self) -> bool {
-        from_bool32(self.0.usingDefaultChannelMap())
+        from_bool8(self.0.usingDefaultChannelMap)
     }
 
     pub fn format(&self) -> Format {
@@ -1579,15 +1579,15 @@ impl DevicePlayback {
     }
 
     pub fn using_default_format(&self) -> bool {
-        from_bool32(self.0.usingDefaultFormat())
+        from_bool8(self.0.usingDefaultFormat)
     }
 
     pub fn using_default_channels(&self) -> bool {
-        from_bool32(self.0.usingDefaultChannels())
+        from_bool8(self.0.usingDefaultChannels)
     }
 
     pub fn using_default_channel_map(&self) -> bool {
-        from_bool32(self.0.usingDefaultChannelMap())
+        from_bool8(self.0.usingDefaultChannelMap)
     }
 
     pub fn format(&self) -> Format {

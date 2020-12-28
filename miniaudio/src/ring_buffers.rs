@@ -3,7 +3,7 @@
 //! the `PCMRingBuffer` operates on PCM frames. They are otherwise identical as `PCMRingBuffer` is
 //! just a wrapper around `RingBuffer`.
 
-use crate::base::{from_bool32, Error};
+use crate::base::{from_bool8, Error};
 use miniaudio_sys as sys;
 use std::os::raw::c_void;
 use std::ptr::NonNull;
@@ -343,7 +343,7 @@ impl<T: Clone> Drop for RingBuffer<T> {
         unsafe {
             let buffer_ptr = self.inner.pBuffer;
             let count = self.inner.subbufferCount;
-            let owns_buffer = from_bool32(self.inner.ownsBuffer());
+            let owns_buffer = from_bool8(self.inner.ownsBuffer);
 
             sys::ma_rb_uninit(&mut self.inner);
 
