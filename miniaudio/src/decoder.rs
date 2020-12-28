@@ -341,7 +341,7 @@ unsafe extern "C" fn decoder_read_with_reader(
         return 0;
     }
 
-    let reader: &mut Box<dyn SeekRead> = std::mem::transmute((*decoder).pUserData);
+    let reader: &mut Box<dyn SeekRead> = &mut *((*decoder).pUserData as *mut _);
     let buffer = std::slice::from_raw_parts_mut(buffer_out as _, bytes_to_read);
 
     reader.read(buffer).ok().unwrap_or(0)
@@ -356,7 +356,7 @@ unsafe extern "C" fn decoder_seek_with_reader(
         return to_bool32(false);
     }
 
-    let reader: &mut Box<dyn SeekRead> = std::mem::transmute((*decoder).pUserData);
+    let reader: &mut Box<dyn SeekRead> = &mut *((*decoder).pUserData as *mut _);
     let pos = match origin {
         sys::ma_seek_origin_start => io::SeekFrom::Start(byte_offset as _),
         sys::ma_seek_origin_current => io::SeekFrom::Current(byte_offset as _),
