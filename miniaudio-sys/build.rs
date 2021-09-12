@@ -265,20 +265,26 @@ fn emit_supported_features() {
         }
     };
 
-    let ma_macos = cfg!(target_os = "macos");
-    let ma_ios = cfg!(target_os = "ios");
+    // NOTE: the cfg! macro doesn't work when cross-compiling, it would return values for the host
+    let target_os =
+        std::env::var("CARGO_CFG_TARGET_OS").expect("CARGO_CFG_TARGET_OS is set by cargo.");
+    let target_family =
+        std::env::var("CARGO_CFG_TARGET_FAMILY").expect("CARGO_CFG_TARGET_FAMILY is set by cargo.");
+
+    let ma_macos = target_os == "macos";
+    let ma_ios = target_os == "ios";
     let ma_apple = ma_macos | ma_ios;
-    let ma_win32 = cfg!(target_family = "windows");
+    let ma_win32 = target_family == "windows";
     let ma_win32_desktop = ma_win32; // FIXME for now I just assume they are the same.
-    let ma_unix = cfg!(target_family = "unix") && !ma_apple; // MacOS/iOS does not define __unix__ so doesn't define MA_UNIX in miniaudio.
-    let ma_android = cfg!(target_os = "android");
-    let ma_linux = ma_android | cfg!(target_os = "linux");
-    let ma_openbsd = cfg!(target_os = "openbsd");
-    let ma_freebsd = cfg!(target_os = "freebsd");
-    let ma_netbsd = cfg!(target_os = "netbsd");
-    let ma_dragonfly = cfg!(target_os = "dragonfly");
+    let ma_unix = target_family == "unix" && !ma_apple; // MacOS/iOS does not define __unix__ so doesn't define MA_UNIX in miniaudio.
+    let ma_android = target_os == "android";
+    let ma_linux = ma_android | (target_os == "linux");
+    let ma_openbsd = target_os == "openbsd";
+    let ma_freebsd = target_os == "freebsd";
+    let ma_netbsd = target_os == "netbsd";
+    let ma_dragonfly = target_os == "dragonfly";
     let ma_bsd = ma_openbsd | ma_freebsd | ma_netbsd | ma_dragonfly;
-    let ma_emscripten = cfg!(target_os = "emscripten");
+    let ma_emscripten = target_os == "emscripten";
 
     // #FIXME This is probably not correct but it's not a big deal atm.
     let ma_posix = !ma_win32;
