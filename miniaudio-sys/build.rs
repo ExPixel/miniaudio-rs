@@ -95,11 +95,14 @@ fn generate_bindings() {
         "./bindings.h"
     };
 
-    let bindings = bindgen::Builder::default()
+    let mut builder = bindgen::Builder::default()
         // Make sure to only whitelist miniaudio's API.
         .whitelist_type("ma_.*")
         .whitelist_function("ma_.*")
         .whitelist_var("(ma|MA)_.*")
+        // Explicitly set target in case we are cross-compiling.
+        // See https://github.com/rust-lang/rust-bindgen/issues/1780 for context.
+        .clang_arg(format!("--target={}", std::env::var("TARGET").unwrap()))
         // We just use one big generated header created by concatenating what we need.
         .header(header)
         .size_t_is_usize(true)
@@ -108,9 +111,15 @@ fn generate_bindings() {
         .derive_copy(true)
         .impl_debug(true)
         .prepend_enum_name(false)
-        .rust_target(bindgen::RustTarget::Stable_1_36)
-        .generate()
-        .expect("failed to generate bindings");
+        .rust_target(bindgen::RustTarget::Stable_1_36);
+
+    if std::env::var("CARGO_CFG_TARGET_ARCH").unwrap() == "wasm32" {
+        // Make sure MA_API functions are not hidden.
+        // See https://github.com/rust-lang/rust-bindgen/issues/751 for context.
+        builder = builder.clang_arg("-DMA_API=__attribute__ ((visibility(\"default\")))");
+    }
+
+    let bindings = builder.generate().expect("failed to generate bindings");
 
     let out_path = PathBuf::from(std::env::var("OUT_DIR").unwrap()).join("bindings.rs");
     bindings
