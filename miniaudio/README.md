@@ -1,6 +1,11 @@
 Mini Audio Rust Bindings
 ===
 
+*Note:*
+The upstream version is currently broken due to an outdated cbindgen dependency.
+This is a workaround until upstream is fixed. A pull request has been made.
+
+
 [![Build Status](https://github.com/ExPixel/miniaudio-rs/workflows/CI/badge.svg)](https://github.com/ExPixel/miniaudio-rs/actions?query=workflow%3ACI)
 [![crates.io](https://img.shields.io/crates/v/miniaudio.svg?color=orange)](https://crates.io/crates/miniaudio)
 [![docs.rs](https://img.shields.io/badge/docs-stable-blue.svg)](https://docs.rs/miniaudio)
