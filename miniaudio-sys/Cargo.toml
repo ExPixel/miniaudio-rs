@@ -1,12 +1,12 @@
 [package]
-name = "ep-miniaudio-sys"
+name = "om-fork-ep-miniaudio-sys"
 version = "2.5.0"
-authors = ["ExPixel <adolphc@outlook.com>"]
+authors = ["ExPixel <adolphc@outlook.com>", "anti <andreas@omni-mad.com>"]
 edition = "2018"
-description = "Raw bindings to the miniaudio C library."
+description = "Raw bindings to the miniaudio C library. Fork until upstream is updated!"
 documentation = "https://docs.rs/ep-miniaudio-sys"
-repository = "https://github.com/ExPixel/miniaudio-rs"
-homepage = "https://github.com/ExPixel/miniaudio-rs"
+repository = "https://github.com/andreasOM/miniaudio-rs"
+homepage = "https://github.com/andreasOM/miniaudio-rs"
 license = "MIT"
 keywords = ["audio", "miniaudio", "sound", "pcm"]
 publish = true
