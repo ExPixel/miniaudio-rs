@@ -1,6 +1,6 @@
 [package]
 name = "om-fork-ep-miniaudio-sys"
-version = "2.6.0-dev"
+version = "2.6.0"
 authors = ["ExPixel <adolphc@outlook.com>", "anti <andreas@omni-mad.com>"]
 edition = "2018"
 description = "Raw bindings to the miniaudio C library. Fork until upstream is updated!"
