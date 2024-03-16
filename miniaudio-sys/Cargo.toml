@@ -1,6 +1,6 @@
 [package]
 name = "om-fork-ep-miniaudio-sys"
-version = "2.6.0"
+version = "2.6.1"
 authors = ["ExPixel <adolphc@outlook.com>", "anti <andreas@omni-mad.com>"]
 edition = "2018"
 description = "Raw bindings to the miniaudio C library. Fork until upstream is updated!"
@@ -69,8 +69,8 @@ ma-debug-output = []
 
 [dependencies]
 libc = "0.2"
-bitflags = "1.3.2"
+bitflags = "2.4.2"
 
 [build-dependencies]
 cc = "1.0"
-bindgen = { version = "0.63.0", default-features = false, features = ["runtime"], optional = true }
+bindgen = { version = "0.69.4", default-features = false, features = ["runtime"], optional = true }
