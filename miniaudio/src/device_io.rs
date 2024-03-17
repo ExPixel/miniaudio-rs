@@ -865,7 +865,7 @@ impl ContextConfigCoreAudio {
 
     #[inline]
     pub fn set_session_category_options(&mut self, options: IOSSessionCategoryOption) {
-        self.0.sessionCategoryOptions = options.bits as _;
+        self.0.sessionCategoryOptions = options.bits() as _;
     }
 }
 

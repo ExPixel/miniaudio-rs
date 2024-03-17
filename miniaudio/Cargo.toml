@@ -1,12 +1,12 @@
 [package]
-name = "miniaudio"
-version = "0.10.0"
-authors = ["Adolph C. <adolphc@outlook.com>"]
+name = "om-fork-miniaudio"
+version = "0.12.1"
+authors = ["Adolph C. <adolphc@outlook.com>", "anti <andreas@omni-mad.com>"]
 edition = "2018"
-description = "Bindings to the miniaudio C library."
+description = "Bindings to the miniaudio C library. Fork until upstream is updated!"
 documentation = "https://docs.rs/miniaudio"
-repository = "https://github.com/ExPixel/miniaudio-rs"
-homepage = "https://github.com/ExPixel/miniaudio-rs"
+repository = "https://github.com/andreasOM/miniaudio-rs"
+homepage = "https://github.com/andreasOM/miniaudio-rs"
 license = "MIT"
 keywords = ["audio", "miniaudio", "sound", "pcm"]
 readme = "README.md"
@@ -24,43 +24,44 @@ crate_type = ["lib"]
 
 [features]
 default = ["ma-log-level-error", "bindgen"]
-bindgen = ["ep-miniaudio-sys/bindgen"]
+bindgen = ["om-fork-ep-miniaudio-sys/bindgen"]
 
-ma-enable-vorbis = ["ep-miniaudio-sys/ma-enable-vorbis"]
+ma-enable-vorbis = ["om-fork-ep-miniaudio-sys/ma-enable-vorbis"]
 
-ma-no-flac = ["ep-miniaudio-sys/ma-no-flac"]
-ma-no-mp3 = ["ep-miniaudio-sys/ma-no-mp3"]
-ma-no-wav = ["ep-miniaudio-sys/ma-no-wav"]
+ma-no-flac = ["om-fork-ep-miniaudio-sys/ma-no-flac"]
+ma-no-mp3 = ["om-fork-ep-miniaudio-sys/ma-no-mp3"]
+ma-no-wav = ["om-fork-ep-miniaudio-sys/ma-no-wav"]
 
-ma-no-wasapi = ["ep-miniaudio-sys/ma-no-wasapi"]
-ma-no-dsound = ["ep-miniaudio-sys/ma-no-dsound"]
-ma-no-winmm = ["ep-miniaudio-sys/ma-no-winmm"]
-ma-no-alsa = ["ep-miniaudio-sys/ma-no-alsa"]
-ma-no-pulseaudio = ["ep-miniaudio-sys/ma-no-pulseaudio"]
-ma-no-jack = ["ep-miniaudio-sys/ma-no-jack"]
-ma-no-coreaudio = ["ep-miniaudio-sys/ma-no-coreaudio"]
-ma-no-sndio = ["ep-miniaudio-sys/ma-no-sndio"]
-ma-no-audio4 = ["ep-miniaudio-sys/ma-no-audio4"]
-ma-no-oss = ["ep-miniaudio-sys/ma-no-oss"]
-ma-no-aaudio = ["ep-miniaudio-sys/ma-no-aaudio"]
-ma-no-opensl = ["ep-miniaudio-sys/ma-no-opensl"]
-ma-no-webaudio = ["ep-miniaudio-sys/ma-no-webaudio"]
-ma-no-null = ["ep-miniaudio-sys/ma-no-null"]
-ma-no-decoding = ["ep-miniaudio-sys/ma-no-decoding"]
-ma-no-device-io = ["ep-miniaudio-sys/ma-no-device-io"]
-ma-no-stdio = ["ep-miniaudio-sys/ma-no-stdio"]
-ma-no-sse2 = ["ep-miniaudio-sys/ma-no-sse2"]
-ma-no-avx2 = ["ep-miniaudio-sys/ma-no-avx2"]
-ma-no-avx512 = ["ep-miniaudio-sys/ma-no-avx512"]
-ma-no-neon = ["ep-miniaudio-sys/ma-no-neon"]
+ma-no-wasapi = ["om-fork-ep-miniaudio-sys/ma-no-wasapi"]
+ma-no-dsound = ["om-fork-ep-miniaudio-sys/ma-no-dsound"]
+ma-no-winmm = ["om-fork-ep-miniaudio-sys/ma-no-winmm"]
+ma-no-alsa = ["om-fork-ep-miniaudio-sys/ma-no-alsa"]
+ma-no-pulseaudio = ["om-fork-ep-miniaudio-sys/ma-no-pulseaudio"]
+ma-no-jack = ["om-fork-ep-miniaudio-sys/ma-no-jack"]
+ma-no-coreaudio = ["om-fork-ep-miniaudio-sys/ma-no-coreaudio"]
+ma-no-sndio = ["om-fork-ep-miniaudio-sys/ma-no-sndio"]
+ma-no-audio4 = ["om-fork-ep-miniaudio-sys/ma-no-audio4"]
+ma-no-oss = ["om-fork-ep-miniaudio-sys/ma-no-oss"]
+ma-no-aaudio = ["om-fork-ep-miniaudio-sys/ma-no-aaudio"]
+ma-no-opensl = ["om-fork-ep-miniaudio-sys/ma-no-opensl"]
+ma-no-webaudio = ["om-fork-ep-miniaudio-sys/ma-no-webaudio"]
+ma-no-null = ["om-fork-ep-miniaudio-sys/ma-no-null"]
+ma-no-decoding = ["om-fork-ep-miniaudio-sys/ma-no-decoding"]
+ma-no-device-io = ["om-fork-ep-miniaudio-sys/ma-no-device-io"]
+ma-no-stdio = ["om-fork-ep-miniaudio-sys/ma-no-stdio"]
+ma-no-sse2 = ["om-fork-ep-miniaudio-sys/ma-no-sse2"]
+ma-no-avx2 = ["om-fork-ep-miniaudio-sys/ma-no-avx2"]
+ma-no-avx512 = ["om-fork-ep-miniaudio-sys/ma-no-avx512"]
+ma-no-neon = ["om-fork-ep-miniaudio-sys/ma-no-neon"]
 
-ma-log-level-verbose = ["ep-miniaudio-sys/ma-log-level-verbose"]
-ma-log-level-info = ["ep-miniaudio-sys/ma-log-level-info"]
-ma-log-level-warning = ["ep-miniaudio-sys/ma-log-level-warning"]
-ma-log-level-error = ["ep-miniaudio-sys/ma-log-level-error"]
+ma-log-level-verbose = ["om-fork-ep-miniaudio-sys/ma-log-level-verbose"]
+ma-log-level-info = ["om-fork-ep-miniaudio-sys/ma-log-level-info"]
+ma-log-level-warning = ["om-fork-ep-miniaudio-sys/ma-log-level-warning"]
+ma-log-level-error = ["om-fork-ep-miniaudio-sys/ma-log-level-error"]
 
-ma-debug-output = ["ep-miniaudio-sys/ma-debug-output"]
+ma-debug-output = ["om-fork-ep-miniaudio-sys/ma-debug-output"]
 
 [dependencies]
-ep-miniaudio-sys = { version = "2", path = "../miniaudio-sys", default-features = false }
-bitflags = "1.2"
+om-fork-ep-miniaudio-sys = { version = "2.6.1", path = "../miniaudio-sys", default-features = false }
+bitflags = "2.4.2"
+
